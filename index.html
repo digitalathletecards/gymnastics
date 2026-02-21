@@ -6,19 +6,16 @@
   <meta name="theme-color" content="#070915" />
   <title>Digital Athlete Card</title>
 
-  <!-- Modern fonts (clean + premium) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 
-  <!-- Chart.js for event modal -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="stylesheet" href="style/main.css" />
 </head>
 
 <body>
-  <!-- Background FX layers -->
   <canvas id="fx-canvas" aria-hidden="true"></canvas>
   <div class="vignette" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
@@ -50,8 +47,6 @@
     <section class="hero">
       <button class="nameHero" id="openBioModal" type="button" aria-haspopup="dialog" aria-controls="bioModal">
         <span class="nameGlow" aria-hidden="true"></span>
-
-        <!-- Fireflies orbit ring -->
         <span class="orbit" aria-hidden="true"></span>
 
         <span class="nameLine" id="athleteFirstName">First</span>
@@ -107,9 +102,7 @@
           <div class="cardsSub">Swipe/drag • tap a card • share proudly</div>
         </div>
 
-        <div class="cardsFan" id="cardsFan" aria-label="Athlete photo cards">
-          <!-- Cards injected by JS (keeps it clean + data-driven) -->
-        </div>
+        <div class="cardsFan" id="cardsFan" aria-label="Athlete photo cards"></div>
 
         <div class="cardsHint">
           <span class="kbd">Drag</span>
@@ -145,6 +138,14 @@
         <button class="chip ghost" id="btnReduceMotion" type="button" title="Toggle reduced motion">Reduce Motion</button>
       </div>
     </footer>
+
+    <!-- NEW: Senxia logo centered under footer -->
+    <div class="footerBrandWrap">
+      <button class="senxiaLogoBtn" id="btnOpenSenxia" type="button" aria-haspopup="dialog" aria-controls="senxiaModal" title="Learn about Showcase the Journey">
+        <img src="images/senxia.png" alt="Senxia" />
+      </button>
+      <div class="footerBrandNote">Tap to learn about “Showcase the Journey” cards</div>
+    </div>
   </main>
 
   <!-- BIO MODAL -->
@@ -241,7 +242,66 @@
     </div>
   </div>
 
-  <!-- App -->
+  <!-- NEW: SENXIA POPUP MODAL -->
+  <div class="modalOverlay" id="senxiaModal" role="dialog" aria-modal="true" aria-labelledby="senxiaTitle" aria-hidden="true">
+    <div class="modalCard">
+      <button class="modalClose" type="button" data-close="senxiaModal" aria-label="Close">✕</button>
+
+      <div class="modalHead">
+        <div class="modalKicker">Showcase the Journey</div>
+        <h2 class="modalTitle" id="senxiaTitle">Turn pride into support — instantly.</h2>
+        <div class="modalMeta">
+          <span class="metaPill">Parents feel-good</span>
+          <span class="metaPill soft">Sponsors love it</span>
+          <span class="metaPill soft">One-tap sharing</span>
+        </div>
+      </div>
+
+      <div class="modalBody">
+        <div class="senxiaPitch">
+          <p class="senxiaLead">
+            Families want a simple way to <strong>celebrate progress</strong> and keep everyone updated — without chasing group texts.
+            Sponsors want clarity, visibility, and something they can proudly share too.
+          </p>
+
+          <div class="senxiaGrid">
+            <div class="senxiaBox">
+              <div class="senxiaBoxTitle">For Parents & Family</div>
+              <ul>
+                <li>One beautiful page to track meets, highlights, and milestones</li>
+                <li>Easy to share with grandparents, friends, and teammates</li>
+                <li>Feels professional — something athletes are proud of</li>
+              </ul>
+            </div>
+
+            <div class="senxiaBox">
+              <div class="senxiaBoxTitle">For Sponsors & Fundraising</div>
+              <ul>
+                <li>Clickable logo placement + clean advertiser links</li>
+                <li>More shares = more impressions = more sponsor value</li>
+                <li>Perfect for quick “support my season” campaigns</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="senxiaCTArow">
+            <button class="cta" id="btnSenxiaShowcase" type="button">
+              <span class="ctaPulse" aria-hidden="true"></span>
+              <span class="ctaText">Showcase the Journey</span>
+              <span class="ctaArrow" aria-hidden="true">→</span>
+            </button>
+
+            <div class="senxiaPrice">Custom cards starting at <strong>$199.99</strong></div>
+          </div>
+
+          <div class="senxiaFine">
+            Tap the button to start — we’ll help you build a premium card that’s ready to share with sponsors.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="scripts/app.js"></script>
 </body>
 </html>
