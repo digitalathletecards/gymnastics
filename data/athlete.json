@@ -1,1 +1,115 @@
+{
+  "athlete": {
+    "firstName": "Layla",
+    "lastName": "Neitenbach",
+    "team": "KP Gymnastics",
+    "discipline": "Gymnastics",
+    "headline": "Chasing personal bests — meet by meet.",
+    "shareUrl": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/",
+    "donateUrl": "https://example.com/donate",
+    "heroCardPhoto": "images/card3.png",
+    "quickFacts": [
+      { "label": "Graduation Year", "value": "2028" },
+      { "label": "Hometown", "value": "Your City, ST" },
+      { "label": "Goals", "value": "State • Regionals • Nationals" }
+    ],
+    "story": [
+      "Hi! I’m Layla — thank you for being part of my season.",
+      "This page is my digital athlete card: it helps sponsors and supporters follow my journey with live meet updates and event performance.",
+      "Your support helps cover training, travel, meet fees, and recovery tools so I can keep improving every week."
+    ],
+    "links": [
+      { "label": "Instagram", "url": "https://instagram.com/" },
+      { "label": "Email", "url": "mailto:hello@example.com" }
+    ]
+  },
 
+  "fundraising": {
+    "goalAmount": 2500,
+    "raisedAmount": 860,
+    "subtitle": "Help cover travel, coaching, meet fees."
+  },
+
+  "cards": [
+    { "image": "images/card1.png", "label": "Meet Day" },
+    { "image": "images/card2.png", "label": "Training" },
+    { "image": "images/card3.png", "label": "Highlights" },
+    { "image": "images/card4.png", "label": "Team" },
+    { "image": "images/card5.png", "label": "Progress" }
+  ],
+
+  "events": [
+    {
+      "id": "allAround",
+      "name": "All Around",
+      "scores": [
+        { "meet": "Winter Classic", "date": "2026-01-10", "score": 36.55 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 37.10 },
+        { "meet": "City Cup", "date": "2026-02-08", "score": 37.40 }
+      ]
+    },
+    {
+      "id": "vault",
+      "name": "Vault",
+      "scores": [
+        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.10 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.25 },
+        { "meet": "City Cup", "date": "2026-02-08", "score": 9.35 }
+      ]
+    },
+    {
+      "id": "bars",
+      "name": "Bars",
+      "scores": [
+        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.00 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.15 },
+        { "meet": "City Cup", "date": "2026-02-08", "score": 9.20 }
+      ]
+    },
+    {
+      "id": "beam",
+      "name": "Beam",
+      "scores": [
+        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.05 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.20 },
+        { "meet": "City Cup", "date": "2026-02-08", "score": 9.30 }
+      ]
+    },
+    {
+      "id": "floor",
+      "name": "Floor",
+      "scores": [
+        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.40 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.50 },
+        { "meet": "City Cup", "date": "2026-02-08", "score": 9.55 }
+      ]
+    }
+  ],
+
+  "sponsors": [
+    {
+      "name": "Sponsor One",
+      "tagline": "Local business supporter",
+      "logo": "sponsors/sponsor1.png",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Sponsor Two",
+      "tagline": "Proud to support youth sports",
+      "logo": "sponsors/sponsor2.png",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Sponsor Three",
+      "tagline": "Community partner",
+      "logo": "sponsors/sponsor3.png",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Sponsor Four",
+      "tagline": "Thank you for sponsoring!",
+      "logo": "sponsors/sponsor4.png",
+      "url": "https://example.com"
+    }
+  ]
+}
