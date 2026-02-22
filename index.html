@@ -8,18 +8,18 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="style/main.css" />
 </head>
 
 <body>
-  <!-- Ambient background layers -->
-  <div class="bg">
+  <!-- Ambient background -->
+  <div class="bg" aria-hidden="true">
     <div class="bg__grid"></div>
     <div class="bg__glow bg__glow--a"></div>
     <div class="bg__glow bg__glow--b"></div>
-    <canvas id="fx" aria-hidden="true"></canvas>
+    <canvas id="fx"></canvas>
   </div>
 
   <header class="topbar">
@@ -43,10 +43,11 @@
   <main class="wrap">
     <section class="hero">
       <div class="hero__left">
+
         <div class="athlete">
-          <div class="athlete__photo">
+          <button class="athlete__photo" id="bioBtnPhoto" type="button" title="View Bio">
             <img id="athletePhoto" alt="Athlete photo" loading="lazy" decoding="async" />
-          </div>
+          </button>
 
           <div class="athlete__meta">
             <div class="badgeRow">
@@ -76,11 +77,11 @@
 
           <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="meter__bar" id="meterBar"></div>
-            <div class="meter__spark" aria-hidden="true"></div>
+            <div class="meter__spark"></div>
           </div>
 
           <div class="fund__foot">
-            <div class="note" id="fundNote">Layla is 33% to the season goal! Help finish strong 💕</div>
+            <div class="note" id="fundNote">Athlete is 33% to the season goal! Help finish strong 💕</div>
             <button class="btn btn--primary" id="donateBtn" type="button">Support / Donate</button>
           </div>
         </div>
@@ -91,10 +92,11 @@
             <div class="share__chips" id="shareChips"></div>
           </div>
           <div class="share__foot">
-            <div class="note">The easiest way to raise funds is sharing the card with 3 sponsors today.</div>
+            <div class="note">Fastest results: share the card with 3 sponsors today.</div>
             <button class="btn btn--ghost" id="openShareModalBtn" type="button">Open Share Options</button>
           </div>
         </div>
+
       </div>
 
       <aside class="hero__right">
@@ -148,6 +150,6 @@
     </div>
   </div>
 
-  <script src="app.js" defer></script>
+  <script src="scripts/app.js" defer></script>
 </body>
 </html>
