@@ -1,11 +1,9 @@
-/* Digital Athlete Card - Premium Vanilla JS
+/* Digital Athlete Card - Premium Vanilla JS (Full-screen + Apple-like fluidity)
    Paths:
    - data/athlete.json
    - style/main.css
    - scripts/app.js
    - assets/brand/Senxia.png
-   - images/*.png
-   - sponsors/*.png
 */
 
 const $ = (sel, root=document) => root.querySelector(sel);
@@ -36,6 +34,28 @@ function setText(sel, value){
 function safeOpen(url){
   if(!url) return;
   window.open(url, "_blank", "noopener,noreferrer");
+}
+
+/* ---------- Mobile-safe viewport height (full screen always) ---------- */
+function setVH(){
+  // 1% of the viewport height
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty("--vh", `${vh}px`);
+}
+
+/* ---------- Cursor spotlight on cards ---------- */
+function bindSpotlights(){
+  const cards = Array.from(document.querySelectorAll(".fxCard"));
+  cards.forEach(card => {
+    const onMove = (e) => {
+      const r = card.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * 100;
+      const y = ((e.clientY - r.top) / r.height) * 100;
+      card.style.setProperty("--mx", `${x}%`);
+      card.style.setProperty("--my", `${y}%`);
+    };
+    card.addEventListener("mousemove", onMove, { passive:true });
+  });
 }
 
 /* ---------- Modal System ---------- */
@@ -163,7 +183,6 @@ function render(){
   const pctLabel = Math.round(pct * 100);
   $("#meterBar").style.width = `${pctLabel}%`;
   $(".meter")?.setAttribute("aria-valuenow", String(pctLabel));
-
   setText("#fundNote", `${a.name.split(" ")[0]} is ${pctLabel}% to the season goal! Help finish strong 💕`);
 
   // Share chips
@@ -315,6 +334,10 @@ function render(){
   $("#copyLinkBtn").onclick = () => copyToClipboard(a.share?.publicUrl || location.href);
 
   $("#builtBtn").onclick = () => openBuiltModal();
+
+  // after render, bind spotlight and then animate in
+  bindSpotlights();
+  requestAnimationFrame(() => document.body.classList.add("isLoaded"));
 }
 
 /* ---------- Image Zoom Modal ---------- */
@@ -424,7 +447,6 @@ function openShareModal(){
 /* ---------- Built to be shared (BOTTOM modal) ---------- */
 function openBuiltModal(){
   openModal("Built to be shared", `
-    <!-- SENXIA brand mark (premium) -->
     <div class="brandMark" aria-label="Senxia">
       <div class="brandMark__halo"></div>
       <div class="brandMark__card">
@@ -471,15 +493,13 @@ function attachBrandMarkTilt(){
   if(card.dataset.tiltBound === "1") return;
   card.dataset.tiltBound = "1";
 
-  const strength = 9; // subtle
+  const strength = 9;
   const onMove = (e) => {
     const r = card.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-
     const rx = (py - 0.5) * -strength;
     const ry = (px - 0.5) * strength;
-
     card.style.transform = `translateY(-2px) rotateX(${rx}deg) rotateY(${ry}deg)`;
   };
   const onLeave = () => { card.style.transform = ""; };
@@ -578,6 +598,9 @@ function escapeAttr(s){
 
 /* ---------- Boot ---------- */
 (async function init(){
+  setVH();
+  window.addEventListener("resize", setVH, { passive:true });
+
   startFX();
   state.data = await loadData();
   render();
