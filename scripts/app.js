@@ -173,264 +173,294 @@
   window.openModal = openModal;
   window.closeModal = closeModal;
 
-  // ---------- Cards fan (auto-rotating + lightbox) ----------
+  // ---------- Cards — full-width slider + pop-up lightbox with share ----------
   function renderCards(cards){
     const fan = $("#cardsFan");
     fan.innerHTML = "";
 
+    if(!cards.length){ fan.innerHTML=`<div style="color:var(--muted2);padding:40px;text-align:center">No photos yet 🌸</div>`; return; }
+
+    // ── Build slider structure ──
+    fan.classList.add("sliderMode");
+
+    // Track holds all slides side by side
+    const track = document.createElement("div");
+    track.className = "sliderTrack";
+
     cards.forEach((c,i)=>{
-      const el = document.createElement("div");
-      el.className = "card";
-      el.dataset.index = String(i);
-      el.setAttribute("role","button");
-      el.setAttribute("tabindex","0");
-      el.setAttribute("aria-label", `View ${c.label||"card "+(i+1)} larger`);
+      const slide = document.createElement("div");
+      slide.className = "sliderSlide";
+      slide.dataset.index = String(i);
 
       const img = document.createElement("img");
-      img.src = c.image; img.alt = c.label||`Card ${i+1}`; img.loading="lazy";
-      img.style.pointerEvents="none";
+      img.src = c.image;
+      img.alt = c.label||`Card ${i+1}`;
+      img.loading = i===0?"eager":"lazy";
+      img.draggable = false;
 
       const label = document.createElement("div");
-      label.className = "cardLabel";
-      label.style.pointerEvents="none";
+      label.className = "sliderLabel";
       label.innerHTML = `<span class="spark" aria-hidden="true"></span><span>${escapeHtml(c.label||"Moment")}</span>`;
 
-      el.appendChild(img); el.appendChild(label); fan.appendChild(el);
+      // Click slide → open pop-up lightbox
+      slide.addEventListener("click",()=> openPopup(i));
+
+      slide.appendChild(img);
+      slide.appendChild(label);
+      track.appendChild(slide);
     });
 
-    let active = 0;
+    fan.appendChild(track);
+
+    // ── Prev / Next arrow buttons ──
+    const btnPrev = document.createElement("button");
+    btnPrev.className = "sliderArrow sliderArrowPrev";
+    btnPrev.innerHTML = "‹";
+    btnPrev.setAttribute("aria-label","Previous photo");
+
+    const btnNext = document.createElement("button");
+    btnNext.className = "sliderArrow sliderArrowNext";
+    btnNext.innerHTML = "›";
+    btnNext.setAttribute("aria-label","Next photo");
+
+    fan.appendChild(btnPrev);
+    fan.appendChild(btnNext);
+
+    // ── Dot indicators ──
+    const dots = document.createElement("div");
+    dots.className = "sliderDots";
+    cards.forEach((_,i)=>{
+      const d = document.createElement("button");
+      d.className = "sliderDot" + (i===0?" active":"");
+      d.setAttribute("aria-label",`Go to photo ${i+1}`);
+      d.addEventListener("click",()=>goTo(i));
+      dots.appendChild(d);
+    });
+    fan.appendChild(dots);
+
+    // ── State ──
+    let current = 0;
     let autoTimer = null;
     let paused = false;
-    let expandedIndex = null; // which card is in lightbox
 
-    layoutFan(active);
-
-    // ── Auto-rotate: advance every 2.5s ──
-    function startAuto(){
-      stopAuto();
-      if(reduceMotion) return;
-      autoTimer = setInterval(()=>{
-        if(!paused && expandedIndex === null){
-          active = (active + 1) % cards.length;
-          layoutFan(active);
-        }
-      }, 2500);
+    function goTo(index, animate=true){
+      current = ((index % cards.length) + cards.length) % cards.length;
+      track.style.transition = animate && !reduceMotion ? "transform .5s cubic-bezier(.4,0,.2,1)" : "none";
+      track.style.transform = `translateX(-${current * 100}%)`;
+      // update dots
+      $$(".sliderDot", fan).forEach((d,i)=> d.classList.toggle("active", i===current));
+      // update arrows visibility
+      btnPrev.style.opacity = cards.length > 1 ? "1" : "0";
+      btnNext.style.opacity = cards.length > 1 ? "1" : "0";
     }
-    function stopAuto(){ clearInterval(autoTimer); autoTimer=null; }
 
+    btnPrev.addEventListener("click",()=>{ paused=true; goTo(current-1); setTimeout(()=>paused=false,4000); });
+    btnNext.addEventListener("click",()=>{ paused=true; goTo(current+1); setTimeout(()=>paused=false,4000); });
+
+    // ── Auto-advance every 3s ──
+    function startAuto(){
+      clearInterval(autoTimer);
+      if(reduceMotion) return;
+      autoTimer = setInterval(()=>{ if(!paused) goTo(current+1); }, 3000);
+    }
     startAuto();
 
-    // Pause on hover/focus so user can look
     fan.addEventListener("mouseenter",()=>{ paused=true; });
     fan.addEventListener("mouseleave",()=>{ paused=false; });
-    fan.addEventListener("focusin",()=>{ paused=true; });
-    fan.addEventListener("focusout",()=>{ paused=false; });
 
-    // ── Lightbox ──
-    function buildLightbox(){
-      if(document.getElementById("cardLightbox")) return;
-      const lb = document.createElement("div");
-      lb.id = "cardLightbox";
-      Object.assign(lb.style,{
-        position:"fixed", inset:"0", zIndex:"99",
-        display:"none", alignItems:"center", justifyContent:"center",
-        background:"rgba(20,4,18,.88)", backdropFilter:"blur(12px)",
-        cursor:"zoom-out", padding:"20px"
-      });
+    // ── Touch/swipe on slider ──
+    let touchStartX=0, touchMoved=false;
+    track.addEventListener("pointerdown",(e)=>{ touchStartX=e.clientX; touchMoved=false; track.setPointerCapture(e.pointerId); });
+    track.addEventListener("pointermove",(e)=>{ if(Math.abs(e.clientX-touchStartX)>8) touchMoved=true; });
+    track.addEventListener("pointerup",(e)=>{
+      const dx=e.clientX-touchStartX;
+      if(touchMoved){
+        paused=true;
+        if(dx < -40) goTo(current+1);
+        else if(dx > 40) goTo(current-1);
+        setTimeout(()=>paused=false,4000);
+      }
+    });
 
-      const inner = document.createElement("div");
-      Object.assign(inner.style,{
-        position:"relative", maxWidth:"92vw", maxHeight:"88vh",
-        borderRadius:"28px", overflow:"hidden",
-        border:"2px solid rgba(255,110,180,.45)",
-        boxShadow:"0 40px 120px rgba(200,0,80,.5), 0 0 80px rgba(255,110,180,.25)",
-        animation:"lbIn .45s cubic-bezier(.34,1.56,.64,1) both"
-      });
+    // Keyboard arrows
+    fan.setAttribute("tabindex","0");
+    fan.addEventListener("keydown",(e)=>{
+      if(e.key==="ArrowRight"){ paused=true; goTo(current+1); setTimeout(()=>paused=false,4000); }
+      if(e.key==="ArrowLeft"){ paused=true; goTo(current-1); setTimeout(()=>paused=false,4000); }
+    });
 
-      const lbImg = document.createElement("img");
-      lbImg.id = "cardLightboxImg";
-      Object.assign(lbImg.style,{
-        display:"block", maxWidth:"92vw", maxHeight:"88vh",
-        objectFit:"contain", userSelect:"none", pointerEvents:"none"
-      });
+    goTo(0, false);
 
-      const lbLabel = document.createElement("div");
-      lbLabel.id = "cardLightboxLabel";
-      Object.assign(lbLabel.style,{
-        position:"absolute", bottom:"16px", left:"50%",
-        transform:"translateX(-50%)",
-        background:"rgba(0,0,0,.45)", backdropFilter:"blur(10px)",
-        border:"1.5px solid rgba(255,110,180,.35)",
-        borderRadius:"999px", padding:"8px 18px",
-        color:"rgba(255,230,245,.95)", fontFamily:"'Fredoka One',cursive",
-        fontSize:"15px", whiteSpace:"nowrap", pointerEvents:"none"
-      });
+    // ═══════════════════════════════════
+    // ── Pop-up Lightbox with Share btn ──
+    // ═══════════════════════════════════
+    let popupIndex = null;
 
-      // Close button
-      const closeBtn = document.createElement("button");
-      closeBtn.innerHTML = "✕";
-      Object.assign(closeBtn.style,{
-        position:"absolute", top:"12px", right:"12px",
-        width:"38px", height:"38px", borderRadius:"50%", border:"none",
-        background:"rgba(255,110,180,.25)", color:"#fff",
-        fontSize:"16px", cursor:"pointer", zIndex:"2",
-        transition:"transform .2s, background .2s"
-      });
-      closeBtn.addEventListener("mouseenter",()=>{ closeBtn.style.background="rgba(255,110,180,.5)"; closeBtn.style.transform="scale(1.1)"; });
-      closeBtn.addEventListener("mouseleave",()=>{ closeBtn.style.background="rgba(255,110,180,.25)"; closeBtn.style.transform="scale(1)"; });
+    function buildPopup(){
+      if(document.getElementById("imgPopup")) return;
 
-      // Prev / Next arrows
-      ["prev","next"].forEach(dir=>{
-        const btn = document.createElement("button");
-        btn.id = `lb${dir}`;
-        btn.innerHTML = dir==="prev" ? "‹" : "›";
-        Object.assign(btn.style,{
-          position:"absolute", top:"50%",
-          [dir==="prev"?"left":"right"]:"12px",
-          transform:"translateY(-50%)",
-          width:"44px", height:"44px", borderRadius:"50%", border:"none",
-          background:"rgba(255,110,180,.22)", color:"#fff",
-          fontSize:"28px", cursor:"pointer", zIndex:"2",
-          transition:"transform .2s, background .2s", lineHeight:"1"
-        });
-        btn.addEventListener("mouseenter",()=>{ btn.style.background="rgba(255,110,180,.45)"; btn.style.transform="translateY(-50%) scale(1.12)"; });
-        btn.addEventListener("mouseleave",()=>{ btn.style.background="rgba(255,110,180,.22)"; btn.style.transform="translateY(-50%) scale(1)"; });
-        btn.addEventListener("click",(e)=>{
-          e.stopPropagation();
-          expandedIndex = dir==="prev"
-            ? (expandedIndex - 1 + cards.length) % cards.length
-            : (expandedIndex + 1) % cards.length;
-          showLightbox(expandedIndex);
-        });
-        inner.appendChild(btn);
-      });
-
-      inner.appendChild(lbImg);
-      inner.appendChild(lbLabel);
-      inner.appendChild(closeBtn);
-      lb.appendChild(inner);
-      document.body.appendChild(lb);
-
-      // Close on backdrop click or close btn
-      lb.addEventListener("click",(e)=>{
-        if(e.target===lb) closeLightbox();
-      });
-      closeBtn.addEventListener("click", closeLightbox);
-
-      // Keyboard nav
-      document.addEventListener("keydown",(e)=>{
-        if(expandedIndex===null) return;
-        if(e.key==="Escape") closeLightbox();
-        if(e.key==="ArrowRight"){ expandedIndex=(expandedIndex+1)%cards.length; showLightbox(expandedIndex); }
-        if(e.key==="ArrowLeft"){ expandedIndex=(expandedIndex-1+cards.length)%cards.length; showLightbox(expandedIndex); }
-      });
-
-      // Inject keyframe animation
-      if(!document.getElementById("lbStyles")){
-        const s = document.createElement("style");
-        s.id="lbStyles";
-        s.textContent=`@keyframes lbIn{ from{transform:scale(.82);opacity:0;} to{transform:scale(1);opacity:1;} }`;
+      // inject styles once
+      if(!document.getElementById("popupStyles")){
+        const s=document.createElement("style");
+        s.id="popupStyles";
+        s.textContent=`
+          @keyframes popIn{ from{transform:scale(.84);opacity:0} to{transform:scale(1);opacity:1} }
+          #imgPopup{ position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+            background:rgba(14,3,12,.92);backdrop-filter:blur(16px);padding:16px;cursor:zoom-out; }
+          #imgPopup[data-open]{ display:flex; }
+          #imgPopupInner{ position:relative;display:flex;flex-direction:column;align-items:center;gap:0;
+            max-width:min(780px,94vw);width:100%;animation:popIn .4s cubic-bezier(.34,1.4,.64,1) both; }
+          #imgPopupImg{ width:100%;max-height:74vh;object-fit:contain;border-radius:22px;
+            border:2px solid rgba(255,110,180,.4);
+            box-shadow:0 40px 100px rgba(200,0,80,.55),0 0 60px rgba(255,110,180,.2);
+            display:block;user-select:none;pointer-events:none; }
+          .popupBar{ width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+            padding:12px 4px 0; }
+          .popupLabel{ font-family:'Fredoka One',cursive;font-size:17px;
+            color:rgba(255,230,245,.92);letter-spacing:.02em;flex:1; }
+          .popupShareBtn{ display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;border:none;
+            background:linear-gradient(90deg,rgba(255,110,180,.95),rgba(212,168,255,.9));
+            color:rgba(20,4,18,.95);font-family:'Fredoka One',cursive;font-size:14px;
+            cursor:pointer;white-space:nowrap;
+            box-shadow:0 10px 35px rgba(200,0,80,.4);
+            transition:transform .25s,filter .25s; }
+          .popupShareBtn:hover{ transform:translateY(-2px);filter:brightness(1.06); }
+          .popupNavBtn{ position:absolute;top:50%;transform:translateY(-60%);
+            width:46px;height:46px;border-radius:50%;border:none;
+            background:rgba(255,110,180,.22);color:#fff;font-size:26px;cursor:pointer;
+            transition:background .2s,transform .2s;display:flex;align-items:center;justify-content:center;
+            backdrop-filter:blur(8px); }
+          .popupNavBtn:hover{ background:rgba(255,110,180,.5);transform:translateY(-60%) scale(1.1); }
+          .popupNavPrev{ left:-24px; }
+          .popupNavNext{ right:-24px; }
+          .popupClose{ position:absolute;top:-14px;right:-14px;width:36px;height:36px;border-radius:50%;
+            border:none;background:rgba(255,110,180,.25);color:#fff;font-size:15px;
+            cursor:pointer;backdrop-filter:blur(8px);z-index:2;
+            transition:background .2s,transform .2s; }
+          .popupClose:hover{ background:rgba(255,110,180,.55);transform:scale(1.1); }
+          .popupDots{ display:flex;gap:7px;justify-content:center;padding-top:12px; }
+          .popupDotEl{ width:7px;height:7px;border-radius:50%;border:none;
+            background:rgba(255,110,180,.25);cursor:pointer;transition:background .3s,transform .3s; }
+          .popupDotEl.on{ background:var(--pink1);transform:scale(1.3); }
+          @media(max-width:600px){
+            .popupNavPrev{ left:-2px; } .popupNavNext{ right:-2px; }
+            .popupNavBtn{ width:36px;height:36px;font-size:20px; }
+          }
+        `;
         document.head.appendChild(s);
       }
+
+      const popup = document.createElement("div");
+      popup.id = "imgPopup";
+
+      const inner = document.createElement("div");
+      inner.id = "imgPopupInner";
+
+      // Close btn
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "popupClose";
+      closeBtn.innerHTML = "✕";
+      closeBtn.addEventListener("click",(e)=>{ e.stopPropagation(); closePopup(); });
+
+      // Prev/Next
+      const prevBtn = document.createElement("button");
+      prevBtn.className = "popupNavBtn popupNavPrev";
+      prevBtn.innerHTML = "‹";
+      prevBtn.setAttribute("aria-label","Previous");
+      prevBtn.addEventListener("click",(e)=>{ e.stopPropagation(); openPopup((popupIndex-1+cards.length)%cards.length); });
+
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "popupNavBtn popupNavNext";
+      nextBtn.innerHTML = "›";
+      nextBtn.setAttribute("aria-label","Next");
+      nextBtn.addEventListener("click",(e)=>{ e.stopPropagation(); openPopup((popupIndex+1)%cards.length); });
+
+      // Image
+      const img = document.createElement("img");
+      img.id = "imgPopupImg";
+      img.alt = "";
+
+      // Bottom bar: label + share button
+      const bar = document.createElement("div");
+      bar.className = "popupBar";
+
+      const lbl = document.createElement("div");
+      lbl.className = "popupLabel";
+      lbl.id = "imgPopupLabel";
+
+      const shareBtn = document.createElement("button");
+      shareBtn.className = "popupShareBtn";
+      shareBtn.innerHTML = `<span>📤</span><span>Share this photo</span>`;
+      shareBtn.addEventListener("click",(e)=>{
+        e.stopPropagation();
+        const c = cards[popupIndex];
+        const shareUrl = (window._athleteShareUrl)||window.location.href;
+        const text = `Check out this photo from ${window._athleteName||"this athlete"}'s gymnastics season! 🌸`;
+        if(navigator.share){
+          navigator.share({title:document.title, text, url:shareUrl}).catch(()=>{});
+        } else {
+          copyText(shareUrl);
+          toast("📤 Link copied — paste to share this photo!");
+        }
+      });
+
+      bar.appendChild(lbl);
+      bar.appendChild(shareBtn);
+
+      // Dot row
+      const dotRow = document.createElement("div");
+      dotRow.className = "popupDots";
+      dotRow.id = "imgPopupDots";
+      cards.forEach((_,i)=>{
+        const d = document.createElement("button");
+        d.className = "popupDotEl" + (i===0?" on":"");
+        d.setAttribute("aria-label",`Photo ${i+1}`);
+        d.addEventListener("click",(e)=>{ e.stopPropagation(); openPopup(i); });
+        dotRow.appendChild(d);
+      });
+
+      inner.appendChild(closeBtn);
+      inner.appendChild(prevBtn);
+      inner.appendChild(nextBtn);
+      inner.appendChild(img);
+      inner.appendChild(bar);
+      inner.appendChild(dotRow);
+      popup.appendChild(inner);
+      document.body.appendChild(popup);
+
+      // Close on backdrop
+      popup.addEventListener("click",(e)=>{ if(e.target===popup) closePopup(); });
+
+      // Keyboard
+      document.addEventListener("keydown",(e)=>{
+        if(popupIndex===null) return;
+        if(e.key==="Escape") closePopup();
+        if(e.key==="ArrowRight") openPopup((popupIndex+1)%cards.length);
+        if(e.key==="ArrowLeft") openPopup((popupIndex-1+cards.length)%cards.length);
+      });
     }
 
-    function showLightbox(index){
-      buildLightbox();
-      const lb = document.getElementById("cardLightbox");
-      const img = document.getElementById("cardLightboxImg");
-      const lbl = document.getElementById("cardLightboxLabel");
+    function openPopup(index){
+      buildPopup();
+      popupIndex = index;
       const c = cards[index];
-      img.src = c.image;
-      img.alt = c.label||`Card ${index+1}`;
-      lbl.textContent = c.label||`Card ${index+1}`;
-      expandedIndex = index;
-      lb.style.display="flex";
+      document.getElementById("imgPopupImg").src = c.image;
+      document.getElementById("imgPopupImg").alt = c.label||`Photo ${index+1}`;
+      document.getElementById("imgPopupLabel").textContent = c.label||`Photo ${index+1}`;
+      // update dots
+      $$(".popupDotEl",document.getElementById("imgPopup"))
+        .forEach((d,i)=>d.classList.toggle("on",i===index));
+      document.getElementById("imgPopup").setAttribute("data-open","true");
       document.body.style.overflow="hidden";
       paused=true;
     }
 
-    function closeLightbox(){
-      const lb = document.getElementById("cardLightbox");
-      if(lb) lb.style.display="none";
-      expandedIndex=null;
+    function closePopup(){
+      const p=document.getElementById("imgPopup");
+      if(p) p.removeAttribute("data-open");
+      popupIndex=null;
       document.body.style.overflow="";
       paused=false;
-    }
-
-    // ── Pointer handling: tap = lightbox, drag = manual advance ──
-    let down=false, startX=0, startY=0, moved=false, downTarget=null;
-
-    fan.addEventListener("pointerdown",(e)=>{
-      fan.setPointerCapture(e.pointerId);
-      down=true; moved=false;
-      startX=e.clientX; startY=e.clientY;
-      downTarget=e.target;
-    });
-
-    fan.addEventListener("pointermove",(e)=>{
-      if(!down) return;
-      const dx=e.clientX-startX, dy=e.clientY-startY;
-      if(Math.abs(dx)>8||Math.abs(dy)>8) moved=true;
-      if(moved) fan.style.transform=`translateZ(0) rotateY(${clamp(dx/80,-6,6)}deg)`;
-    });
-
-    fan.addEventListener("pointerup",(e)=>{
-      if(!down) return;
-      down=false;
-      fan.style.transform="";
-      const dx=e.clientX-startX;
-
-      if(!moved){
-        // Tap — open lightbox for the tapped card (or active if tapping center)
-        const card = e.target.closest(".card") || (downTarget && downTarget.closest(".card"));
-        if(card){
-          const tappedIndex = parseInt(card.dataset.index,10);
-          // Bring it to front first if it's not active
-          if(tappedIndex !== active){
-            active = tappedIndex;
-            layoutFan(active);
-            // Small delay so the fan animates before lightbox opens
-            setTimeout(()=>showLightbox(tappedIndex), 350);
-          } else {
-            showLightbox(tappedIndex);
-          }
-        }
-      } else {
-        // Swipe — advance manually
-        if(dx < -40){ active=clamp(active+1,0,cards.length-1); layoutFan(active); }
-        if(dx >  40){ active=clamp(active-1,0,cards.length-1); layoutFan(active); }
-      }
-      moved=false; downTarget=null;
-    });
-
-    fan.addEventListener("pointercancel",()=>{
-      down=false; moved=false; downTarget=null;
-      fan.style.transform="";
-    });
-
-    // Keyboard: Enter/Space on focused card opens lightbox
-    fan.addEventListener("keydown",(e)=>{
-      if(e.key==="Enter"||e.key===" "){
-        const card = document.activeElement.closest(".card");
-        if(card){ e.preventDefault(); showLightbox(parseInt(card.dataset.index,10)); }
-      }
-    });
-
-    function layoutFan(activeIndex){
-      const els=$$(".card",fan);
-      els.forEach((el)=>{
-        const i=parseInt(el.dataset.index,10);
-        const off=i-activeIndex;
-        const rot=off*14*0.75;
-        const tx=off*48;
-        const ty=Math.abs(off)*8;
-        const scale=off===0?1.06:0.92;
-        el.style.zIndex=String(100-Math.abs(off));
-        el.style.opacity=Math.abs(off)>3?"0":"1";
-        el.style.cursor=off===0?"zoom-in":"pointer";
-        el.style.transform=`translateX(${tx}px) translateY(${ty}px) rotate(${rot}deg) scale(${scale}) translateZ(0)`;
-        el.style.filter=off===0?"brightness(1.05) saturate(1.15)":"brightness(.86) saturate(.88)";
-      });
     }
   }
 
@@ -603,6 +633,10 @@
     const heroPhoto=a.heroCardPhoto||(data.cards&&data.cards[0]&&data.cards[0].image)||"";
     const level=a.level||"Bronze";
     const f=data.fundraising||{};
+
+    // Store globally so popup share btn can access
+    window._athleteShareUrl = shareUrl;
+    window._athleteName = fullName;
 
     // ── DOM ──
     $("#athleteFirstName").textContent=a.firstName||"First";
