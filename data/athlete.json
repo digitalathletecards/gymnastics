@@ -4,6 +4,7 @@
     "lastName": "Neitenbach",
     "team": "KP Gymnastics",
     "discipline": "Gymnastics",
+    "level": "Bronze",
     "headline": "Chasing personal bests — meet by meet.",
     "shareUrl": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/",
     "donateUrl": "https://example.com/donate",
@@ -14,7 +15,7 @@
       { "label": "Goals", "value": "State • Regionals • Nationals" }
     ],
     "story": [
-      "Hi! I’m Layla — thank you for being part of my season.",
+      "Hi! I'm Layla — thank you for being part of my season.",
       "This page is my digital athlete card: it helps sponsors and supporters follow my journey with live meet updates and event performance.",
       "Your support helps cover training, travel, meet fees, and recovery tools so I can keep improving every week."
     ],
@@ -30,9 +31,17 @@
     "subtitle": "Help cover travel, coaching, meet fees."
   },
 
+  "supporters": [
+    { "name": "Sarah M.",     "amount": 50,  "time": "2 hours ago" },
+    { "name": "Coach Kim",    "amount": 25,  "time": "Yesterday" },
+    { "name": "The Johnson Family", "amount": 100, "time": "2 days ago" },
+    { "name": "Uncle Dave",   "amount": 50,  "time": "3 days ago" },
+    { "name": "Anonymous",    "amount": 20,  "time": "4 days ago" }
+  ],
+
   "cards": [
-    { "image": "images/card1.PNG", "label": "Meet Day" },
-    { "image": "images/card2.PNG", "label": "Training" },
+    { "image": "images/card1.png", "label": "Meet Day" },
+    { "image": "images/card2.png", "label": "Training" },
     { "image": "images/card3.png", "label": "Highlights" },
     { "image": "images/card4.png", "label": "Team" },
     { "image": "images/card5.png", "label": "Progress" }
@@ -43,45 +52,45 @@
       "id": "allAround",
       "name": "All Around",
       "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-10", "score": 36.55 },
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 36.55 },
         { "meet": "January Invitational", "date": "2026-01-25", "score": 37.10 },
-        { "meet": "City Cup", "date": "2026-02-08", "score": 37.40 }
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 37.40 }
       ]
     },
     {
       "id": "vault",
       "name": "Vault",
       "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.10 },
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.10 },
         { "meet": "January Invitational", "date": "2026-01-25", "score": 9.25 },
-        { "meet": "City Cup", "date": "2026-02-08", "score": 9.35 }
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.35 }
       ]
     },
     {
       "id": "bars",
       "name": "Bars",
       "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.00 },
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.00 },
         { "meet": "January Invitational", "date": "2026-01-25", "score": 9.15 },
-        { "meet": "City Cup", "date": "2026-02-08", "score": 9.20 }
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.20 }
       ]
     },
     {
       "id": "beam",
       "name": "Beam",
       "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.05 },
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.05 },
         { "meet": "January Invitational", "date": "2026-01-25", "score": 9.20 },
-        { "meet": "City Cup", "date": "2026-02-08", "score": 9.30 }
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.30 }
       ]
     },
     {
       "id": "floor",
       "name": "Floor",
       "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-10", "score": 9.40 },
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.40 },
         { "meet": "January Invitational", "date": "2026-01-25", "score": 9.50 },
-        { "meet": "City Cup", "date": "2026-02-08", "score": 9.55 }
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.55 }
       ]
     }
   ],
