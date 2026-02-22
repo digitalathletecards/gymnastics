@@ -807,3 +807,165 @@ button{ font-family:inherit; cursor:pointer; }
     scroll-behavior:auto !important;
   }
 }
+
+/* ═══════════════════════════════════════
+   NEW SEO / VIRAL / FEATURE ADDITIONS
+═══════════════════════════════════════ */
+
+/* ── Milestone track under progress bar ── */
+.milestoneTrack{
+  position:relative; height:18px; margin-top:4px;
+}
+.milestoneMark{
+  position:absolute; transform:translateX(-50%);
+  font-size:10px; color:rgba(255,180,215,.55);
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  pointer-events:none;
+}
+.milestoneMark::before{
+  content:""; width:1px; height:6px;
+  background:rgba(255,110,180,.35);
+}
+
+/* ── Share Progress button ── */
+.shareProgressBtn{
+  margin-top:10px; width:100%;
+  border:1.5px dashed rgba(255,110,180,.35);
+  background:rgba(255,110,180,.06);
+  border-radius:14px; padding:9px 14px;
+  color:var(--muted); font-size:12px; font-weight:800;
+  cursor:pointer; text-align:center;
+  transition:background .3s, border-color .3s, color .3s;
+}
+.shareProgressBtn:hover{
+  background:rgba(255,110,180,.14);
+  border-color:var(--pink1); color:var(--pink2);
+}
+
+/* ── Quick Share Row ── */
+.quickShareRow{
+  border-radius:18px;
+  border:1.5px solid var(--stroke);
+  background:rgba(255,110,180,.05);
+  padding:12px 14px;
+  backdrop-filter:blur(14px);
+}
+.quickShareLabel{
+  font-size:11px; font-weight:800; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted2); margin-bottom:10px;
+}
+.quickShareBtns{
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.qsBtn{
+  flex:1 1 auto;
+  text-align:center; text-decoration:none;
+  border:1.5px solid rgba(255,110,180,.22);
+  background:rgba(255,110,180,.09);
+  color:var(--text); font-family:var(--ff); font-weight:800; font-size:12px;
+  padding:9px 10px; border-radius:12px;
+  transition:transform .3s var(--bounce), background .3s, border-color .3s;
+  white-space:nowrap;
+}
+.qsBtn:hover{
+  transform:translateY(-2px) scale(1.04);
+  background:rgba(255,110,180,.18);
+  border-color:var(--pink1);
+}
+
+/* ── Sponsor logo hover overlay ── */
+.sLogo{ position:relative; overflow:hidden; }
+.sLogoOverlay{
+  position:absolute; inset:0;
+  background:rgba(255,110,180,.82);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--ff2); font-size:13px; color:#fff;
+  opacity:0; transition:opacity .3s;
+  border-radius:16px;
+}
+.sLogo:hover .sLogoOverlay{ opacity:1; }
+
+/* Sponsor visit text in modal card */
+.sponsorVisit{
+  font-size:11px; color:var(--pink2); font-weight:800;
+  margin-top:4px; opacity:0;
+  transition:opacity .3s;
+}
+.sponsorCard:hover .sponsorVisit{ opacity:1; }
+
+/* Sponsor analytics banner */
+.sponsorAnalyticsBanner{
+  display:none;
+  margin-top:16px; padding:14px;
+  border-radius:18px;
+  border:1.5px solid rgba(255,110,180,.18);
+  background:rgba(255,110,180,.07);
+  font-size:12px; color:var(--muted);
+}
+.analyticsTitle{
+  font-weight:900; color:var(--pink2);
+  margin-bottom:8px; font-size:13px;
+}
+.analyticsRow{
+  display:block; margin-bottom:4px;
+}
+
+/* ── Supporters section ── */
+.supportersSection{
+  margin-top:14px;
+  border-radius:var(--r);
+  border:1.5px solid var(--stroke);
+  background:rgba(255,110,180,.04);
+  padding:16px; backdrop-filter:blur(16px);
+}
+.supportersHead{ margin-bottom:12px; }
+.supportersTitle{ font-family:var(--ff2); font-size:16px; color:var(--pink2); }
+.supportersSub{ font-size:12px; color:var(--muted2); margin-top:3px; }
+.supportersFeed{ display:flex; flex-direction:column; gap:10px; }
+.supporterItem{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 12px; border-radius:16px;
+  border:1.5px solid rgba(255,110,180,.14);
+  background:rgba(255,110,180,.06);
+}
+.supporterAvatar{
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg,var(--pink1),var(--lavender));
+  display:grid; place-items:center;
+  font-family:var(--ff2); font-size:16px; color:#fff;
+  flex:0 0 auto;
+}
+.supporterInfo{ flex:1; }
+.supporterName{ font-weight:900; font-size:13px; color:var(--pink3); }
+.supporterTime{ font-size:11px; color:var(--muted2); margin-top:2px; }
+.supporterAmount{
+  font-family:var(--ff2); font-size:14px; color:var(--good);
+  padding:6px 10px; border-radius:10px;
+  border:1.5px solid rgba(168,240,212,.22);
+  background:rgba(168,240,212,.08);
+}
+
+/* ── Inline link button ── */
+.inlineLink{
+  background:none; border:none; padding:0;
+  color:var(--pink2); font-weight:800; font-size:inherit;
+  cursor:pointer; text-decoration:underline;
+  text-decoration-color:rgba(255,110,180,.35);
+  transition:color .2s;
+}
+.inlineLink:hover{ color:var(--pink1); }
+
+/* ── Create Your Own CTA ── */
+.createYourOwn{
+  margin-top:18px; padding:14px;
+  border-radius:18px;
+  border:1.5px dashed rgba(255,110,180,.30);
+  background:rgba(255,110,180,.06);
+  text-align:center;
+}
+.cyo-title{ font-family:var(--ff2); font-size:15px; color:var(--pink2); }
+.cyo-sub{ font-size:12px; color:var(--muted2); margin-top:4px; }
+
+/* ── Milestone overlay pulse ── */
+#milestoneOverlay{ display:none; }
+#milestoneOverlay[style*="flex"]{ display:flex !important; }
