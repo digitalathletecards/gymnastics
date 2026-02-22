@@ -196,34 +196,49 @@
     let active = Math.floor(cards.length/2);
     layoutFan(active);
 
-    fan.addEventListener("click",(e)=>{
-      const card = e.target.closest(".card");
-      if(!card) return;
-      active = parseInt(card.dataset.index,10);
-      layoutFan(active);
+    // ── Pointer handling: cleanly separate tap vs drag ──
+    let down=false, startX=0, startY=0, moved=false, downTarget=null;
+
+    fan.addEventListener("pointerdown",(e)=>{
+      fan.setPointerCapture(e.pointerId);
+      down=true; moved=false;
+      startX=e.clientX; startY=e.clientY;
+      downTarget=e.target;
     });
 
-    let down=false, startX=0, moved=false;
-    const onDown=(cx)=>{ down=true; moved=false; startX=cx; };
-    const onMove=(cx)=>{
+    fan.addEventListener("pointermove",(e)=>{
       if(!down) return;
-      const dx=cx-startX; if(Math.abs(dx)>18) moved=true;
-      fan.style.transform=`translateZ(0) rotateY(${clamp(dx/80,-6,6)}deg)`;
-    };
-    const onUp=(cx)=>{
-      if(!down) return; down=false; fan.style.transform="";
-      const dx=cx-startX;
-      if(moved){
-        if(dx<-40) active=clamp(active+1,0,cards.length-1);
-        if(dx>40)  active=clamp(active-1,0,cards.length-1);
+      const dx=e.clientX-startX, dy=e.clientY-startY;
+      if(Math.abs(dx)>8||Math.abs(dy)>8) moved=true;
+      if(moved) fan.style.transform=`translateZ(0) rotateY(${clamp(dx/80,-6,6)}deg)`;
+    });
+
+    fan.addEventListener("pointerup",(e)=>{
+      if(!down) return;
+      down=false;
+      fan.style.transform="";
+      const dx=e.clientX-startX;
+
+      if(!moved){
+        // Pure tap — bring tapped card to front
+        const card = e.target.closest(".card") || (downTarget && downTarget.closest(".card"));
+        if(card){
+          active = parseInt(card.dataset.index,10);
+          layoutFan(active);
+        }
+      } else {
+        // Drag swipe — advance active index
+        if(dx < -40) active=clamp(active+1,0,cards.length-1);
+        if(dx >  40) active=clamp(active-1,0,cards.length-1);
         layoutFan(active);
       }
-    };
+      moved=false; downTarget=null;
+    });
 
-    fan.addEventListener("pointerdown",(e)=>{ fan.setPointerCapture(e.pointerId); onDown(e.clientX); });
-    fan.addEventListener("pointermove",(e)=>onMove(e.clientX));
-    fan.addEventListener("pointerup",(e)=>onUp(e.clientX));
-    fan.addEventListener("pointercancel",(e)=>onUp(e.clientX));
+    fan.addEventListener("pointercancel",()=>{
+      down=false; moved=false; downTarget=null;
+      fan.style.transform="";
+    });
 
     fan.addEventListener("mousemove",(e)=>{
       if(reduceMotion) return;
