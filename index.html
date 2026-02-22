@@ -31,16 +31,12 @@
     </div>
 
     <div class="topbar__right">
-      <button class="btn btn--ghost" id="copyLinkBtn" type="button" title="Copy Link">
-        ↗ Copy Link
-      </button>
-      <button class="btn btn--primary" id="shareBtn" type="button">
-        📤 Share
-      </button>
+      <button class="btn btn--ghost" id="copyLinkBtn" type="button" title="Copy Link">↗ Copy Link</button>
+      <button class="btn btn--primary" id="shareBtn" type="button">📤 Share</button>
     </div>
   </header>
 
-  <main class="stage">
+  <main class="stage" id="stage">
     <div class="wrap">
       <section class="hero">
         <div class="hero__left">
@@ -98,7 +94,6 @@
             </div>
           </div>
 
-          <!-- Photo Cards / Gallery -->
           <div class="card gallery fxCard">
             <div class="titleRow">
               <div class="title">🖼️ Photo Cards</div>
@@ -158,7 +153,6 @@
             </div>
             <div class="achList" id="achList"></div>
           </div>
-
         </aside>
       </section>
 
@@ -172,7 +166,7 @@
     </div>
   </main>
 
-  <!-- MODAL HOST -->
+  <!-- MODAL HOST (keep at END of body, outside stage) -->
   <div class="modalHost" id="modalHost" aria-hidden="true">
     <div class="modalHost__backdrop" id="modalBackdrop"></div>
 
