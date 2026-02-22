@@ -4,9 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#1a0a18" />
-  <title>Digital Athlete Card</title>
 
-  <!-- Fonts: Nunito (body) + Fredoka One (display) -->
+  <!-- ═══ SEO FOUNDATION ═══ -->
+  <title id="pageTitle">Digital Athlete Card | Youth Sports Fundraising</title>
+  <meta name="description" id="metaDesc" content="Support a competitive gymnast. View meet scores, performance charts, season highlights, and sponsor their journey." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" id="canonicalLink" href="" />
+
+  <!-- ═══ OPEN GRAPH (Facebook, iMessage, WhatsApp, LinkedIn) ═══ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Digital Athlete Card" />
+  <meta property="og:title" id="ogTitle" content="Support a Gymnast's Season Journey ✨" />
+  <meta property="og:description" id="ogDesc" content="View scores, season highlights, and sponsor this athlete's competitive gymnastics season." />
+  <meta property="og:image" id="ogImage" content="" />
+  <meta property="og:url" id="ogUrl" content="" />
+
+  <!-- ═══ TWITTER CARD ═══ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" id="twTitle" content="Support a Gymnast's Season ✨" />
+  <meta name="twitter:description" id="twDesc" content="Tap to view scores, meet history, and sponsor this athlete's season." />
+  <meta name="twitter:image" id="twImage" content="" />
+
+  <!-- ═══ STRUCTURED DATA (JSON-LD) — injected dynamically by JS ═══ -->
+  <script id="jsonLd" type="application/ld+json">{}</script>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
@@ -15,17 +37,14 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="stylesheet" href="style/main.css" />
+
+  <!-- Confetti (milestone celebrations) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
 
 <body>
-
-  <!-- Floating hearts / stars background deco -->
   <div class="float-deco" id="floatDeco" aria-hidden="true"></div>
-
-  <!-- Canvas particles -->
   <canvas id="fx-canvas" aria-hidden="true"></canvas>
-
-  <!-- Film grain -->
   <div class="grain" aria-hidden="true"></div>
 
   <main class="shell">
@@ -39,11 +58,14 @@
           <div class="brand-sub">Fundraising · Sponsors · Journey</div>
         </div>
       </div>
-
       <div class="topbar-actions">
         <button class="chip" id="btnCopyLink" type="button" title="Copy share link">
           <span class="chip-icon" aria-hidden="true">↗</span>
-          <span>Copy Share Link</span>
+          <span>Copy Link</span>
+        </button>
+        <button class="chip" id="btnNativeShare" type="button" title="Share">
+          <span class="chip-icon" aria-hidden="true">📤</span>
+          <span>Share</span>
         </button>
         <button class="chip ghost" id="btnOpenSponsors" type="button" title="View sponsors">
           <span class="chip-icon" aria-hidden="true">💎</span>
@@ -54,18 +76,12 @@
 
     <!-- ── Hero ── -->
     <section class="hero">
-
-      <!-- Name card (opens bio) -->
       <button class="nameHero" id="openBioModal" type="button" aria-haspopup="dialog" aria-controls="bioModal">
         <span class="nameGlow" aria-hidden="true"></span>
         <span class="orbit" aria-hidden="true"></span>
-
-        <!-- Bronze Level Badge -->
-        <span class="levelBadge" aria-label="Bronze Level">🏅 Bronze</span>
-
+        <span class="levelBadge" id="levelBadge" aria-label="Level">🏅 Bronze</span>
         <span class="nameLine" id="athleteFirstName">First</span>
         <span class="nameLine last" id="athleteLastName">Last</span>
-
         <span class="nameMeta">
           <span class="badge" id="athleteTeam">Team</span>
           <span class="badge soft" id="athleteDiscipline">Discipline</span>
@@ -73,7 +89,6 @@
         </span>
       </button>
 
-      <!-- Fundraising card -->
       <div class="heroRight">
         <div class="goalCard" id="goalCard">
           <div class="goalTop">
@@ -89,6 +104,14 @@
             <div class="progressGlow" aria-hidden="true"></div>
           </div>
 
+          <!-- Milestone markers -->
+          <div class="milestoneTrack" aria-hidden="true">
+            <span class="milestoneMark" style="left:25%"><span>25%</span></span>
+            <span class="milestoneMark" style="left:50%"><span>50%</span></span>
+            <span class="milestoneMark" style="left:75%"><span>75%</span></span>
+            <span class="milestoneMark" style="left:100%"><span>🏆</span></span>
+          </div>
+
           <div class="goalBottom">
             <button class="cta" id="ctaDonate" type="button">
               <span class="ctaPulse" aria-hidden="true"></span>
@@ -100,47 +123,68 @@
               <span class="ctaArrow" aria-hidden="true">↗</span>
             </button>
           </div>
+
+          <!-- Share progress one-tap -->
+          <button class="shareProgressBtn" id="btnShareProgress" type="button">
+            <span id="shareProgressText">Share progress 📊</span>
+          </button>
         </div>
 
         <div class="microNote" id="microNote">
           <span class="dotLive" aria-hidden="true"></span>
           <span id="microNoteText">Live updates: scores · meets · sponsors</span>
         </div>
+
+        <!-- Quick Share Row -->
+        <div class="quickShareRow">
+          <div class="quickShareLabel">Share via</div>
+          <div class="quickShareBtns">
+            <a class="qsBtn" id="qsSms" href="#" title="Text Message">💬 Text</a>
+            <a class="qsBtn" id="qsWhatsapp" href="#" title="WhatsApp" target="_blank" rel="noopener">💚 WhatsApp</a>
+            <a class="qsBtn" id="qsFacebook" href="#" title="Facebook" target="_blank" rel="noopener">📘 Facebook</a>
+            <a class="qsBtn" id="qsEmail" href="#" title="Email">✉️ Email</a>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ── Cards + Events ── -->
     <section class="stage">
-
       <div class="cardsWrap">
         <div class="cardsHeader">
           <div class="cardsTitle">🌸 Showcasing the journey</div>
-          <div class="cardsSub">Swipe · tap · share with pride ✨</div>
+          <div class="cardsSub">Auto-rotates · tap to enlarge ✨</div>
         </div>
-
         <div class="cardsFan" id="cardsFan" aria-label="Athlete photo cards"></div>
-
         <div class="cardsHint">
           <span class="kbd">Drag</span>
           <span class="sep">·</span>
-          <span class="kbd">Tap</span>
+          <span class="kbd">Tap to enlarge</span>
           <span class="sep">·</span>
-          <span class="kbd">Share</span>
+          <span class="kbd">Auto-rotates</span>
         </div>
       </div>
 
       <aside class="eventsWrap" aria-label="Event scores">
         <div class="eventsTitle">🏆 Events</div>
         <div class="eventsSub">Tap an event for chart + meet history</div>
-
         <div class="eventGrid" id="eventGrid"></div>
 
         <div class="sponsorRail">
-          <div class="sponsorTitle">Featured Sponsors</div>
+          <div class="sponsorTitle">These local businesses power this season 💎</div>
           <div class="sponsorStrip" id="sponsorStrip"></div>
-          <div class="sponsorFoot">Tap a logo to visit · Your support powers the season 💕</div>
+          <div class="sponsorFoot">Tap a logo to visit · Want to sponsor? <button class="inlineLink" id="btnBecomeSponsor">Learn more →</button></div>
         </div>
       </aside>
+    </section>
+
+    <!-- ── Recent Supporters ── -->
+    <section class="supportersSection" id="supportersSection" style="display:none">
+      <div class="supportersHead">
+        <div class="supportersTitle">💕 Recent Supporters</div>
+        <div class="supportersSub">People cheering Layla on</div>
+      </div>
+      <div class="supportersFeed" id="supportersFeed"></div>
     </section>
 
     <!-- ── Footer ── -->
@@ -151,7 +195,7 @@
       </div>
       <div class="footerRight">
         <button class="chip" id="btnOpenAbout" type="button">About</button>
-        <button class="chip ghost" id="btnReduceMotion" type="button" title="Toggle reduced motion">Reduce Motion</button>
+        <button class="chip ghost" id="btnReduceMotion" type="button">Reduce Motion</button>
       </div>
     </footer>
   </main>
@@ -195,9 +239,7 @@
       </div>
       <div class="modalBody">
         <div class="eventLayout">
-          <div class="chartBox">
-            <canvas id="eventScoreChart" aria-label="Event score chart"></canvas>
-          </div>
+          <div class="chartBox"><canvas id="eventScoreChart" aria-label="Event score chart"></canvas></div>
           <div class="meetList" id="meetList"></div>
         </div>
       </div>
@@ -215,6 +257,8 @@
       </div>
       <div class="modalBody">
         <div class="sponsorGrid" id="sponsorGrid"></div>
+        <!-- Sponsor analytics summary -->
+        <div class="sponsorAnalyticsBanner" id="sponsorAnalyticsBanner"></div>
       </div>
     </div>
   </div>
@@ -236,8 +280,31 @@
             <li>💎 Tap sponsor logos to visit their site</li>
             <li>💕 Use "Share" to send to advertisers instantly</li>
           </ul>
+          <div class="createYourOwn">
+            <div class="cyo-title">Want one for your athlete?</div>
+            <div class="cyo-sub">Digital Athlete Cards are free to create and share.</div>
+            <button class="cta" id="btnCreateOwn" type="button" style="margin-top:12px;width:100%;justify-content:center;">
+              <span class="ctaText">Create your own card →</span>
+            </button>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ MILESTONE CELEBRATION OVERLAY ═══ -->
+  <div id="milestoneOverlay" style="display:none;position:fixed;inset:0;z-index:200;pointer-events:none;align-items:center;justify-content:center;">
+    <div id="milestoneBadge" style="
+      background:linear-gradient(135deg,rgba(255,110,180,.95),rgba(212,168,255,.95));
+      border-radius:28px; padding:28px 36px; text-align:center;
+      box-shadow:0 30px 80px rgba(200,0,80,.5);
+      border:2px solid rgba(255,255,255,.3);
+      animation:lbIn .5s cubic-bezier(.34,1.56,.64,1) both;
+      pointer-events:auto;
+    ">
+      <div style="font-size:52px" id="milestoneEmoji">🎉</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:26px;color:#fff;margin-top:8px" id="milestoneMsg">Milestone reached!</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.8);margin-top:6px" id="milestoneSub">Thank you for the support!</div>
     </div>
   </div>
 
