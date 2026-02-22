@@ -7,11 +7,13 @@
     "sport": "Gymnastics",
     "tierLabel": "🏅 Bronze",
     "photo": "images/card1.PNG",
+
     "bio": [
-      "Layla is a dedicated gymnast who loves learning new skills and competing with her team.",
-      "This season she’s training for meets, travel events, and skill progression — and she’s proud to share the journey with friends, family, and local sponsors.",
-      "Every sponsor helps cover coaching, meet fees, travel, and training costs."
+      "Layla is a determined young gymnast who loves learning new skills, showing great sportsmanship, and competing with her team.",
+      "This digital athlete card keeps family updated and makes it easy for local sponsors to support her season.",
+      "Every sponsor helps cover coaching, meet fees, travel, and training costs — and every share helps the dream go further."
     ],
+
     "fundraising": {
       "title": "Help cover travel, coaching, meet fees.",
       "raised": 650,
@@ -19,19 +21,49 @@
       "currency": "USD",
       "ctaUrl": "https://example.com/donate"
     },
+
     "share": {
       "publicUrl": "https://example.com/layla"
     },
+
+    "stats": [
+      { "label": "Season goal", "value": "$2,000" },
+      { "label": "Raised so far", "value": "$650" },
+      { "label": "Meets this year", "value": "6" },
+      { "label": "Training / week", "value": "4 days" }
+    ],
+
+    "gallery": [
+      { "src": "images/card1.PNG", "title": "Meet Day", "tag": "Competition" },
+      { "src": "images/card2.PNG", "title": "Training Focus", "tag": "Practice" },
+      { "src": "images/card3.png", "title": "New Skill", "tag": "Milestone" },
+      { "src": "images/card4.png", "title": "Team Spirit", "tag": "Gym Fam" },
+      { "src": "images/card5.png", "title": "Confidence", "tag": "Growth" }
+    ],
+
     "sponsors": [
       { "name": "Sponsor One", "tier": "Bronze", "url": "https://example.com", "image": "sponsors/sponsor1.png" },
       { "name": "Sponsor Two", "tier": "Bronze", "url": "https://example.com", "image": "sponsors/sponsor2.png" },
       { "name": "Sponsor Three", "tier": "Silver", "url": "https://example.com", "image": "sponsors/sponsor3.png" },
       { "name": "Sponsor Four", "tier": "Gold", "url": "https://example.com", "image": "sponsors/sponsor4.png" }
     ],
+
     "journey": [
       { "date": "Feb 2026", "title": "New Skill Unlock", "desc": "Working on consistency and clean landings." },
       { "date": "Mar 2026", "title": "Meet Prep", "desc": "Focused training blocks with the team." },
-      { "date": "Apr 2026", "title": "Competition Weekend", "desc": "Travel + meet fees covered by sponsors." }
+      { "date": "Apr 2026", "title": "Competition Weekend", "desc": "Travel + meet fees supported by sponsors." }
+    ],
+
+    "upcoming": [
+      { "date": "Mar 9", "title": "Gym Showcase", "desc": "Routine run-through + family day." },
+      { "date": "Mar 23", "title": "Spring Invitational", "desc": "Meet weekend — travel + coaching fees." },
+      { "date": "Apr 12", "title": "District Qualifier", "desc": "Big milestone meet — share with sponsors!" }
+    ],
+
+    "achievements": [
+      { "date": "Jan 2026", "title": "Personal Best", "desc": "Improved form and consistency in routines." },
+      { "date": "Feb 2026", "title": "New Routine Upgrade", "desc": "Added difficulty with clean execution." },
+      { "date": "Feb 2026", "title": "Team Support Award", "desc": "Positive energy + great sportsmanship." }
     ]
   }
 }
