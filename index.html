@@ -3,601 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#070915" />
-  <title>Digital Athlete Card</title>
+  <meta name="theme-color" content="#0b0610" />
 
-  <!-- Dynamic SEO meta tags (filled by JS) -->
-  <meta name="description" id="metaDesc" content="Digital Athlete Fundraising Card" />
-  <meta property="og:title" id="ogTitle" content="Digital Athlete Card" />
-  <meta property="og:description" id="ogDesc" content="Support this athlete's season journey." />
+  <!-- ✅ IMPORTANT: Social preview scrapers often DO NOT run JS
+       These default tags will be updated in-browser by app.js, but MUST exist here. -->
+  <title>Digital Athlete Card | Youth Sports Fundraising</title>
+  <meta name="description" content="Support a youth athlete. View meet scores, performance charts, season highlights, and sponsor their journey." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://digitalathletecards.github.io/gymnastics/" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:site_name" content="Digital Athlete Card" />
+  <meta property="og:title" content="Support a Gymnast's Season Journey ✨" />
+  <meta property="og:description" content="View scores, season highlights, and sponsor this athlete's season." />
+  <meta property="og:url" content="https://digitalathletecards.github.io/gymnastics/" />
+  <meta property="og:image" content="https://digitalathletecards.github.io/gymnastics/images/senxia.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
 
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Support a Gymnast's Season ✨" />
+  <meta name="twitter:description" content="Tap to view scores, meet history, and sponsor this athlete's season." />
+  <meta name="twitter:image" content="https://digitalathletecards.github.io/gymnastics/images/senxia.png" />
+
+  <!-- JSON-LD (filled by JS too, but placeholder helps) -->
+  <script id="jsonLd" type="application/ld+json">{}</script>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-:root{
-  --bg0:#050613;
-  --bg1:#070a1b;
-  --card: rgba(255,255,255,.06);
-  --card2: rgba(255,255,255,.08);
-  --stroke: rgba(255,255,255,.12);
-  --stroke2: rgba(255,255,255,.18);
-  --text: rgba(255,255,255,.92);
-  --muted: rgba(255,255,255,.62);
-  --muted2: rgba(255,255,255,.45);
-  --accent1:#ffb3e0;
-  --accent2:#7dd3ff;
-  --accent3:#a78bfa;
-  --good:#6ee7b7;
-  --shadow: 0 30px 90px rgba(0,0,0,.55);
-  --shadow2: 0 16px 45px rgba(0,0,0,.45);
-  --ff: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  --ff2:"Orbitron", ui-sans-serif, system-ui;
-  --r: 24px;
-  --ease: cubic-bezier(.2,.9,.2,1);
-}
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
-body{
-  margin:0;
-  color:var(--text);
-  font-family:var(--ff);
-  background:
-    radial-gradient(1100px 700px at 15% 10%, rgba(167,139,250,.18), transparent 55%),
-    radial-gradient(900px 600px at 80% 15%, rgba(125,211,255,.12), transparent 55%),
-    radial-gradient(700px 500px at 50% 95%, rgba(255,179,224,.10), transparent 55%),
-    linear-gradient(180deg, var(--bg1), var(--bg0));
-  overflow-x:hidden;
-}
-a{ color:inherit; }
-button{ font-family:inherit; }
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-/* ── FX layers ── */
-#fx-canvas{
-  position:fixed; inset:0; width:100%; height:100%;
-  z-index:0; pointer-events:none;
-}
-.vignette{
-  position:fixed; inset:-2px; z-index:1; pointer-events:none;
-  background:
-    radial-gradient(1200px 700px at 50% 15%, transparent 55%, rgba(0,0,0,.55) 100%),
-    radial-gradient(900px 600px at 50% 100%, transparent 55%, rgba(0,0,0,.55) 100%);
-  mix-blend-mode: multiply;
-}
-.grain{
-  position:fixed; inset:0; z-index:2; pointer-events:none; opacity:.10;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
-}
-
-/* ── Shell ── */
-.shell{
-  position:relative; z-index:3;
-  max-width:1200px; margin:0 auto; padding:22px 18px 28px;
-}
-
-/* ── Topbar ── */
-.topbar{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:14px; padding:10px 12px; border-radius:18px;
-  border:1px solid var(--stroke);
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  box-shadow: var(--shadow2); backdrop-filter: blur(14px);
-}
-.brand{ display:flex; align-items:center; gap:10px; }
-.brand-dot{
-  width:12px; height:12px; border-radius:999px;
-  background: linear-gradient(135deg, var(--accent1), var(--accent2));
-  box-shadow: 0 0 0 6px rgba(255,179,224,.08), 0 0 40px rgba(125,211,255,.22);
-}
-.brand-text{ display:flex; flex-direction:column; line-height:1.1; }
-.brand-title{ font-weight:800; letter-spacing:.02em; }
-.brand-sub{ font-size:12px; color:var(--muted2); }
-.topbar-actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-
-/* ── Chips ── */
-.chip{
-  border:1px solid var(--stroke);
-  background: rgba(255,255,255,.06);
-  color:var(--text); padding:10px 12px; border-radius:999px;
-  display:inline-flex; align-items:center; gap:9px;
-  cursor:pointer; font-size:14px; font-weight:600;
-  transition: transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease);
-  backdrop-filter: blur(14px);
-}
-.chip:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.08); }
-.chip:active{ transform: translateY(0px) scale(.98); }
-.chip.ghost{ background: rgba(255,255,255,.03); }
-.chip-icon{
-  width:18px; height:18px; display:grid; place-items:center;
-  border-radius:6px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10);
-}
-
-/* ── Hero ── */
-.hero{
-  display:grid; grid-template-columns: 1.2fr .8fr;
-  gap:16px; margin-top:14px;
-}
-@media (max-width: 980px){ .hero{ grid-template-columns: 1fr; } }
-
-.nameHero{
-  position:relative; border:none; text-align:left; width:100%;
-  padding:22px 20px 18px; border-radius: var(--r);
-  border:1px solid var(--stroke);
-  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-  box-shadow: var(--shadow); cursor:pointer; overflow:hidden;
-  backdrop-filter: blur(16px);
-  transition: transform .55s var(--ease), border-color .55s var(--ease);
-}
-.nameHero:hover{ transform: translateY(-2px); border-color: rgba(255,255,255,.22); }
-.nameGlow{
-  position:absolute; inset:-20%;
-  background:
-    radial-gradient(600px 260px at 25% 25%, rgba(255,179,224,.18), transparent 60%),
-    radial-gradient(520px 260px at 80% 10%, rgba(125,211,255,.14), transparent 60%),
-    radial-gradient(560px 320px at 60% 90%, rgba(167,139,250,.14), transparent 62%);
-  filter: blur(6px); opacity:.9; transform: translateZ(0);
-}
-.nameLine{
-  position:relative; display:block;
-  font-family: var(--ff2); font-weight:900; letter-spacing:.02em;
-  text-transform:uppercase; font-size: clamp(34px, 5vw, 64px); line-height:1.0;
-  text-shadow: 0 10px 45px rgba(0,0,0,.55), 0 0 40px rgba(255,179,224,.18), 0 0 60px rgba(125,211,255,.12);
-}
-.nameLine.last{
-  background: linear-gradient(90deg, rgba(255,255,255,.92), rgba(255,179,224,.92), rgba(125,211,255,.9));
-  -webkit-background-clip:text; background-clip:text; color: transparent;
-}
-.nameMeta{
-  position:relative; display:flex; flex-wrap:wrap; gap:10px;
-  align-items:center; margin-top:14px;
-}
-.badge{
-  font-size:12px; letter-spacing:.08em; text-transform:uppercase;
-  padding:9px 10px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06);
-}
-.badge.soft{ color: rgba(255,255,255,.78); background: rgba(255,255,255,.04); }
-.tapHint{
-  margin-left:auto; font-size:12px; color: var(--muted2);
-  display:flex; align-items:center; gap:10px;
-}
-.tapHint::before{
-  content:""; width:8px; height:8px; border-radius:999px;
-  background: linear-gradient(135deg, var(--accent1), var(--accent2));
-  box-shadow: 0 0 16px rgba(255,179,224,.35);
-}
-.orbit{
-  position:absolute; inset:-40px -40px auto auto;
-  width:220px; height:220px; border-radius:999px;
-  border:1px dashed rgba(255,255,255,.12); transform: rotate(-15deg);
-  opacity:.9; filter: drop-shadow(0 0 20px rgba(255,179,224,.12));
-}
-.orbit::before, .orbit::after{
-  content:""; position:absolute; inset:0; border-radius:999px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255,179,224,.9), transparent 40%),
-    radial-gradient(circle at 70% 75%, rgba(125,211,255,.85), transparent 45%),
-    radial-gradient(circle at 45% 55%, rgba(167,139,250,.75), transparent 45%);
-  opacity:.6; filter: blur(10px); animation: orbitSpin 8s linear infinite;
-}
-.orbit::after{ opacity:.35; filter: blur(18px); animation-duration: 12s; }
-@keyframes orbitSpin{ from{ transform: rotate(0deg); } to{ transform: rotate(360deg); } }
-
-/* ── Goal card ── */
-.heroRight{ display:flex; flex-direction:column; gap:12px; }
-.goalCard{
-  border-radius: var(--r); border:1px solid var(--stroke);
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  box-shadow: var(--shadow); padding:16px; overflow:hidden;
-  position:relative; backdrop-filter: blur(16px);
-}
-.goalCard::before{
-  content:""; position:absolute; inset:-40%;
-  background:
-    radial-gradient(400px 240px at 25% 30%, rgba(255,179,224,.16), transparent 60%),
-    radial-gradient(380px 240px at 85% 10%, rgba(125,211,255,.12), transparent 60%);
-  filter: blur(10px); opacity:.9;
-}
-.goalTop{ position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-.goalTitle{ font-weight:800; letter-spacing:.01em; }
-.goalSub{ font-size:12px; color: var(--muted2); margin-top:4px; max-width:42ch; }
-.goalPill{
-  position:relative; font-size:12px; padding:10px;
-  border-radius:999px; border:1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.18); white-space:nowrap;
-}
-.progress{
-  position:relative; margin-top:14px; height:12px; border-radius:999px;
-  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); overflow:hidden;
-}
-.progressBar{
-  position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:999px;
-  background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
-  box-shadow: 0 0 30px rgba(125,211,255,.25); transition: width .9s var(--ease);
-}
-.progressGlow{
-  position:absolute; inset:-50%;
-  background: radial-gradient(200px 90px at 30% 50%, rgba(255,179,224,.18), transparent 65%);
-  opacity:.55; filter: blur(12px); pointer-events:none;
-  animation: shimmer 2.6s var(--ease) infinite;
-}
-@keyframes shimmer{
-  0%{ transform: translateX(-10%); opacity:.28; }
-  50%{ transform: translateX(10%); opacity:.6; }
-  100%{ transform: translateX(-10%); opacity:.28; }
-}
-.goalBottom{ position:relative; margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
-.cta{
-  border:none; cursor:pointer; border-radius:16px; padding:12px 14px;
-  display:flex; align-items:center; gap:10px;
-  background: linear-gradient(90deg, rgba(255,179,224,.95), rgba(125,211,255,.92));
-  color: rgba(10,12,25,.95); font-weight:900; letter-spacing:.01em;
-  box-shadow: 0 18px 55px rgba(0,0,0,.45); position:relative;
-  overflow:hidden; font-size:14px;
-  transition: transform .35s var(--ease), filter .35s var(--ease);
-}
-.cta:hover{ transform: translateY(-1px); filter: brightness(1.02); }
-.cta:active{ transform: translateY(0px) scale(.985); }
-.cta.secondary{
-  background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
-  color: var(--text); box-shadow: none;
-}
-.ctaPulse{
-  position:absolute; inset:-40%;
-  background: radial-gradient(220px 110px at 30% 50%, rgba(255,255,255,.35), transparent 60%);
-  filter: blur(14px); opacity:.22; animation: pulse 2.2s var(--ease) infinite;
-}
-@keyframes pulse{
-  0%{ transform: translateX(-4%); opacity:.12; }
-  50%{ transform: translateX(4%); opacity:.28; }
-  100%{ transform: translateX(-4%); opacity:.12; }
-}
-.ctaText{ position:relative; }
-.ctaArrow{ position:relative; opacity:.9; }
-.microNote{
-  border-radius: 18px; border:1px solid var(--stroke); background: rgba(255,255,255,.03);
-  padding:12px; display:flex; align-items:center; gap:10px;
-  color: var(--muted); backdrop-filter: blur(14px); font-size:13px;
-}
-.dotLive{
-  width:10px; height:10px; border-radius:999px; flex-shrink:0;
-  background: var(--good);
-  box-shadow: 0 0 0 6px rgba(110,231,183,.10), 0 0 30px rgba(110,231,183,.20);
-}
-
-/* ── Stage ── */
-.stage{
-  display:grid; grid-template-columns: 1.25fr .75fr;
-  gap:16px; margin-top:16px;
-}
-@media (max-width: 980px){ .stage{ grid-template-columns: 1fr; } }
-
-.cardsWrap{
-  border-radius: var(--r); border:1px solid var(--stroke);
-  background: rgba(255,255,255,.03); box-shadow: var(--shadow2);
-  padding:16px; backdrop-filter: blur(16px); overflow:hidden;
-}
-.cardsHeader{ display:flex; justify-content:space-between; gap:12px; align-items:flex-end; }
-.cardsTitle{ font-weight:900; letter-spacing:.01em; }
-.cardsSub{ font-size:12px; color:var(--muted2); }
-
-.cardsFan{
-  position:relative; height:340px; margin-top:14px;
-  display:grid; place-items:center;
-  user-select:none; touch-action: pan-y;
-}
-.card{
-  position:absolute; width:min(420px, 78vw); height:280px;
-  border-radius: 22px; overflow:hidden;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  box-shadow: 0 30px 90px rgba(0,0,0,.55);
-  transform: translateZ(0);
-  transition: transform .65s var(--ease), filter .65s var(--ease), opacity .65s var(--ease);
-  cursor:pointer;
-}
-.card img{ width:100%; height:100%; object-fit: cover; display:block; transform: scale(1.03); filter: saturate(1.08) contrast(1.05); }
-.card::after{
-  content:""; position:absolute; inset:0;
-  background:
-    radial-gradient(420px 200px at 20% 10%, rgba(255,179,224,.14), transparent 60%),
-    radial-gradient(360px 220px at 85% 20%, rgba(125,211,255,.12), transparent 60%),
-    linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.35));
-  mix-blend-mode: screen; pointer-events:none; opacity:.75;
-}
-.card .cardLabel{
-  position:absolute; left:14px; bottom:14px;
-  display:flex; gap:8px; align-items:center;
-  padding:10px 12px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.18);
-  backdrop-filter: blur(12px); color: rgba(255,255,255,.9); font-size:12px;
-}
-.card .cardLabel .spark{
-  width:8px; height:8px; border-radius:999px;
-  background: linear-gradient(135deg, var(--accent1), var(--accent2));
-  box-shadow: 0 0 18px rgba(255,179,224,.25);
-}
-/* Placeholder card when no image */
-.card.placeholder{
-  display:flex; align-items:center; justify-content:center;
-  flex-direction:column; gap:8px;
-}
-.card.placeholder .ph-icon{ font-size:40px; opacity:.3; }
-.card.placeholder .ph-label{ font-size:12px; color:var(--muted2); }
-
-.cardsHint{ display:flex; justify-content:center; gap:10px; margin-top:12px; color: var(--muted2); font-size:12px; }
-.kbd{ border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); padding:6px 10px; border-radius:999px; }
-.sep{ opacity:.5; }
-
-/* ── Events ── */
-.eventsWrap{
-  border-radius: var(--r); border:1px solid var(--stroke);
-  background: rgba(255,255,255,.03); box-shadow: var(--shadow2);
-  padding:16px; backdrop-filter: blur(16px);
-}
-.eventsTitle{ font-weight:900; letter-spacing:.01em; }
-.eventsSub{ margin-top:4px; font-size:12px; color:var(--muted2); }
-.eventGrid{ margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-.eventBtn{
-  border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05);
-  border-radius:18px; padding:12px; cursor:pointer; color:var(--text);
-  transition: transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease);
-  text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.eventBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.22); }
-.eventName{ font-weight:800; letter-spacing:.02em; font-size:13px; }
-.eventMeta{ margin-top:4px; font-size:11px; color: var(--muted2); }
-.eventScore{
-  font-family: var(--ff2); font-weight:900; letter-spacing:.03em;
-  padding:10px; border-radius:14px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.18);
-  min-width:60px; text-align:center; font-size:13px;
-}
-
-/* ── Sponsor rail ── */
-.sponsorRail{ margin-top:14px; border-top:1px solid rgba(255,255,255,.10); padding-top:14px; }
-.sponsorTitle{ font-weight:900; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.84); }
-.sponsorStrip{ margin-top:10px; display:flex; gap:10px; overflow:auto; padding-bottom:6px; }
-.sLogo{
-  flex:0 0 auto; width:112px; height:56px; border-radius:16px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05);
-  display:grid; place-items:center; cursor:pointer; overflow:hidden;
-  transition: transform .35s var(--ease), border-color .35s var(--ease), background .35s var(--ease);
-}
-.sLogo:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.07); }
-.sLogo img{ max-width:80%; max-height:70%; filter: drop-shadow(0 10px 25px rgba(0,0,0,.35)); }
-.sLogo .sLogoText{ font-size:10px; font-weight:700; color:var(--muted); text-align:center; padding:4px; }
-.sponsorFoot{ margin-top:10px; font-size:12px; color: var(--muted2); }
-
-/* ── Footer ── */
-.footer{
-  margin-top:16px; display:flex; align-items:center; justify-content:space-between;
-  gap:12px; padding:14px 12px; border-radius:18px;
-  border:1px solid var(--stroke); background: rgba(255,255,255,.03);
-  backdrop-filter: blur(14px);
-}
-.footTitle{ font-weight:900; }
-.footSub{ font-size:12px; color: var(--muted2); margin-top:2px; }
-.footerRight{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-
-/* ── Modals ── */
-.modalOverlay{
-  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  padding:18px; background: rgba(0,0,0,.65); z-index:20;
-  backdrop-filter: blur(4px);
-}
-.modalOverlay[data-open="true"]{ display:flex; }
-.modalCard{
-  width:min(880px, 96vw); border-radius: 26px;
-  border:1px solid rgba(255,255,255,.16);
-  background: linear-gradient(180deg, rgba(18,18,40,.96), rgba(10,10,30,.98));
-  box-shadow: var(--shadow); overflow:hidden; position:relative;
-  max-height:90vh; display:flex; flex-direction:column;
-}
-.modalCard.wide{ width:min(1040px, 96vw); }
-.modalClose{
-  position:absolute; right:14px; top:14px; border:none; cursor:pointer;
-  width:44px; height:44px; border-radius:14px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.35);
-  color: rgba(255,255,255,.9); font-size:16px; z-index:2;
-  transition: transform .35s var(--ease), background .35s var(--ease);
-}
-.modalClose:hover{ transform: translateY(-1px); background: rgba(0,0,0,.5); }
-.modalHead{
-  padding:22px 22px 14px; border-bottom:1px solid rgba(255,255,255,.10);
-  background:
-    radial-gradient(600px 240px at 15% 30%, rgba(255,179,224,.10), transparent 60%),
-    radial-gradient(520px 240px at 85% 0%, rgba(125,211,255,.08), transparent 60%);
-  flex-shrink:0;
-}
-.modalKicker{
-  font-size:11px; letter-spacing:.18em; text-transform:uppercase;
-  color: rgba(255,255,255,.55); font-weight:700;
-}
-.modalTitle{
-  margin:8px 0 0; font-family: var(--ff2); font-weight:900;
-  letter-spacing:.02em; font-size:clamp(18px,3vw,26px);
-}
-.modalMeta{ margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; }
-.metaPill{
-  border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.25);
-  padding:8px 12px; border-radius:999px; font-size:12px;
-}
-.metaPill.soft{ background: rgba(255,255,255,.05); }
-.modalBadges{ margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; }
-.modalBody{ padding:18px 22px 22px; overflow-y:auto; }
-
-/* ── Bio modal ── */
-.bioGrid{ display:grid; grid-template-columns: 0.9fr 1.1fr; gap:16px; }
-@media (max-width: 860px){ .bioGrid{ grid-template-columns: 1fr; } }
-.bioPhoto{
-  height:240px; border-radius:22px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06);
-  overflow:hidden; box-shadow: 0 18px 55px rgba(0,0,0,.35);
-  position:relative;
-}
-.bioPhoto::after{
-  content:""; position:absolute; inset:0;
-  background:
-    radial-gradient(420px 180px at 30% 15%, rgba(255,179,224,.10), transparent 62%),
-    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35));
-  pointer-events:none;
-}
-.bioQuick{ margin-top:12px; display:grid; gap:10px; }
-.quickRow{
-  border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
-  border-radius:16px; padding:12px;
-}
-.quickLabel{ font-size:11px; color:var(--muted2); text-transform:uppercase; letter-spacing:.06em; }
-.quickValue{ margin-top:5px; font-weight:800; font-size:14px; }
-.bioStory{
-  border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
-  border-radius:22px; padding:16px; line-height:1.65;
-  color: rgba(255,255,255,.88); font-size:14px;
-}
-.bioStory p{ margin:0 0 10px; }
-.bioStory p:last-child{ margin:0; }
-.bioLinks{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
-
-/* ── Event modal ── */
-.eventLayout{ display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
-@media (max-width: 900px){ .eventLayout{ grid-template-columns: 1fr; } }
-.chartBox{
-  border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
-  border-radius:22px; padding:14px; min-height:260px; position:relative;
-}
-.meetList{
-  border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
-  border-radius:22px; padding:14px; max-height:340px; overflow:auto;
-}
-.meetRow{
-  display:flex; justify-content:space-between; gap:10px;
-  padding:10px; border-radius:16px;
-  border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.15);
-  margin-bottom:10px;
-}
-.meetRow:last-child{ margin-bottom:0; }
-.meetLeft{ display:flex; flex-direction:column; gap:4px; }
-.meetName{ font-weight:900; font-size:13px; }
-.meetDate{ font-size:11px; color:var(--muted2); }
-.meetScore{
-  font-family: var(--ff2); font-weight:900;
-  padding:8px 10px; border-radius:14px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.25);
-  min-width:64px; text-align:center; font-size:13px; align-self:center;
-}
-
-/* ── Sponsors modal ── */
-.sponsorGrid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; }
-@media (max-width: 760px){ .sponsorGrid{ grid-template-columns: 1fr; } }
-.sponsorCard{
-  border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
-  border-radius:22px; padding:14px; display:flex; gap:12px; align-items:center;
-  cursor:pointer;
-  transition: transform .35s var(--ease), border-color .35s var(--ease), background .35s var(--ease);
-}
-.sponsorCard:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.06); }
-.sponsorThumb{
-  width:84px; height:54px; border-radius:16px;
-  border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.2);
-  display:grid; place-items:center; overflow:hidden; flex-shrink:0;
-}
-.sponsorThumb img{ max-width:80%; max-height:70%; }
-.sponsorThumb .spName{ font-size:10px; font-weight:700; color:var(--muted); text-align:center; padding:4px; }
-.sponsorInfo{ display:flex; flex-direction:column; gap:6px; }
-.sponsorName{ font-weight:900; font-size:14px; }
-.sponsorTag{ font-size:12px; color:var(--muted2); }
-
-/* ── About modal ── */
-.aboutCopy{
-  border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
-  border-radius:22px; padding:18px; line-height:1.65; font-size:14px;
-}
-.aboutCopy p{ margin:0 0 14px; color:rgba(255,255,255,.85); }
-.aboutCopy ul{ margin:0; padding-left:18px; display:grid; gap:10px; }
-.aboutCopy li{ color:rgba(255,255,255,.75); }
-
-/* ── Toast ── */
-#toast{
-  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-  z-index:50; padding:12px 20px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.55);
-  backdrop-filter: blur(14px); color:rgba(255,255,255,.92);
-  box-shadow: 0 18px 55px rgba(0,0,0,.45);
-  font-family: var(--ff); font-weight:800; letter-spacing:.01em;
-  opacity:0; pointer-events:none;
-  transition: opacity .35s var(--ease), transform .35s var(--ease);
-}
-#toast.show{ opacity:1; transform:translateX(-50%) translateY(-2px); }
-
-/* ── Image slider (lightbox) ── */
-.lightboxOverlay{
-  position:fixed; inset:0; background:rgba(0,0,0,.88);
-  z-index:30; display:none; align-items:center; justify-content:center;
-  padding:20px; backdrop-filter:blur(8px);
-}
-.lightboxOverlay.open{ display:flex; }
-.lightboxInner{ position:relative; max-width:900px; width:100%; }
-.lightboxImg{
-  width:100%; max-height:80vh; object-fit:contain;
-  border-radius:22px; border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 40px 100px rgba(0,0,0,.7);
-}
-.lightboxClose{
-  position:absolute; top:-16px; right:-16px;
-  width:44px; height:44px; border-radius:14px;
-  border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.5);
-  color:#fff; font-size:18px; cursor:pointer; display:grid; place-items:center;
-  transition:background .2s;
-}
-.lightboxClose:hover{ background:rgba(0,0,0,.7); }
-.lightboxNav{
-  position:absolute; top:50%; transform:translateY(-50%);
-  width:44px; height:44px; border-radius:14px;
-  border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.4);
-  color:#fff; font-size:20px; cursor:pointer; display:grid; place-items:center;
-  transition:background .2s;
-}
-.lightboxNav:hover{ background:rgba(0,0,0,.65); }
-.lightboxNav.prev{ left:-56px; }
-.lightboxNav.next{ right:-56px; }
-.lightboxLabel{
-  text-align:center; margin-top:14px; font-size:13px; color:rgba(255,255,255,.6);
-}
-
-/* ── Reduced motion ── */
-@media (prefers-reduced-motion: reduce){
-  *{ animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
-}
-</style>
+  <link rel="stylesheet" href="style/main.css" />
 </head>
 
 <body>
+  <!-- Ambient FX -->
+  <div class="float-deco" id="floatDeco" aria-hidden="true"></div>
   <canvas id="fx-canvas" aria-hidden="true"></canvas>
-  <div class="vignette" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
 
   <main class="shell">
-    <!-- Topbar -->
+
+    <!-- Top Bar -->
     <header class="topbar">
       <div class="brand">
         <div class="brand-dot" aria-hidden="true"></div>
         <div class="brand-text">
-          <div class="brand-title">Digital Athlete Card</div>
-          <div class="brand-sub">Fundraising • Sponsors • Journey</div>
+          <div class="brand-title">✨ Digital Athlete Card</div>
+          <div class="brand-sub">Fundraising · Sponsors · Journey</div>
         </div>
       </div>
+
       <div class="topbar-actions">
         <button class="chip" id="btnCopyLink" type="button" title="Copy share link">
           <span class="chip-icon" aria-hidden="true">↗</span>
-          <span>Copy Share Link</span>
+          <span>Copy Link</span>
+        </button>
+        <button class="chip" id="btnNativeShare" type="button" title="Share">
+          <span class="chip-icon" aria-hidden="true">📤</span>
+          <span>Share</span>
         </button>
         <button class="chip ghost" id="btnOpenSponsors" type="button" title="View sponsors">
-          <span class="chip-icon" aria-hidden="true">✦</span>
+          <span class="chip-icon" aria-hidden="true">💎</span>
           <span>Sponsors</span>
         </button>
       </div>
@@ -605,14 +81,19 @@ button{ font-family:inherit; }
 
     <!-- Hero -->
     <section class="hero">
+
       <button class="nameHero" id="openBioModal" type="button" aria-haspopup="dialog" aria-controls="bioModal">
         <span class="nameGlow" aria-hidden="true"></span>
         <span class="orbit" aria-hidden="true"></span>
-        <span class="nameLine" id="athleteFirstName">First</span>
-        <span class="nameLine last" id="athleteLastName">Last</span>
+
+        <span class="levelBadge" id="levelBadge" aria-label="Level">🏅 Bronze</span>
+
+        <span class="nameLine" id="athleteFirstName">Layla</span>
+        <span class="nameLine last" id="athleteLastName">Neitenbach</span>
+
         <span class="nameMeta">
-          <span class="badge" id="athleteTeam">Team</span>
-          <span class="badge soft" id="athleteDiscipline">Discipline</span>
+          <span class="badge" id="athleteTeam">KP Gymnastics</span>
+          <span class="badge soft" id="athleteDiscipline">Gymnastics</span>
           <span class="tapHint">Tap to view bio</span>
         </span>
       </button>
@@ -621,19 +102,27 @@ button{ font-family:inherit; }
         <div class="goalCard" id="goalCard">
           <div class="goalTop">
             <div>
-              <div class="goalTitle">Season Fundraising</div>
+              <div class="goalTitle">🎀 Season Fundraising</div>
               <div class="goalSub" id="goalSubtitle">Help cover travel, coaching, meet fees.</div>
             </div>
             <div class="goalPill" id="goalPill">$0 / $0</div>
           </div>
-          <div class="progress">
+
+          <div class="progress" aria-label="Fundraising progress">
             <div class="progressBar" id="progressBar"></div>
             <div class="progressGlow" aria-hidden="true"></div>
           </div>
+
+          <div class="milestoneTrack" aria-hidden="true">
+            <span class="milestoneMark" style="left:25%"><span>25%</span></span>
+            <span class="milestoneMark" style="left:50%"><span>50%</span></span>
+            <span class="milestoneMark" style="left:75%"><span>75%</span></span>
+            <span class="milestoneMark" style="left:100%"><span>🏆</span></span>
+          </div>
+
           <div class="goalBottom">
             <button class="cta" id="ctaDonate" type="button">
-              <span class="ctaPulse" aria-hidden="true"></span>
-              <span class="ctaText">Support this athlete</span>
+              <span class="ctaText">💕 Support this athlete</span>
               <span class="ctaArrow" aria-hidden="true">→</span>
             </button>
             <button class="cta secondary" id="ctaShare" type="button">
@@ -641,10 +130,27 @@ button{ font-family:inherit; }
               <span class="ctaArrow" aria-hidden="true">↗</span>
             </button>
           </div>
+
+          <button class="shareProgressBtn" id="btnShareProgress" type="button">
+            <span id="shareProgressText">Share progress 📊</span>
+          </button>
+
+          <div class="suggestRow" id="suggestRow" aria-label="Suggested amounts"></div>
         </div>
+
         <div class="microNote" id="microNote">
           <span class="dotLive" aria-hidden="true"></span>
-          <span id="microNoteText">Live updates: scores • meets • sponsors</span>
+          <span id="microNoteText">Live updates: scores · meets · sponsors</span>
+        </div>
+
+        <div class="quickShareRow">
+          <div class="quickShareLabel">Share via</div>
+          <div class="quickShareBtns">
+            <a class="qsBtn" id="qsSms" href="#" title="Text Message">💬 Text</a>
+            <a class="qsBtn" id="qsWhatsapp" href="#" title="WhatsApp" target="_blank" rel="noopener">💚 WhatsApp</a>
+            <a class="qsBtn" id="qsFacebook" href="#" title="Facebook" target="_blank" rel="noopener">📘 Facebook</a>
+            <a class="qsBtn" id="qsEmail" href="#" title="Email">✉️ Email</a>
+          </div>
         </div>
       </div>
     </section>
@@ -653,45 +159,59 @@ button{ font-family:inherit; }
     <section class="stage">
       <div class="cardsWrap">
         <div class="cardsHeader">
-          <div class="cardsTitle">Showcasing the journey</div>
-          <div class="cardsSub">Tap a card to enlarge • drag to browse</div>
+          <div class="cardsTitle">🌸 Showcasing the journey</div>
+          <div class="cardsSub">Auto-rotates · tap to enlarge ✨</div>
         </div>
+
         <div class="cardsFan" id="cardsFan" aria-label="Athlete photo cards"></div>
+
         <div class="cardsHint">
-          <span class="kbd">Drag</span>
-          <span class="sep">•</span>
-          <span class="kbd">Tap</span>
-          <span class="sep">•</span>
+          <span class="kbd">Drag</span><span class="sep">·</span>
+          <span class="kbd">Tap</span><span class="sep">·</span>
           <span class="kbd">Share</span>
         </div>
       </div>
 
       <aside class="eventsWrap" aria-label="Event scores">
-        <div class="eventsTitle">Events</div>
+        <div class="eventsTitle">🏆 Events</div>
         <div class="eventsSub">Tap an event for chart + meet history</div>
+
         <div class="eventGrid" id="eventGrid"></div>
+
         <div class="sponsorRail">
-          <div class="sponsorTitle">Featured Sponsors</div>
+          <div class="sponsorTitle">These local businesses power this season 💎</div>
           <div class="sponsorStrip" id="sponsorStrip"></div>
-          <div class="sponsorFoot">Tap a logo to visit • Your support powers the season</div>
+          <div class="sponsorFoot">
+            Tap a logo to visit · Want to sponsor?
+            <button class="inlineLink" id="btnBecomeSponsor">Learn more →</button>
+          </div>
         </div>
+
+        <div class="spotlight" id="spotlight" aria-label="Sponsor spotlight"></div>
       </aside>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
       <div class="footerLeft">
-        <div class="footTitle" id="footerTitle">Built to be shared.</div>
+        <div class="footTitle" id="footerTitle">Built to be shared. ✨</div>
         <div class="footSub">A digital fundraising tool athletes are proud to show off.</div>
       </div>
       <div class="footerRight">
         <button class="chip" id="btnOpenAbout" type="button">About</button>
-        <button class="chip ghost" id="btnReduceMotion" type="button">Reduce Motion</button>
+        <button class="chip ghost" id="btnReduceMotion" type="button" title="Toggle reduced motion">Reduce Motion</button>
       </div>
     </footer>
   </main>
 
-  <!-- ══ BIO MODAL ══ -->
+  <!-- Mobile Sticky Action Bar -->
+  <nav class="stickyBar" id="stickyBar" aria-label="Quick actions">
+    <button class="sbBtn primary" id="sbDonate">💕 Support</button>
+    <button class="sbBtn" id="sbShare">📤 Share</button>
+    <button class="sbBtn" id="sbSponsors">💎 Sponsors</button>
+  </nav>
+
+  <!-- BIO MODAL -->
   <div class="modalOverlay" id="bioModal" role="dialog" aria-modal="true" aria-labelledby="bioTitle" aria-hidden="true">
     <div class="modalCard">
       <button class="modalClose" type="button" data-close="bioModal" aria-label="Close bio">✕</button>
@@ -715,7 +235,24 @@ button{ font-family:inherit; }
     </div>
   </div>
 
-  <!-- ══ EVENT MODAL ══ -->
+  <!-- PHOTO MODAL -->
+  <div class="modalOverlay" id="photoModal" role="dialog" aria-modal="true" aria-labelledby="photoTitle" aria-hidden="true">
+    <div class="modalCard wide">
+      <button class="modalClose" type="button" data-close="photoModal" aria-label="Close photo">✕</button>
+      <div class="modalHead">
+        <div class="modalKicker">Journey Moment</div>
+        <h2 class="modalTitle" id="photoTitle">Photo</h2>
+      </div>
+      <div class="modalBody">
+        <div class="photoLightbox">
+          <img id="photoFull" alt="Athlete photo" />
+          <div class="photoCaption" id="photoCaption"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENT MODAL -->
   <div class="modalOverlay" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="eventTitle" aria-hidden="true">
     <div class="modalCard wide">
       <button class="modalClose" type="button" data-close="eventModal" aria-label="Close event">✕</button>
@@ -739,741 +276,53 @@ button{ font-family:inherit; }
     </div>
   </div>
 
-  <!-- ══ SPONSORS MODAL ══ -->
+  <!-- SPONSORS MODAL -->
   <div class="modalOverlay" id="sponsorsModal" role="dialog" aria-modal="true" aria-labelledby="sponsorsTitle" aria-hidden="true">
     <div class="modalCard">
       <button class="modalClose" type="button" data-close="sponsorsModal" aria-label="Close sponsors">✕</button>
       <div class="modalHead">
         <div class="modalKicker">Sponsors</div>
-        <h2 class="modalTitle" id="sponsorsTitle">Advertisers &amp; Supporters</h2>
+        <h2 class="modalTitle" id="sponsorsTitle">💎 Advertisers & Supporters</h2>
         <div class="modalMeta"><span class="metaPill soft">Tap a sponsor to visit their link</span></div>
       </div>
       <div class="modalBody">
         <div class="sponsorGrid" id="sponsorGrid"></div>
+        <div class="sponsorCtaBox" id="sponsorCtaBox"></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ ABOUT MODAL ══ -->
+  <!-- ABOUT MODAL -->
   <div class="modalOverlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" aria-hidden="true">
     <div class="modalCard">
       <button class="modalClose" type="button" data-close="aboutModal" aria-label="Close about">✕</button>
       <div class="modalHead">
         <div class="modalKicker">What is this?</div>
-        <h2 class="modalTitle" id="aboutTitle">A shareable athlete fundraising page</h2>
+        <h2 class="modalTitle" id="aboutTitle">A shareable athlete fundraising page ✨</h2>
       </div>
       <div class="modalBody">
-        <div class="aboutCopy">
-          <p>This page is designed to be shared with sponsors, friends, and family — showcasing an athlete's journey, scores, and milestones while making it easy to support the season.</p>
+        <div class="aboutCopy" id="aboutCopy">
+          <p>This page is designed to be shared with sponsors, friends, and family — showcasing an athlete’s journey and making it easy to support the season.</p>
           <ul>
-            <li>Tap the athlete name for the full bio</li>
-            <li>Tap events for charts and meet history</li>
-            <li>Tap sponsor logos to visit their site</li>
-            <li>Use "Share" to send to advertisers instantly</li>
+            <li>🌸 Tap the athlete name for the full bio</li>
+            <li>🏆 Tap events for charts and meet history</li>
+            <li>💎 Tap sponsor logos to visit their site</li>
+            <li>📤 Share buttons are one-tap friendly</li>
           </ul>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ LIGHTBOX ══ -->
-  <div class="lightboxOverlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo lightbox">
-    <div class="lightboxInner">
-      <button class="lightboxClose" id="lightboxClose" aria-label="Close photo">✕</button>
-      <button class="lightboxNav prev" id="lightboxPrev" aria-label="Previous photo">‹</button>
-      <img class="lightboxImg" id="lightboxImg" src="" alt="" />
-      <button class="lightboxNav next" id="lightboxNext" aria-label="Next photo">›</button>
-      <div class="lightboxLabel" id="lightboxLabel"></div>
+  <!-- Milestone Overlay -->
+  <div id="milestoneOverlay" class="milestoneOverlay" style="display:none" aria-hidden="true">
+    <div id="milestoneBadge" class="milestoneBadge">
+      <div class="milestoneEmoji" id="milestoneEmoji">🎉</div>
+      <div class="milestoneMsg" id="milestoneMsg">Milestone reached!</div>
+      <div class="milestoneSub" id="milestoneSub">Thank you for the support!</div>
     </div>
   </div>
 
-  <!-- ══ TOAST ══ -->
-  <div id="toast" role="status" aria-live="polite"></div>
-
-<script>
-(() => {
-  'use strict';
-
-  // ── Utilities ──────────────────────────────────────────────
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
-
-  function esc(s){
-    return String(s ?? '')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-  }
-
-  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-  function avg(arr){ return arr.length ? arr.reduce((s,x)=>s+x,0)/arr.length : 0; }
-
-  function fmtMoney(n){
-    try{ return new Intl.NumberFormat(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
-    catch{ return '$'+Math.round(n); }
-  }
-  function fmtScore(n){ return (Math.round(n*100)/100).toFixed(2); }
-  function fmtDate(iso){
-    const [y,m,d] = iso.split('-').map(Number);
-    try{ return new Date(y,m-1,d).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
-    catch{ return iso; }
-  }
-
-  // ── Reduce-motion ──────────────────────────────────────────
-  let reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
-  try{ const s=localStorage.getItem('dac_rm'); if(s!==null) reduceMotion=s==='1'; }catch{}
-
-  // ── Toast ──────────────────────────────────────────────────
-  let toastTimer;
-  function toast(msg){
-    const el = $('#toast');
-    if(!el) return;
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=>el.classList.remove('show'), 2000);
-  }
-
-  // ── Clipboard ──────────────────────────────────────────────
-  async function copyText(text){
-    try{
-      await navigator.clipboard.writeText(text);
-    }catch{
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-    }
-    toast('Copied to clipboard ✓');
-  }
-
-  // ── Modal system ────────────────────────────────────────────
-  const modal = {
-    open: null,
-    last: null,
-
-    show(id){
-      const el = document.getElementById(id);
-      if(!el) return;
-      this.last = document.activeElement;
-      this.open = id;
-      el.setAttribute('data-open','true');
-      el.setAttribute('aria-hidden','false');
-      document.body.style.overflow = 'hidden';
-      const focusables = this._focusable(el);
-      if(focusables.length) setTimeout(()=>focusables[0].focus({preventScroll:true}),50);
-    },
-
-    hide(id){
-      const el = document.getElementById(id || this.open);
-      if(!el) return;
-      el.removeAttribute('data-open');
-      el.setAttribute('aria-hidden','true');
-      this.open = null;
-      document.body.style.overflow = '';
-      if(this.last?.focus) this.last.focus({preventScroll:true});
-    },
-
-    _focusable(root){
-      return $$('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',root)
-        .filter(el=>!el.disabled && el.offsetParent!==null);
-    }
-  };
-
-  // Global close handlers
-  document.addEventListener('keydown', e=>{
-    if(e.key==='Escape' && modal.open) modal.hide();
-    if(e.key==='Tab' && modal.open){
-      const overlay = document.getElementById(modal.open);
-      const f = modal._focusable(overlay);
-      if(!f.length) return;
-      if(e.shiftKey && document.activeElement===f[0]){ e.preventDefault(); f[f.length-1].focus(); }
-      else if(!e.shiftKey && document.activeElement===f[f.length-1]){ e.preventDefault(); f[0].focus(); }
-    }
-  });
-
-  document.addEventListener('click', e=>{
-    // [data-close] buttons
-    const closeBtn = e.target.closest('[data-close]');
-    if(closeBtn){ modal.hide(closeBtn.dataset.close); return; }
-    // click outside modal card
-    if(e.target.classList.contains('modalOverlay') && e.target.dataset.open==='true'){
-      modal.hide(e.target.id);
-    }
-  });
-
-  // Expose for debug
-  window._modal = modal;
-
-  // ── Embedded data (edit this block to update athlete info) ──
-  function loadData(){
-    return Promise.resolve({
-  "athlete": {
-    "firstName": "Layla",
-    "lastName": "Neitenbach",
-    "team": "KP Gymnastics",
-    "discipline": "Gymnastics",
-    "headline": "Chasing personal bests — meet by meet.",
-    "shareUrl": "https://digitalathletecards.github.io/layla/",
-    "donateUrl": "https://example.com/donate",
-    "heroCardPhoto": "images/card3.png",
-    "quickFacts": [
-      { "label": "Graduation Year", "value": "2028" },
-      { "label": "Hometown",        "value": "Your City, ST" },
-      { "label": "Goals",           "value": "State • Regionals • Nationals" }
-    ],
-    "story": [
-      "Hi! I'm Layla — thank you for being part of my season.",
-      "This page is my digital athlete card: it helps sponsors and supporters follow my journey with live meet updates and event performance.",
-      "Your support helps cover training, travel, meet fees, and recovery tools so I can keep improving every week."
-    ],
-    "links": [
-      { "label": "Instagram", "url": "https://instagram.com/" },
-      { "label": "Email",     "url": "mailto:hello@example.com" }
-    ]
-  },
-  "fundraising": {
-    "goalAmount":   2500,
-    "raisedAmount":  860,
-    "subtitle": "Help cover travel, coaching, meet fees."
-  },
-  "cards": [
-    { "image": "images/card1.png", "label": "Meet Day"   },
-    { "image": "images/card2.png", "label": "Training"   },
-    { "image": "images/card3.png", "label": "Highlights" },
-    { "image": "images/card4.png", "label": "Team"       },
-    { "image": "images/card5.png", "label": "Progress"   }
-  ],
-  "events": [
-    {
-      "id": "allAround", "name": "All Around",
-      "scores": [
-        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 36.55 },
-        { "meet": "January Invitational", "date": "2026-01-25", "score": 37.10 },
-        { "meet": "City Cup",             "date": "2026-02-08", "score": 37.40 }
-      ]
-    },
-    {
-      "id": "vault", "name": "Vault",
-      "scores": [
-        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.10 },
-        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.25 },
-        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.35 }
-      ]
-    },
-    {
-      "id": "bars", "name": "Bars",
-      "scores": [
-        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.00 },
-        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.15 },
-        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.20 }
-      ]
-    },
-    {
-      "id": "beam", "name": "Beam",
-      "scores": [
-        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.05 },
-        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.20 },
-        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.30 }
-      ]
-    },
-    {
-      "id": "floor", "name": "Floor",
-      "scores": [
-        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.40 },
-        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.50 },
-        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.55 }
-      ]
-    }
-  ],
-  "sponsors": [
-    { "name": "Sponsor One",   "tagline": "Local business supporter",      "logo": "sponsors/sponsor1.png", "url": "https://example.com" },
-    { "name": "Sponsor Two",   "tagline": "Proud to support youth sports",  "logo": "sponsors/sponsor2.png", "url": "https://example.com" },
-    { "name": "Sponsor Three", "tagline": "Community partner",              "logo": "sponsors/sponsor3.png", "url": "https://example.com" },
-    { "name": "Sponsor Four",  "tagline": "Thank you for sponsoring!",      "logo": "sponsors/sponsor4.png", "url": "https://example.com" }
-  ]
-    });
-  }
-
-  // ── SEO meta ────────────────────────────────────────────────
-  function applySeo(data){
-    const a = data.athlete || {};
-    const name = `${a.firstName||''} ${a.lastName||''}`.trim();
-    const title = `${name} · Digital Athlete Card`;
-    document.title = title;
-    const setMeta = (id,v)=>{ const el=document.getElementById(id); if(el) el.setAttribute('content',v); };
-    setMeta('metaDesc', a.headline || 'Support this athlete\'s season journey.');
-    setMeta('ogTitle', title);
-    setMeta('ogDesc', (data.fundraising?.subtitle) || a.headline || 'Help this athlete reach their goals.');
-  }
-
-  // ── Bio render ──────────────────────────────────────────────
-  function renderBio(data){
-    const a = data.athlete || {};
-
-    // Hero name
-    $('#athleteFirstName').textContent = a.firstName || 'First';
-    $('#athleteLastName').textContent  = a.lastName  || 'Last';
-    $('#athleteTeam').textContent      = a.team       || 'Team';
-    $('#athleteDiscipline').textContent= a.discipline || 'Sport';
-    $('#microNoteText').textContent    = a.headline   || 'Live updates: scores • meets • sponsors';
-
-    // Modal
-    $('#bioTitle').textContent = `${a.firstName||''} ${a.lastName||''}`.trim();
-    $('#goalSubtitle').textContent = data.fundraising?.subtitle || 'Support the season.';
-
-    $('#bioBadges').innerHTML = `
-      <span class="metaPill">${esc(a.team||'Team')}</span>
-      <span class="metaPill soft">${esc(a.discipline||'Sport')}</span>
-    `;
-
-    // Photo
-    const photo = a.heroCardPhoto || (data.cards?.[0]?.image) || '';
-    const bioPhoto = $('#bioPhoto');
-    bioPhoto.style.cssText = photo
-      ? `background:url("${photo}") center/cover no-repeat`
-      : 'background:rgba(255,255,255,.06)';
-
-    // Quick facts
-    $('#bioQuick').innerHTML = (a.quickFacts||[]).map(q=>`
-      <div class="quickRow">
-        <div class="quickLabel">${esc(q.label)}</div>
-        <div class="quickValue">${esc(q.value)}</div>
-      </div>
-    `).join('');
-
-    // Story
-    $('#bioStory').innerHTML = (a.story||[]).map(p=>`<p>${esc(p)}</p>`).join('')
-      + `<p style="color:rgba(255,255,255,.55);font-size:12px">Thank you for supporting the journey.</p>`;
-
-    // Links
-    const linksEl = $('#bioLinks');
-    linksEl.innerHTML = '';
-    (a.links||[]).forEach(l=>{
-      const btn = document.createElement('button');
-      btn.type='button'; btn.className='chip';
-      btn.innerHTML=`<span class="chip-icon">↗</span><span>${esc(l.label)}</span>`;
-      btn.addEventListener('click',()=>safeOpen(l.url));
-      linksEl.appendChild(btn);
-    });
-  }
-
-  // ── Fundraising ─────────────────────────────────────────────
-  function renderFundraising(data){
-    const f = data.fundraising || {};
-    const goal   = Number(f.goalAmount||0);
-    const raised = Number(f.raisedAmount||0);
-    const pct    = goal>0 ? clamp((raised/goal)*100,0,100) : 0;
-    $('#goalPill').textContent = `${fmtMoney(raised)} / ${fmtMoney(goal)}`;
-    // Animate on next frame so CSS transition fires
-    requestAnimationFrame(()=>{
-      $('#progressBar').style.width = pct+'%';
-    });
-  }
-
-  // ── Cards fan ──────────────────────────────────────────────
-  function renderCards(cards){
-    const fan = $('#cardsFan');
-    fan.innerHTML = '';
-    if(!cards.length){
-      fan.innerHTML = '<div style="color:var(--muted2);font-size:14px;text-align:center;padding:40px">No cards yet — add images/card1.png … card5.png</div>';
-      return;
-    }
-
-    cards.forEach((c,i)=>{
-      const el = document.createElement('div');
-      el.className = 'card';
-      el.dataset.index = String(i);
-
-      if(c.image){
-        const img = document.createElement('img');
-        img.src = c.image; img.alt = c.label||`Card ${i+1}`; img.loading='lazy';
-        // On error show placeholder text
-        img.onerror = ()=>{ el.classList.add('placeholder'); img.remove(); addPhLabel(); };
-        el.appendChild(img);
-      } else {
-        el.classList.add('placeholder');
-        addPhLabel();
-      }
-
-      function addPhLabel(){
-        el.innerHTML += `<div class="ph-icon">📷</div><div class="ph-label">${esc(c.label||'Photo')}</div>`;
-      }
-
-      const label = document.createElement('div');
-      label.className = 'cardLabel';
-      label.innerHTML = `<span class="spark"></span><span>${esc(c.label||'Moment')}</span>`;
-      el.appendChild(label);
-      fan.appendChild(el);
-    });
-
-    let active = Math.floor(cards.length/2);
-    layoutFan(active);
-
-    // Tap to bring forward / lightbox
-    fan.addEventListener('click', e=>{
-      const card = e.target.closest('.card');
-      if(!card) return;
-      const idx = parseInt(card.dataset.index,10);
-      if(idx===active){
-        // open lightbox
-        openLightbox(cards, idx);
-      } else {
-        active = idx;
-        layoutFan(active);
-      }
-    });
-
-    // Drag / swipe
-    let down=false, startX=0, moved=false;
-    fan.addEventListener('pointerdown',e=>{ fan.setPointerCapture(e.pointerId); down=true; moved=false; startX=e.clientX; });
-    fan.addEventListener('pointermove',e=>{
-      if(!down) return;
-      const dx = e.clientX-startX;
-      if(Math.abs(dx)>14) moved=true;
-      if(!reduceMotion) fan.style.transform=`rotateY(${clamp(dx/80,-6,6)}deg)`;
-    });
-    fan.addEventListener('pointerup',e=>{
-      if(!down) return; down=false;
-      fan.style.transform='';
-      const dx = e.clientX-startX;
-      if(moved){
-        if(dx < -40) active = clamp(active+1,0,cards.length-1);
-        if(dx >  40) active = clamp(active-1,0,cards.length-1);
-        layoutFan(active);
-      }
-    });
-    fan.addEventListener('pointercancel',()=>{ down=false; fan.style.transform=''; });
-
-    // Hover tilt
-    fan.addEventListener('mousemove',e=>{
-      if(reduceMotion) return;
-      const r=fan.getBoundingClientRect();
-      const cx=(e.clientX-r.left)/r.width-.5;
-      const cy=(e.clientY-r.top)/r.height-.5;
-      fan.style.transform=`rotateY(${cx*6}deg) rotateX(${-cy*4}deg)`;
-    });
-    fan.addEventListener('mouseleave',()=>{ fan.style.transform=''; });
-
-    function layoutFan(ai){
-      $$('.card',fan).forEach(el=>{
-        const i=parseInt(el.dataset.index,10);
-        const off=i-ai;
-        el.style.zIndex   = String(100-Math.abs(off));
-        el.style.opacity  = Math.abs(off)>3?'0':'1';
-        el.style.transform= `translateX(${off*48}px) translateY(${Math.abs(off)*8}px) rotate(${off*12}deg) scale(${off===0?1.04:0.92}) translateZ(0)`;
-        el.style.filter   = off===0?'brightness(1.02) saturate(1.05)':'brightness(.88) saturate(.94)';
-      });
-    }
-  }
-
-  // ── Lightbox ────────────────────────────────────────────────
-  let lightboxCards=[], lightboxIdx=0;
-
-  function openLightbox(cards, idx){
-    lightboxCards = cards.filter(c=>c.image);
-    // map original idx to filtered idx
-    const filteredIdx = lightboxCards.findIndex(c=>c===cards[idx]);
-    lightboxIdx = filteredIdx>=0?filteredIdx:0;
-    showLightboxSlide();
-    $('#lightbox').classList.add('open');
-    document.body.style.overflow='hidden';
-  }
-
-  function showLightboxSlide(){
-    const c = lightboxCards[lightboxIdx];
-    if(!c) return;
-    const img = $('#lightboxImg');
-    img.src=c.image; img.alt=c.label||'';
-    $('#lightboxLabel').textContent = (c.label||'') + (lightboxCards.length>1 ? ` (${lightboxIdx+1} / ${lightboxCards.length})` : '');
-    // prev/next visibility
-    $('#lightboxPrev').style.opacity = lightboxIdx===0?'0.3':'1';
-    $('#lightboxNext').style.opacity = lightboxIdx===lightboxCards.length-1?'0.3':'1';
-  }
-
-  function closeLightbox(){
-    $('#lightbox').classList.remove('open');
-    document.body.style.overflow='';
-  }
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    $('#lightboxClose')?.addEventListener('click',closeLightbox);
-    $('#lightbox')?.addEventListener('click',e=>{ if(e.target.id==='lightbox') closeLightbox(); });
-    $('#lightboxPrev')?.addEventListener('click',()=>{
-      lightboxIdx=clamp(lightboxIdx-1,0,lightboxCards.length-1); showLightboxSlide();
-    });
-    $('#lightboxNext')?.addEventListener('click',()=>{
-      lightboxIdx=clamp(lightboxIdx+1,0,lightboxCards.length-1); showLightboxSlide();
-    });
-    document.addEventListener('keydown',e=>{
-      if(!$('#lightbox').classList.contains('open')) return;
-      if(e.key==='Escape') closeLightbox();
-      if(e.key==='ArrowLeft'){ lightboxIdx=clamp(lightboxIdx-1,0,lightboxCards.length-1); showLightboxSlide(); }
-      if(e.key==='ArrowRight'){ lightboxIdx=clamp(lightboxIdx+1,0,lightboxCards.length-1); showLightboxSlide(); }
-    });
-  });
-
-  // ── Events ──────────────────────────────────────────────────
-  let chart=null;
-
-  function calcStats(scores){
-    const vals=scores.map(s=>s.score);
-    return { a:avg(vals), last:vals[vals.length-1]||0, best:Math.max(...vals,0) };
-  }
-
-  function renderEvents(events){
-    const grid=$('#eventGrid');
-    grid.innerHTML='';
-    events.forEach(evt=>{
-      const stats=calcStats(evt.scores);
-      const btn=document.createElement('button');
-      btn.type='button'; btn.className='eventBtn';
-      btn.innerHTML=`
-        <div>
-          <div class="eventName">${esc(evt.name)}</div>
-          <div class="eventMeta">${evt.scores.length} meets • avg ${fmtScore(stats.a)}</div>
-        </div>
-        <div class="eventScore">${fmtScore(stats.last)}</div>
-      `;
-      btn.addEventListener('click',()=>openEvent(evt));
-      grid.appendChild(btn);
-    });
-  }
-
-  function openEvent(evt){
-    const stats=calcStats(evt.scores);
-    $('#eventTitle').textContent=evt.name;
-    $('#eventAvg').textContent=fmtScore(stats.a);
-    $('#eventLast').textContent=fmtScore(stats.last);
-    $('#eventBest').textContent=fmtScore(stats.best);
-
-    // Meet list
-    $('#meetList').innerHTML=evt.scores.slice().reverse().map(s=>`
-      <div class="meetRow">
-        <div class="meetLeft">
-          <div class="meetName">${esc(s.meet)}</div>
-          <div class="meetDate">${esc(fmtDate(s.date))}</div>
-        </div>
-        <div class="meetScore">${fmtScore(s.score)}</div>
-      </div>
-    `).join('');
-
-    // Chart — destroy old first
-    if(chart){ chart.destroy(); chart=null; }
-    const ctx=$('#eventScoreChart');
-    if(ctx){
-      chart=new Chart(ctx.getContext('2d'),{
-        type:'line',
-        data:{
-          labels:evt.scores.map(s=>fmtDate(s.date)),
-          datasets:[{
-            label:evt.name,
-            data:evt.scores.map(s=>s.score),
-            tension:0.35, fill:true,
-            borderColor:'rgba(125,211,255,.85)',
-            backgroundColor:'rgba(125,211,255,.12)',
-            pointBackgroundColor:'rgba(255,179,224,.9)',
-            pointRadius:5, pointHoverRadius:7
-          }]
-        },
-        options:{
-          responsive:true, maintainAspectRatio:false,
-          plugins:{
-            legend:{display:false},
-            tooltip:{callbacks:{label:item=>` ${fmtScore(item.parsed.y)}`}}
-          },
-          scales:{
-            x:{ticks:{color:'rgba(255,255,255,.55)',font:{size:11}},grid:{color:'rgba(255,255,255,.07)'}},
-            y:{ticks:{color:'rgba(255,255,255,.55)',font:{size:11}},grid:{color:'rgba(255,255,255,.07)'}}
-          }
-        }
-      });
-    }
-
-    modal.show('eventModal');
-  }
-
-  // ── Sponsors ────────────────────────────────────────────────
-  function renderSponsors(sponsors){
-    const strip=$('#sponsorStrip');
-    const grid=$('#sponsorGrid');
-    strip.innerHTML=''; grid.innerHTML='';
-
-    sponsors.forEach(sp=>{
-      // Rail logo
-      const logo=document.createElement('div');
-      logo.className='sLogo'; logo.title=sp.name;
-      if(sp.logo){
-        const img=document.createElement('img');
-        img.src=sp.logo; img.alt=esc(sp.name); img.loading='lazy';
-        img.onerror=()=>{ img.remove(); logo.innerHTML=`<span class="sLogoText">${esc(sp.name)}</span>`; };
-        logo.appendChild(img);
-      } else {
-        logo.innerHTML=`<span class="sLogoText">${esc(sp.name)}</span>`;
-      }
-      logo.addEventListener('click',()=>{ trackSponsor(sp); safeOpen(sp.url); });
-      strip.appendChild(logo);
-
-      // Modal card
-      const card=document.createElement('div');
-      card.className='sponsorCard';
-      const thumbContent = sp.logo
-        ? `<img src="${sp.logo}" alt="${esc(sp.name)}" loading="lazy" onerror="this.style.display='none'">`
-        : `<span class="spName">${esc(sp.name)}</span>`;
-      card.innerHTML=`
-        <div class="sponsorThumb">${thumbContent}</div>
-        <div class="sponsorInfo">
-          <div class="sponsorName">${esc(sp.name)}</div>
-          <div class="sponsorTag">${esc(sp.tagline||'Sponsor')}</div>
-        </div>
-      `;
-      card.addEventListener('click',()=>{ trackSponsor(sp); safeOpen(sp.url); });
-      grid.appendChild(card);
-    });
-  }
-
-  function trackSponsor(sp){
-    // Analytics placeholder — swap with your analytics call
-    console.log('[DAC] Sponsor click:', sp.name, sp.url);
-  }
-
-  function safeOpen(url){
-    if(!url) return;
-    window.open(url,'_blank','noopener,noreferrer');
-  }
-
-  // ── Actions wiring ──────────────────────────────────────────
-  function wireActions(data){
-    const a = data.athlete||{};
-    const shareUrl = a.shareUrl || window.location.href;
-    const donateUrl = a.donateUrl || '';
-
-    $('#btnCopyLink').addEventListener('click',()=>copyText(shareUrl));
-
-    $('#ctaShare').addEventListener('click',async()=>{
-      const payload={title:document.title, text:'Check out this athlete\'s season page:', url:shareUrl};
-      if(navigator.share){
-        try{ await navigator.share(payload); }catch(e){ if(e.name!=='AbortError') copyText(shareUrl); }
-      } else {
-        copyText(shareUrl);
-      }
-    });
-
-    $('#ctaDonate').addEventListener('click',()=>{
-      if(!donateUrl){ toast('Add a donateUrl in data/athlete.json'); return; }
-      safeOpen(donateUrl);
-    });
-
-    $('#openBioModal').addEventListener('click',()=>modal.show('bioModal'));
-    $('#btnOpenSponsors').addEventListener('click',()=>modal.show('sponsorsModal'));
-    $('#btnOpenAbout').addEventListener('click',()=>modal.show('aboutModal'));
-
-    $('#btnReduceMotion').addEventListener('click',()=>{
-      reduceMotion=!reduceMotion;
-      try{ localStorage.setItem('dac_rm',reduceMotion?'1':'0'); }catch{}
-      $('#btnReduceMotion').textContent = reduceMotion ? 'Motion: Off' : 'Reduce Motion';
-      toast(reduceMotion?'Reduced motion enabled':'Full motion enabled');
-    });
-  }
-
-  // ── Canvas FX ───────────────────────────────────────────────
-  function startFx(){
-    const canvas=$('#fx-canvas');
-    if(!canvas) return;
-    const ctx=canvas.getContext('2d',{alpha:true});
-    const dpr=Math.min(2,window.devicePixelRatio||1);
-    const mouse={x:0,y:0,vx:0,vy:0,active:false};
-    let w=0,h=0,lastT=performance.now();
-
-    function resize(){
-      w=window.innerWidth; h=window.innerHeight;
-      canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr);
-      canvas.style.width=w+'px'; canvas.style.height=h+'px';
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-    }
-    window.addEventListener('resize',resize,{passive:true}); resize();
-
-    const count=clamp(Math.floor(w*h/18000),40,110);
-    const p=Array.from({length:count},()=>({
-      x:Math.random()*w, y:Math.random()*h,
-      vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22,
-      r:1.2+Math.random()*1.8, a:.18+Math.random()*.22,
-      hue:200+Math.random()*120
-    }));
-
-    function onMove(cx,cy){
-      mouse.vx=cx-mouse.x; mouse.vy=cy-mouse.y;
-      mouse.x=cx; mouse.y=cy; mouse.active=true;
-    }
-    window.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY),{passive:true});
-    window.addEventListener('touchmove',e=>{ if(e.touches[0]) onMove(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
-
-    function step(t){
-      const dt=Math.min(32,t-lastT); lastT=t;
-      ctx.clearRect(0,0,w,h);
-
-      if(reduceMotion){ drawPass(0,1,0.55); requestAnimationFrame(step); return; }
-
-      for(const s of p){
-        s.x+=s.vx*dt; s.y+=s.vy*dt;
-        if(s.x<-20)s.x=w+20; if(s.x>w+20)s.x=-20;
-        if(s.y<-20)s.y=h+20; if(s.y>h+20)s.y=-20;
-        if(mouse.active){
-          const dx=mouse.x-s.x,dy=mouse.y-s.y,dist=Math.hypot(dx,dy);
-          if(dist<220){ const pull=(1-dist/220)*.0009*dt; s.vx+=dx*pull; s.vy+=dy*pull; }
-        }
-        s.vx*=.995; s.vy*=.995;
-      }
-
-      drawPass(1,1.8,.32);
-      drawPass(0,1.0,1.0);
-      requestAnimationFrame(step);
-    }
-
-    function drawPass(blur,sm,am){
-      for(const s of p){
-        ctx.beginPath();
-        ctx.fillStyle=`hsla(${s.hue},90%,75%,${s.a*am})`;
-        ctx.arc(s.x,s.y,s.r*sm,0,Math.PI*2);
-        ctx.fill();
-      }
-      const maxD=130;
-      for(let i=0;i<p.length;i++){
-        for(let j=i+1;j<p.length;j++){
-          const a=p[i],b=p[j];
-          const d=Math.hypot(a.x-b.x,a.y-b.y);
-          if(d<maxD){
-            ctx.strokeStyle=`rgba(255,255,255,${.08*(1-d/maxD)*am})`;
-            ctx.lineWidth=(blur?1.6:1)*sm;
-            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-          }
-        }
-      }
-      if(mouse.active){
-        ctx.beginPath(); ctx.fillStyle=`rgba(255,179,224,${.10*am})`; ctx.arc(mouse.x,mouse.y,70*sm,0,Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.fillStyle=`rgba(125,211,255,${.08*am})`; ctx.arc(mouse.x+mouse.vx*.2,mouse.y+mouse.vy*.2,60*sm,0,Math.PI*2); ctx.fill();
-      }
-    }
-
-    requestAnimationFrame(step);
-  }
-
-  // ── Boot ────────────────────────────────────────────────────
-  loadData()
-    .then(data=>{
-      applySeo(data);
-      renderBio(data);
-      renderFundraising(data);
-      renderCards(data.cards||[]);
-      renderEvents(data.events||[]);
-      renderSponsors(data.sponsors||[]);
-      wireActions(data);
-      startFx();
-    })
-    .catch(err=>{
-      console.error('[DAC]', err);
-      toast('Could not load athlete data — check data/athlete.json');
-    });
-
-})();
-</script>
+  <script src="scripts/app.js"></script>
 </body>
 </html>
