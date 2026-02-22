@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#070A12" />
   <title>Digital Athlete Card</title>
 
@@ -40,137 +40,136 @@
     </div>
   </header>
 
-  <main class="wrap">
-    <section class="hero">
-      <div class="hero__left">
+  <main class="stage">
+    <div class="wrap">
+      <section class="hero">
+        <div class="hero__left">
 
-        <div class="athlete">
-          <button class="athlete__photo" id="bioBtnPhoto" type="button" title="View Bio">
-            <img id="athletePhoto" alt="Athlete photo" loading="lazy" decoding="async" />
-          </button>
+          <div class="athlete">
+            <button class="athlete__photo" id="bioBtnPhoto" type="button" title="View Bio">
+              <img id="athletePhoto" alt="Athlete photo" loading="lazy" decoding="async" />
+            </button>
 
-          <div class="athlete__meta">
-            <div class="badgeRow">
-              <span class="badge" id="tierBadge">🏅 Bronze</span>
-              <span class="badge badge--soft" id="clubBadge">KP Gymnastics</span>
-              <span class="badge badge--soft" id="sportBadge">Gymnastics</span>
+            <div class="athlete__meta">
+              <div class="badgeRow">
+                <span class="badge" id="tierBadge">🏅 Bronze</span>
+                <span class="badge badge--soft" id="clubBadge">KP Gymnastics</span>
+                <span class="badge badge--soft" id="sportBadge">Gymnastics</span>
+              </div>
+
+              <h1 class="athlete__name" id="athleteName">Athlete Name</h1>
+              <div class="athlete__sub" id="athleteSub">Tap to view bio</div>
+
+              <div class="ctaRow">
+                <button class="btn btn--soft" id="bioBtn" type="button">View Bio</button>
+                <button class="btn btn--glow" id="supportBtn" type="button">💕 Support this athlete</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="fund card fxCard">
+            <div class="fund__head">
+              <div>
+                <div class="kicker">🎀 Season Fundraising</div>
+                <div class="title" id="fundTitle">Help cover travel, coaching, meet fees.</div>
+              </div>
+              <div class="fund__numbers" id="fundNumbers">$650 / $2,000</div>
             </div>
 
-            <h1 class="athlete__name" id="athleteName">Athlete Name</h1>
-            <div class="athlete__sub" id="athleteSub">Tap to view bio</div>
+            <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="meter__bar" id="meterBar"></div>
+              <div class="meter__spark"></div>
+            </div>
 
-            <div class="ctaRow">
-              <button class="btn btn--soft" id="bioBtn" type="button">View Bio</button>
-              <button class="btn btn--glow" id="supportBtn" type="button">💕 Support this athlete</button>
+            <div class="fund__foot">
+              <div class="note" id="fundNote">Athlete is 33% to the season goal! Help finish strong 💕</div>
+              <button class="btn btn--primary" id="donateBtn" type="button">Support / Donate</button>
             </div>
           </div>
-        </div>
 
-        <div class="fund card">
-          <div class="fund__head">
-            <div>
-              <div class="kicker">🎀 Season Fundraising</div>
-              <div class="title" id="fundTitle">Help cover travel, coaching, meet fees.</div>
+          <div class="share card fxCard">
+            <div class="share__head">
+              <div class="kicker">Share via</div>
+              <div class="share__chips" id="shareChips"></div>
             </div>
-            <div class="fund__numbers" id="fundNumbers">$650 / $2,000</div>
+            <div class="share__foot">
+              <div class="note">Fastest results: share the card with 3 sponsors today.</div>
+              <button class="btn btn--ghost" id="openShareModalBtn" type="button">Open Share Options</button>
+            </div>
           </div>
 
-          <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div class="meter__bar" id="meterBar"></div>
-            <div class="meter__spark"></div>
-          </div>
-
-          <div class="fund__foot">
-            <div class="note" id="fundNote">Athlete is 33% to the season goal! Help finish strong 💕</div>
-            <button class="btn btn--primary" id="donateBtn" type="button">Support / Donate</button>
-          </div>
-        </div>
-
-        <div class="share card">
-          <div class="share__head">
-            <div class="kicker">Share via</div>
-            <div class="share__chips" id="shareChips"></div>
-          </div>
-          <div class="share__foot">
-            <div class="note">Fastest results: share the card with 3 sponsors today.</div>
-            <button class="btn btn--ghost" id="openShareModalBtn" type="button">Open Share Options</button>
-          </div>
-        </div>
-
-        <!-- NEW: Photo Cards / Gallery -->
-        <div class="card gallery">
-          <div class="titleRow">
-            <div class="title">🖼️ Photo Cards</div>
-            <div class="pill pill--spark">Tap to expand</div>
-          </div>
-          <div class="sub" id="gallerySub">Highlights from training + meets.</div>
-          <div class="galleryGrid" id="galleryGrid"></div>
-        </div>
-
-      </div>
-
-      <aside class="hero__right">
-        <div class="card sponsors">
-          <div class="sponsors__head">
+          <!-- Photo Cards / Gallery -->
+          <div class="card gallery fxCard">
             <div class="titleRow">
-              <div class="title">💎 Sponsors</div>
-              <div class="pill">Tap to visit</div>
+              <div class="title">🖼️ Photo Cards</div>
+              <div class="pill pill--spark">Tap to expand</div>
             </div>
-            <div class="sub" id="sponsorSub">Thank you for helping build the journey.</div>
+            <div class="sub" id="gallerySub">Highlights from training + meets.</div>
+            <div class="galleryGrid" id="galleryGrid"></div>
           </div>
 
-          <div class="sponsorGrid" id="sponsorGrid"></div>
-
-          <div class="sponsors__cta">
-            <button class="btn btn--soft" id="becomeSponsorBtn" type="button">Become a Sponsor</button>
-          </div>
         </div>
 
-        <!-- NEW: Quick stats -->
-        <div class="card stats">
-          <div class="titleRow">
-            <div class="title">⚡ Season Snapshot</div>
-            <div class="pill">Live</div>
+        <aside class="hero__right">
+          <div class="card sponsors fxCard">
+            <div class="sponsors__head">
+              <div class="titleRow">
+                <div class="title">💎 Sponsors</div>
+                <div class="pill">Tap to visit</div>
+              </div>
+              <div class="sub" id="sponsorSub">Thank you for helping build the journey.</div>
+            </div>
+
+            <div class="sponsorGrid" id="sponsorGrid"></div>
+
+            <div class="sponsors__cta">
+              <button class="btn btn--soft" id="becomeSponsorBtn" type="button">Become a Sponsor</button>
+            </div>
           </div>
-          <div class="statsGrid" id="statsGrid"></div>
-        </div>
 
-        <div class="card journey">
-          <div class="titleRow">
-            <div class="title">⭐ Journey</div>
-            <div class="pill pill--spark">Live updates</div>
+          <div class="card stats fxCard">
+            <div class="titleRow">
+              <div class="title">⚡ Season Snapshot</div>
+              <div class="pill">Live</div>
+            </div>
+            <div class="statsGrid" id="statsGrid"></div>
           </div>
-          <div class="timeline" id="timeline"></div>
-        </div>
 
-        <!-- NEW: Upcoming -->
-        <div class="card upcoming">
-          <div class="titleRow">
-            <div class="title">📅 Upcoming</div>
-            <div class="pill pill--spark">Events</div>
+          <div class="card journey fxCard">
+            <div class="titleRow">
+              <div class="title">⭐ Journey</div>
+              <div class="pill pill--spark">Live updates</div>
+            </div>
+            <div class="timeline" id="timeline"></div>
           </div>
-          <div class="upcomingList" id="upcomingList"></div>
-        </div>
 
-        <!-- NEW: Achievements -->
-        <div class="card achievements">
-          <div class="titleRow">
-            <div class="title">🏆 Achievements</div>
-            <div class="pill">This season</div>
+          <div class="card upcoming fxCard">
+            <div class="titleRow">
+              <div class="title">📅 Upcoming</div>
+              <div class="pill pill--spark">Events</div>
+            </div>
+            <div class="upcomingList" id="upcomingList"></div>
           </div>
-          <div class="achList" id="achList"></div>
+
+          <div class="card achievements fxCard">
+            <div class="titleRow">
+              <div class="title">🏆 Achievements</div>
+              <div class="pill">This season</div>
+            </div>
+            <div class="achList" id="achList"></div>
+          </div>
+
+        </aside>
+      </section>
+
+      <footer class="footer">
+        <div class="footer__banner fxCard">
+          <span class="footer__spark">✨</span>
+          <span class="footer__text">Built to be shared</span>
+          <button class="btn btn--ghost btn--tiny" id="builtBtn" type="button">Open</button>
         </div>
-
-      </aside>
-    </section>
-
-    <footer class="footer">
-      <div class="footer__banner">
-        <span class="footer__spark">✨</span>
-        <span class="footer__text">Built to be shared</span>
-        <button class="btn btn--ghost btn--tiny" id="builtBtn" type="button">Open</button>
-      </div>
-    </footer>
+      </footer>
+    </div>
   </main>
 
   <!-- MODAL HOST -->
