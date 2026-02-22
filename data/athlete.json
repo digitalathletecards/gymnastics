@@ -1,137 +1,37 @@
 {
-  "version": "1.0",
-  "slug": "layla-kp-bronze",
-  "firstName": "Layla",
-  "lastName": "Neitenbach",
-  "level": "Bronze",
-  "team": "KP Gymnastics",
-  "discipline": "Gymnastics",
-
-  "seo": {
-    "title": "Layla Neitenbach | Bronze Gymnast | KP Gymnastics | Season Fundraiser",
-    "description": "Support Layla, a Bronze Level gymnast at KP Gymnastics. View meet scores, performance charts, season highlights, and sponsor her journey.",
-    "shareTitle": "Support Layla’s Gymnastics Journey ✨",
-    "shareDescription": "Tap to see scores + highlights and support her season. Sponsors help power youth sports 💎",
-    "shareImage": "images/senxia.png"
-  },
-
-  "fundraising": {
-    "goal": 2000,
-    "raised": 650,
-    "subtitle": "Help cover travel, coaching, meet fees.",
-    "donateUrl": "https://example.com/donate",
-    "suggestedAmounts": [10, 25, 50, 100]
-  },
-
-  "share": {
-    "message": "Support Layla’s gymnastics season 💕 View her scores + highlights here:",
-    "hashtags": ["#YouthSports", "#Gymnastics", "#SupportLocal"]
-  },
-
-  "photos": [
-    { "src": "images/card1.PNG", "alt": "Layla training", "caption": "Training hard 💪" },
-    { "src": "images/card2.PNG", "alt": "Layla meet day", "caption": "Meet day sparkle ✨" },
-    { "src": "images/card3.png", "alt": "Layla beam", "caption": "Beam confidence 🌟" },
-    { "src": "images/card4.png", "alt": "Layla floor", "caption": "Floor energy 🎀" },
-    { "src": "images/card5.png", "alt": "Layla celebrating", "caption": "Proud moments 🏆" }
-  ],
-
-  "bio": {
-    "photo": "images/card1.PNG",
-    "story": [
-      "Layla is a 9-year-old Bronze Level gymnast at KP Gymnastics who loves learning new skills and cheering on her teammates.",
-      "This season she’s working hard to improve her form, build confidence, and have fun at every meet.",
-      "Thank you for supporting her journey — your help makes youth sports possible 💕"
+  "athlete": {
+    "name": "Layla Neitenbach",
+    "age": 9,
+    "country": "USA",
+    "club": "KP Gymnastics",
+    "sport": "Gymnastics",
+    "tierLabel": "🏅 Bronze",
+    "photo": "assets/athletes/layla.jpg",
+    "bio": [
+      "Layla is a dedicated gymnast who loves learning new skills and competing with her team.",
+      "This season she’s training hard for meets, travel events, and skill progression — and she’s proud to share the journey with friends, family, and local sponsors.",
+      "Every sponsor helps cover coaching, meet fees, travel, and training costs."
     ],
-    "quickFacts": [
-      { "label": "Level", "value": "Bronze" },
-      { "label": "Gym", "value": "KP Gymnastics" },
-      { "label": "Season Goal", "value": "$2,000" }
+    "fundraising": {
+      "title": "Help cover travel, coaching, meet fees.",
+      "raised": 650,
+      "goal": 2000,
+      "currency": "USD",
+      "ctaUrl": "https://example.com/donate"
+    },
+    "share": {
+      "publicUrl": "https://example.com/layla"
+    },
+    "sponsors": [
+      { "name": "Local Cafe", "tier": "Bronze", "url": "https://example.com" },
+      { "name": "Auto Detail", "tier": "Bronze", "url": "https://example.com" },
+      { "name": "Dental Care", "tier": "Silver", "url": "https://example.com" },
+      { "name": "Realty Group", "tier": "Gold", "url": "https://example.com" }
     ],
-    "links": [
-      { "label": "Parent Contact", "url": "mailto:parent@example.com" }
+    "journey": [
+      { "date": "Feb 2026", "title": "New Skill Unlock", "desc": "Working on consistency and clean landings." },
+      { "date": "Mar 2026", "title": "Meet Prep", "desc": "Focused training blocks with the team." },
+      { "date": "Apr 2026", "title": "Competition Weekend", "desc": "Travel + meet fees covered by sponsors." }
     ]
-  },
-
-  "events": [
-    {
-      "key": "vault",
-      "name": "Vault",
-      "emoji": "🤸‍♀️",
-      "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.10 },
-        { "meet": "February Invitational", "date": "2026-02-03", "score": 9.25 }
-      ]
-    },
-    {
-      "key": "bars",
-      "name": "Bars",
-      "emoji": "💫",
-      "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-12", "score": 8.95 },
-        { "meet": "February Invitational", "date": "2026-02-03", "score": 9.05 }
-      ]
-    },
-    {
-      "key": "beam",
-      "name": "Beam",
-      "emoji": "🌸",
-      "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.00 },
-        { "meet": "February Invitational", "date": "2026-02-03", "score": 9.15 }
-      ]
-    },
-    {
-      "key": "floor",
-      "name": "Floor",
-      "emoji": "🎀",
-      "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.20 },
-        { "meet": "February Invitational", "date": "2026-02-03", "score": 9.35 }
-      ]
-    },
-    {
-      "key": "allaround",
-      "name": "All Around",
-      "emoji": "🏆",
-      "scores": [
-        { "meet": "Winter Classic", "date": "2026-01-12", "score": 36.25 },
-        { "meet": "February Invitational", "date": "2026-02-03", "score": 36.80 }
-      ]
-    }
-  ],
-
-  "sponsors": [
-    {
-      "name": "ABC Plumbing",
-      "url": "https://example.com",
-      "logo": "sponsors/sponsor1.png",
-      "blurb": "Local sponsor supporting youth sports."
-    },
-    {
-      "name": "Sunrise Dentistry",
-      "url": "https://example.com",
-      "logo": "sponsors/sponsor2.png",
-      "blurb": "Proud supporter of Layla’s season."
-    },
-    {
-      "name": "Sponsor 3",
-      "url": "https://example.com",
-      "logo": "sponsors/sponsor3.png",
-      "blurb": "Thank you for helping athletes grow."
-    },
-    {
-      "name": "Sponsor 4",
-      "url": "https://example.com",
-      "logo": "sponsors/sponsor4.png",
-      "blurb": "Community partner powering the journey."
-    }
-  ],
-
-  "sponsorCta": {
-    "title": "Become a Sponsor 💎",
-    "copy": "Sponsoring helps cover meet fees, coaching, travel, and training. Sponsors get a clickable placement on this shareable card — parents and fans love sharing it with local businesses.",
-    "buttonText": "Sponsor this season →",
-    "buttonUrl": "mailto:parent@example.com?subject=Sponsor%20Layla%27s%20Season"
   }
 }
