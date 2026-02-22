@@ -1,66 +1,257 @@
-{
-  "firstName": "Layla",
-  "lastName": "Neitenbach",
-  "team": "KP Gymnastics",
-  "discipline": "Gymnastics",
-  "level": "Bronze",
+(() => {
+  const byId = (id) => document.getElementById(id);
+  const on = (el, evt, fn) => el && el.addEventListener(evt, fn);
+  const setText = (el, val) => el && (el.textContent = val ?? "");
+  const setAttr = (el, name, val) => el && val != null && el.setAttribute(name, String(val));
 
-  "shareMessage": "Support Layla’s gymnastics season 💕 View scores, highlights, and sponsors:",
-  "shareImage": "images/share.jpg",
+  const fmtMoney = (n) =>
+    new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number(n || 0));
 
-  "fundraising": {
-    "raised": 650,
-    "goal": 2000,
-    "subtitle": "Help cover travel, coaching, meet fees.",
-    "donateUrl": "https://example.com/donate"
-  },
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  "photos": [
-    { "src": "images/card1.PNG", "alt": "Layla training", "caption": "Early morning training 💪" },
-    { "src": "images/card2.PNG", "alt": "Meet day", "caption": "Meet day energy ✨" }
-  ],
-
-  "events": {
-    "vault": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.1 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.25 }
-    ],
-    "bars": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 8.95 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.05 }
-    ],
-    "beam": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.0 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.15 }
-    ],
-    "floor": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.2 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.35 }
-    ]
-  },
-
-  "sponsors": [
-    {
-      "name": "Sponsor One",
-      "url": "https://example.com",
-      "logo": "logos/sponsor1.png",
-      "blurb": "Proud supporter of Layla’s season."
-    },
-    {
-      "name": "Sponsor Two",
-      "url": "https://example.com",
-      "logo": "logos/sponsor2.png",
-      "blurb": "Local business powering youth sports."
-    }
-  ],
-
-  "bio": {
-    "photo": "images/card1.PNG",
-    "story": "Layla is a Bronze Level gymnast at KP Gymnastics working hard to grow this season. Thank you for supporting her journey!",
-    "quickFacts": [
-      { "label": "Level", "value": "Bronze" },
-      { "label": "Gym", "value": "KP Gymnastics" },
-      { "label": "Season Goal", "value": "$2,000" }
-    ]
+  function pageUrl() {
+    return window.location.href.split("#")[0];
   }
-}
+
+  async function copyLink(text = pageUrl()) {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("Copied!");
+    } catch {
+      prompt("Copy this link:", text);
+    }
+  }
+
+  async function nativeShare({ title, text, url } = {}) {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: title || document.title,
+          text: text || "Support this athlete’s season 💕",
+          url: url || pageUrl()
+        });
+      } else {
+        await copyLink(url || pageUrl());
+      }
+    } catch {}
+  }
+
+  function openModal(id) {
+    const m = byId(id);
+    if (!m) return;
+    m.classList.add("open");
+    m.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal(id) {
+    const m = byId(id);
+    if (!m) return;
+    m.classList.remove("open");
+    m.setAttribute("aria-hidden", "true");
+  }
+
+  function wireModals() {
+    document.querySelectorAll(".modalClose").forEach((btn) => {
+      on(btn, "click", () => {
+        const id = btn.getAttribute("data-close");
+        if (id) closeModal(id);
+      });
+    });
+
+    document.querySelectorAll(".modalOverlay").forEach((overlay) => {
+      on(overlay, "click", (e) => {
+        if (e.target === overlay) closeModal(overlay.id);
+      });
+    });
+
+    on(document, "keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const open = document.querySelector(".modalOverlay.open");
+      if (open) closeModal(open.id);
+    });
+  }
+
+  function applySeo(ath) {
+    const url = pageUrl();
+    const fullName = `${ath.firstName || ""} ${ath.lastName || ""}`.trim() || "Digital Athlete Card";
+    const title = `${fullName} | ${ath.team || "Youth Sports"} | Fundraiser`;
+    const desc =
+      ath.seoDescription ||
+      `Support ${fullName}. View meet scores, season highlights, and sponsor their journey.`;
+
+    document.title = title;
+    setAttr(byId("canonicalLink"), "href", url);
+
+    setAttr(byId("ogUrl"), "content", url);
+    setAttr(byId("ogTitle"), "content", `Support ${fullName}'s Season Journey ✨`);
+    setAttr(byId("ogDesc"), "content", desc);
+
+    setAttr(byId("twTitle"), "content", `Support ${fullName}'s Season ✨`);
+    setAttr(byId("twDesc"), "content", desc);
+
+    setAttr(byId("metaDesc"), "content", desc);
+
+    // share image (NO HEAD check; must exist in repo)
+    if (ath.shareImage) {
+      const abs = new URL(ath.shareImage, url).toString();
+      setAttr(byId("ogImage"), "content", abs);
+      setAttr(byId("twImage"), "content", abs);
+    }
+
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: fullName,
+      sport: ath.discipline || "Gymnastics",
+      memberOf: ath.team || "Team",
+      description: desc,
+      url
+    };
+
+    const el = byId("jsonLd");
+    if (el) el.textContent = JSON.stringify(jsonLd);
+  }
+
+  function renderHero(ath) {
+    setText(byId("athleteFirstName"), ath.firstName || "Athlete");
+    setText(byId("athleteLastName"), ath.lastName || "");
+    setText(byId("athleteTeam"), ath.team || "Team");
+    setText(byId("athleteDiscipline"), ath.discipline || "Gymnastics");
+
+    const badge = byId("levelBadge");
+    if (badge) badge.textContent = `🏅 ${ath.level || "Bronze"}`;
+
+    const raised = Number(ath.fundraising?.raised || 0);
+    const goal = Number(ath.fundraising?.goal || 0);
+    const pct = goal > 0 ? clamp((raised / goal) * 100, 0, 100) : 0;
+
+    setText(byId("goalPill"), `${fmtMoney(raised)} / ${fmtMoney(goal)}`);
+    setText(byId("goalSubtitle"), ath.fundraising?.subtitle || "Help cover travel, coaching, meet fees.");
+
+    const bar = byId("progressBar");
+    if (bar) bar.style.width = `${pct}%`;
+
+    const spt = byId("shareProgressText");
+    if (spt) spt.textContent = `${ath.firstName || "This athlete"} is ${Math.round(pct)}% to the season goal! Help finish strong 💕`;
+
+    on(byId("ctaDonate"), "click", () => {
+      const donateUrl = ath.fundraising?.donateUrl;
+      if (donateUrl) window.open(donateUrl, "_blank", "noopener");
+      else alert("Add fundraising.donateUrl in data/athlete.json");
+    });
+  }
+
+  function renderCards(ath) {
+    const fan = byId("cardsFan");
+    if (!fan) return;
+
+    const photos = (ath.photos || []).filter((p) => p && p.src);
+    fan.innerHTML = "";
+
+    photos.forEach((p, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "photoCard";
+      btn.style.backgroundImage = `url("${p.src}")`; // MUST exist
+      btn.style.backgroundSize = "cover";
+      btn.style.backgroundPosition = "center";
+      btn.title = p.caption || `Photo ${idx + 1}`;
+      fan.appendChild(btn);
+    });
+  }
+
+  function renderSponsors(ath) {
+    const strip = byId("sponsorStrip");
+    const grid = byId("sponsorGrid");
+    const sponsors = (ath.sponsors || []).filter(Boolean);
+
+    if (strip) strip.innerHTML = "";
+    if (grid) grid.innerHTML = "";
+
+    sponsors.forEach((s) => {
+      if (strip) {
+        const a = document.createElement("a");
+        a.className = "sponsorLogo";
+        a.href = s.url || "#";
+        a.target = s.url ? "_blank" : "_self";
+        a.rel = s.url ? "noopener" : "";
+        a.title = s.name || "Sponsor";
+
+        if (s.logo) {
+          const img = document.createElement("img");
+          img.src = s.logo; // MUST exist
+          img.alt = s.name || "Sponsor";
+          img.loading = "lazy";
+          a.appendChild(img);
+        } else {
+          a.textContent = s.name || "Sponsor";
+        }
+        strip.appendChild(a);
+      }
+
+      if (grid) {
+        const a = document.createElement("a");
+        a.className = "sponsorCard";
+        a.href = s.url || "#";
+        a.target = s.url ? "_blank" : "_self";
+        a.rel = s.url ? "noopener" : "";
+        a.innerHTML = `
+          <div class="sponsorLogoBox">${s.logo ? `<img src="${s.logo}" alt="${s.name || "Sponsor"}" loading="lazy">` : ""}</div>
+          <div class="sponsorName">${s.name || "Sponsor"}</div>
+          ${s.blurb ? `<div class="sponsorBlurb">${s.blurb}</div>` : ""}
+          <div class="sponsorCta">Visit sponsor ↗</div>
+        `;
+        grid.appendChild(a);
+      }
+    });
+
+    on(byId("btnOpenSponsors"), "click", () => openModal("sponsorsModal"));
+    on(byId("btnBecomeSponsor"), "click", () => openModal("sponsorsModal"));
+  }
+
+  function wireShare(ath) {
+    const url = pageUrl();
+    const msg = ath.shareMessage || "Support this athlete’s season 💕";
+    const encoded = encodeURIComponent(`${msg} ${url}`);
+
+    const sms = byId("qsSms");
+    if (sms) sms.href = `sms:&body=${encoded}`;
+    const wa = byId("qsWhatsapp");
+    if (wa) wa.href = `https://wa.me/?text=${encoded}`;
+    const fb = byId("qsFacebook");
+    if (fb) fb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    const em = byId("qsEmail");
+    if (em) em.href = `mailto:?subject=${encodeURIComponent("Support this athlete’s season")}&body=${encoded}`;
+
+    on(byId("btnCopyLink"), "click", () => copyLink(url));
+    on(byId("btnNativeShare"), "click", () => nativeShare({ text: msg }));
+    on(byId("ctaShare"), "click", () => nativeShare({ text: msg }));
+    on(byId("btnShareProgress"), "click", () => {
+      const t = byId("shareProgressText")?.textContent || msg;
+      nativeShare({ text: t });
+    });
+  }
+
+  async function init() {
+    wireModals();
+
+    const res = await fetch("data/athlete.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Missing data/athlete.json");
+    const ath = await res.json();
+
+    applySeo(ath);
+    renderHero(ath);
+    renderCards(ath);
+    renderSponsors(ath);
+    wireShare(ath);
+
+    on(byId("openBioModal"), "click", () => openModal("bioModal"));
+    on(byId("btnOpenAbout"), "click", () => openModal("aboutModal"));
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => init().catch(console.error));
+  } else {
+    init().catch(console.error);
+  }
+})();
