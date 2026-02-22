@@ -31,8 +31,8 @@
   },
 
   "cards": [
-    { "image": "images/card1.png", "label": "Meet Day" },
-    { "image": "images/card2.png", "label": "Training" },
+    { "image": "images/card1.PNG", "label": "Meet Day" },
+    { "image": "images/card2.PNG", "label": "Training" },
     { "image": "images/card3.png", "label": "Highlights" },
     { "image": "images/card4.png", "label": "Team" },
     { "image": "images/card5.png", "label": "Progress" }
