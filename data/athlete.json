@@ -6,10 +6,10 @@
     "club": "KP Gymnastics",
     "sport": "Gymnastics",
     "tierLabel": "🏅 Bronze",
-    "photo": "assets/athletes/layla.jpg",
+    "photo": "images/card1.PNG",
     "bio": [
       "Layla is a dedicated gymnast who loves learning new skills and competing with her team.",
-      "This season she’s training hard for meets, travel events, and skill progression — and she’s proud to share the journey with friends, family, and local sponsors.",
+      "This season she’s training for meets, travel events, and skill progression — and she’s proud to share the journey with friends, family, and local sponsors.",
       "Every sponsor helps cover coaching, meet fees, travel, and training costs."
     ],
     "fundraising": {
@@ -23,10 +23,10 @@
       "publicUrl": "https://example.com/layla"
     },
     "sponsors": [
-      { "name": "Local Cafe", "tier": "Bronze", "url": "https://example.com" },
-      { "name": "Auto Detail", "tier": "Bronze", "url": "https://example.com" },
-      { "name": "Dental Care", "tier": "Silver", "url": "https://example.com" },
-      { "name": "Realty Group", "tier": "Gold", "url": "https://example.com" }
+      { "name": "Sponsor One", "tier": "Bronze", "url": "https://example.com", "image": "sponsors/sponsor1.png" },
+      { "name": "Sponsor Two", "tier": "Bronze", "url": "https://example.com", "image": "sponsors/sponsor2.png" },
+      { "name": "Sponsor Three", "tier": "Silver", "url": "https://example.com", "image": "sponsors/sponsor3.png" },
+      { "name": "Sponsor Four", "tier": "Gold", "url": "https://example.com", "image": "sponsors/sponsor4.png" }
     ],
     "journey": [
       { "date": "Feb 2026", "title": "New Skill Unlock", "desc": "Working on consistency and clean landings." },
