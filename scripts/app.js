@@ -1,5 +1,5 @@
 /* Digital Athlete Card - Premium Vanilla JS
-   Folder paths used:
+   Paths:
    - data/athlete.json
    - style/main.css
    - scripts/app.js
@@ -60,7 +60,6 @@ function openModal(title, bodyHTML){
     else window.addEventListener("keydown", escClose, { once: true });
   }
 
-  // Optional tilt for SENXIA card (only binds if present)
   attachBrandMarkTilt();
 }
 
@@ -177,7 +176,7 @@ function render(){
     chips.appendChild(s);
   });
 
-  // Sponsors (use images from sponsors/ folder)
+  // Sponsors
   const grid = $("#sponsorGrid");
   grid.innerHTML = "";
   (a.sponsors || []).forEach(sp => {
@@ -238,6 +237,70 @@ function render(){
     timeline.appendChild(card);
   });
 
+  // Stats
+  const statsGrid = $("#statsGrid");
+  statsGrid.innerHTML = "";
+  (a.stats || []).forEach(s => {
+    const el = document.createElement("div");
+    el.className = "stat";
+    el.innerHTML = `
+      <div class="stat__k">${escapeHTML(s.label || "")}</div>
+      <div class="stat__v">${escapeHTML(s.value || "")}</div>
+    `;
+    statsGrid.appendChild(el);
+  });
+
+  // Upcoming
+  const upcoming = $("#upcomingList");
+  upcoming.innerHTML = "";
+  (a.upcoming || []).forEach(u => {
+    const el = document.createElement("div");
+    el.className = "rowCard";
+    el.innerHTML = `
+      <div class="rowCard__top">
+        <div class="rowCard__title">${escapeHTML(u.title || "")}</div>
+        <div class="rowCard__meta">${escapeHTML(u.date || "")}</div>
+      </div>
+      <div class="rowCard__desc">${escapeHTML(u.desc || "")}</div>
+    `;
+    upcoming.appendChild(el);
+  });
+
+  // Achievements
+  const ach = $("#achList");
+  ach.innerHTML = "";
+  (a.achievements || []).forEach(x => {
+    const el = document.createElement("div");
+    el.className = "rowCard";
+    el.innerHTML = `
+      <div class="rowCard__top">
+        <div class="rowCard__title">${escapeHTML(x.title || "")}</div>
+        <div class="rowCard__meta">${escapeHTML(x.date || "")}</div>
+      </div>
+      <div class="rowCard__desc">${escapeHTML(x.desc || "")}</div>
+    `;
+    ach.appendChild(el);
+  });
+
+  // Gallery
+  const gallery = $("#galleryGrid");
+  gallery.innerHTML = "";
+  const g = (a.gallery || []);
+  setText("#gallerySub", g.length ? "Highlights from training + meets." : "Add photo cards in data/athlete.json.");
+  g.forEach((it, idx) => {
+    const card = document.createElement("div");
+    card.className = "gCard";
+    card.innerHTML = `
+      <img src="${escapeAttr(it.src)}" alt="${escapeAttr(it.title || "Photo")}" loading="lazy" decoding="async" />
+      <div class="gCard__cap">
+        <b>${escapeHTML(it.title || "Photo")}</b>
+        <span>${escapeHTML(it.tag || "Moment")}</span>
+      </div>
+    `;
+    card.addEventListener("click", () => openImageModal(it, idx+1, g.length));
+    gallery.appendChild(card);
+  });
+
   // Buttons
   $("#donateBtn").onclick = () => safeOpen(f.ctaUrl);
   $("#supportBtn").onclick = () => safeOpen(f.ctaUrl);
@@ -252,6 +315,19 @@ function render(){
   $("#copyLinkBtn").onclick = () => copyToClipboard(a.share?.publicUrl || location.href);
 
   $("#builtBtn").onclick = () => openBuiltModal();
+}
+
+/* ---------- Image Zoom Modal ---------- */
+function openImageModal(item, index, total){
+  openModal(`Photo ${index}/${total}`, `
+    <div class="modalSection">
+      <h3>${escapeHTML(item.title || "Photo")}</h3>
+      <p>${escapeHTML(item.tag || "Moment")}</p>
+    </div>
+    <div class="modalSection">
+      <img class="zoomImg" src="${escapeAttr(item.src)}" alt="${escapeAttr(item.title || "Photo")}" />
+    </div>
+  `);
 }
 
 /* ---------- Modal Contents ---------- */
@@ -371,7 +447,7 @@ function openBuiltModal(){
 
     <div class="modalSection">
       <h3>Sponsors get clarity</h3>
-      <p>Businesses see the story, the goal, and the impact — with a clean sponsor section and quick share buttons that drive action.</p>
+      <p>Businesses see the story, the goal, and the impact — with sponsor logos, links, and quick share buttons that drive action.</p>
     </div>
 
     <div class="modalSection">
