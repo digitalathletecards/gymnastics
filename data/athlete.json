@@ -1,65 +1,124 @@
 {
-  "firstName": "Layla",
-  "lastName": "Neitenbach",
-  "team": "KP Gymnastics",
-  "discipline": "Gymnastics",
-  "level": "Bronze",
-
-  "shareMessage": "Support Layla’s gymnastics season 💕 View scores, highlights, and sponsors:",
-  "shareImage": "images/share.jpg",
+  "athlete": {
+    "firstName": "Layla",
+    "lastName": "Neitenbach",
+    "team": "KP Gymnastics",
+    "discipline": "Gymnastics",
+    "level": "Bronze",
+    "headline": "Chasing personal bests — meet by meet.",
+    "shareUrl": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/",
+    "donateUrl": "https://example.com/donate",
+    "heroCardPhoto": "images/card3.png",
+    "quickFacts": [
+      { "label": "Graduation Year", "value": "2028" },
+      { "label": "Hometown", "value": "Your City, ST" },
+      { "label": "Goals", "value": "State • Regionals • Nationals" }
+    ],
+    "story": [
+      "Hi! I'm Layla — thank you for being part of my season.",
+      "This page is my digital athlete card: it helps sponsors and supporters follow my journey with live meet updates and event performance.",
+      "Your support helps cover training, travel, meet fees, and recovery tools so I can keep improving every week."
+    ],
+    "links": [
+      { "label": "Instagram", "url": "https://instagram.com/" },
+      { "label": "Email", "url": "mailto:hello@example.com" }
+    ]
+  },
 
   "fundraising": {
-    "raised": 650,
-    "goal": 2000,
-    "subtitle": "Help cover travel, coaching, meet fees.",
-    "donateUrl": "https://example.com/donate"
+    "goalAmount": 2500,
+    "raisedAmount": 860,
+    "subtitle": "Help cover travel, coaching, meet fees."
   },
 
-  "photos": [
-    { "src": "images/card1.PNG", "alt": "Layla training", "caption": "Early morning training 💪" },
-    { "src": "images/card2.PNG", "alt": "Meet day", "caption": "Meet day energy ✨" },
-    { "src": "images/card3.png", "alt": "Celebration", "caption": "Proud moments 🏅" }
+  "supporters": [
+    { "name": "Sarah M.",     "amount": 50,  "time": "2 hours ago" },
+    { "name": "Coach Kim",    "amount": 25,  "time": "Yesterday" },
+    { "name": "The Johnson Family", "amount": 100, "time": "2 days ago" },
+    { "name": "Uncle Dave",   "amount": 50,  "time": "3 days ago" },
+    { "name": "Anonymous",    "amount": 20,  "time": "4 days ago" }
   ],
 
-  "events": {
-    "vault": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.1 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.25 }
-    ],
-    "bars": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 8.95 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.05 }
-    ],
-    "beam": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.0 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.15 }
-    ],
-    "floor": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 9.2 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 9.35 }
-    ],
-    "allAround": [
-      { "meet": "Winter Classic", "date": "2026-01-12", "score": 36.25 },
-      { "meet": "February Invitational", "date": "2026-02-03", "score": 36.8 }
-    ]
-  },
+  "cards": [
+    { "image": "images/card1.PNG", "label": "Beam" },
+    { "image": "images/card2.PNG", "label": "Meet Week 🏅" },
+    { "image": "images/card3.png", "label": "Winner 🥇" },
+    { "image": "images/card4.png", "label": "Bars" },
+    { "image": "images/card5.png", "label": "Floor 🌸" }
+  ],
+
+  "events": [
+    {
+      "id": "allAround",
+      "name": "All Around",
+      "scores": [
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 36.55 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 37.10 },
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 37.40 }
+      ]
+    },
+    {
+      "id": "vault",
+      "name": "Vault",
+      "scores": [
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.10 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.25 },
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.35 }
+      ]
+    },
+    {
+      "id": "bars",
+      "name": "Bars",
+      "scores": [
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.00 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.15 },
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.20 }
+      ]
+    },
+    {
+      "id": "beam",
+      "name": "Beam",
+      "scores": [
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.05 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.20 },
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.30 }
+      ]
+    },
+    {
+      "id": "floor",
+      "name": "Floor",
+      "scores": [
+        { "meet": "Winter Classic",       "date": "2026-01-10", "score": 9.40 },
+        { "meet": "January Invitational", "date": "2026-01-25", "score": 9.50 },
+        { "meet": "City Cup",             "date": "2026-02-08", "score": 9.55 }
+      ]
+    }
+  ],
 
   "sponsors": [
-    { "name": "ABC Plumbing", "url": "https://example.com", "logo": "logos/sponsor1.png", "blurb": "Local sponsor supporting youth sports." },
-    { "name": "Sunrise Dentistry", "url": "https://example.com", "logo": "logos/sponsor2.png", "blurb": "Proud supporter of Layla’s season." }
-  ],
-
-  "bio": {
-    "photo": "images/card1.PNG",
-    "story": "Layla is a Bronze Level gymnast at KP Gymnastics working hard to grow this season. Thank you for supporting her journey!",
-    "quickFacts": [
-      { "label": "Level", "value": "Bronze" },
-      { "label": "Gym", "value": "KP Gymnastics" },
-      { "label": "Season Goal", "value": "$2,000" }
-    ]
-  },
-
-  "links": [
-    { "label": "KP Gymnastics", "url": "https://example.com" }
+    {
+      "name": "Sponsor One",
+      "tagline": "Local business supporter",
+      "logo": "sponsors/sponsor1.png",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Sponsor Two",
+      "tagline": "Proud to support youth sports",
+      "logo": "sponsors/sponsor2.png",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Sponsor Three",
+      "tagline": "Community partner",
+      "logo": "sponsors/sponsor3.png",
+      "url": "https://example.com"
+    },
+    {
+      "name": "Sponsor Four",
+      "tagline": "Thank you for sponsoring!",
+      "logo": "sponsors/sponsor4.png",
+      "url": "https://example.com"
+    }
   ]
 }
