@@ -1,49 +1,39 @@
-/* Hardened Digital Athlete Card
-   - Modals ALWAYS open (even if data fails)
-   - Uses event delegation so buttons work no matter what
-   - Shows an on-screen error modal if athlete.json fails to load
-*/
+const $ = (sel, root=document) => root.querySelector(sel);
 
-const $ = (sel, root = document) => root.querySelector(sel);
+const state = { data: null };
 
-const state = {
-  athlete: null,
-  dataError: null
-};
-
-function clamp01(x) { return Math.max(0, Math.min(1, x)); }
-
-function money(n, currency = "USD") {
-  try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
-  } catch {
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+function money(n, currency="USD"){
+  try{
+    return new Intl.NumberFormat("en-US", { style:"currency", currency }).format(n);
+  }catch{
     return `$${Number(n).toFixed(0)}`;
   }
 }
-
-function escapeHTML(s) {
+function escapeHTML(s){
   return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
-function escapeAttr(s) { return escapeHTML(s).replaceAll("`", "&#096;"); }
-
-function safeOpen(url) {
-  if (!url) return;
+function escapeAttr(s){
+  return escapeHTML(s).replaceAll("`","&#096;");
+}
+function safeOpen(url){
+  if(!url) return;
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-/* ---------- Fullscreen VH Fix ---------- */
-function setVH() {
+/* ---------- Mobile-safe viewport height ---------- */
+function setVH(){
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty("--vh", `${vh}px`);
 }
 
-/* ---------- Spotlights ---------- */
-function bindSpotlights() {
+/* ---------- Cursor spotlights ---------- */
+function bindSpotlights(){
   const cards = Array.from(document.querySelectorAll(".fxCard"));
   cards.forEach(card => {
     card.addEventListener("mousemove", (e) => {
@@ -52,37 +42,21 @@ function bindSpotlights() {
       const y = ((e.clientY - r.top) / r.height) * 100;
       card.style.setProperty("--mx", `${x}%`);
       card.style.setProperty("--my", `${y}%`);
-    }, { passive: true });
+    }, { passive:true });
   });
 }
 
-/* ---------- Modal System (Always Works) ---------- */
-function ensureModalHost() {
+/* ---------- Modal System (hardened) ---------- */
+function ensureModalHost(){
   const host = $("#modalHost");
-  if (!host) {
-    // If modal host is missing, create it dynamically (failsafe)
-    const div = document.createElement("div");
-    div.id = "modalHost";
-    div.className = "modalHost";
-    div.setAttribute("aria-hidden", "true");
-    div.innerHTML = `
-      <div class="modalHost__backdrop" id="modalBackdrop"></div>
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal__chrome">
-          <div class="modal__top">
-            <div class="modal__title" id="modalTitle">Modal</div>
-            <button class="iconBtn" id="modalClose" type="button" aria-label="Close">✕</button>
-          </div>
-          <div class="modal__body" id="modalBody"></div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(div);
+  if(!host){
+    alert("Modal host missing. Make sure index.html includes #modalHost at the end of <body>.");
+    throw new Error("modalHost missing");
   }
-  return $("#modalHost");
+  return host;
 }
 
-function openModal(title, bodyHTML) {
+function openModal(title, bodyHTML){
   const host = ensureModalHost();
   const backdrop = $("#modalBackdrop");
   const closeBtn = $("#modalClose");
@@ -93,39 +67,34 @@ function openModal(title, bodyHTML) {
   host.classList.add("isOpen");
   host.setAttribute("aria-hidden", "false");
 
-  // hard force top-layer interaction
+  // extra hardening:
   host.style.display = "block";
   host.style.pointerEvents = "auto";
 
   const close = () => closeModal();
-  if (backdrop) backdrop.onclick = close;
-  if (closeBtn) closeBtn.onclick = close;
+  backdrop.onclick = close;
+  closeBtn.onclick = close;
 
-  window.addEventListener("keydown", function esc(e) {
-    if (e.key === "Escape") closeModal();
-    else window.addEventListener("keydown", esc, { once: true });
-  }, { once: true });
+  window.addEventListener("keydown", function esc(e){
+    if(e.key === "Escape") closeModal();
+    else window.addEventListener("keydown", esc, { once:true });
+  }, { once:true });
 
   attachBrandMarkTilt();
 }
 
-function closeModal() {
+function closeModal(){
   const host = $("#modalHost");
-  if (!host) return;
+  if(!host) return;
   host.classList.remove("isOpen");
   host.setAttribute("aria-hidden", "true");
   host.style.display = "";
   host.style.pointerEvents = "";
-  const body = $("#modalBody");
-  if (body) body.innerHTML = "";
+  $("#modalBody").innerHTML = "";
 }
 
-/* Make available for quick console testing */
-window.openModal = openModal;
-window.closeModal = closeModal;
-
 /* ---------- Share ---------- */
-function buildShareLinks(publicUrl, title) {
+function buildShareLinks(publicUrl, title){
   const url = encodeURIComponent(publicUrl);
   const text = encodeURIComponent(`${title} — Support & share the journey: ${publicUrl}`);
   return [
@@ -138,11 +107,11 @@ function buildShareLinks(publicUrl, title) {
   ];
 }
 
-async function copyToClipboard(text) {
-  try {
+async function copyToClipboard(text){
+  try{
     await navigator.clipboard.writeText(text);
     toast("Link copied ✨");
-  } catch {
+  }catch{
     const ta = document.createElement("textarea");
     ta.value = text;
     document.body.appendChild(ta);
@@ -155,28 +124,28 @@ async function copyToClipboard(text) {
 
 /* ---------- Toast ---------- */
 let toastTimer = null;
-function toast(msg) {
+function toast(msg){
   let el = $("#__toast");
-  if (!el) {
+  if(!el){
     el = document.createElement("div");
     el.id = "__toast";
     Object.assign(el.style, {
-      position: "fixed",
-      left: "50%",
-      bottom: "18px",
-      transform: "translateX(-50%)",
-      padding: "10px 12px",
-      borderRadius: "999px",
-      border: "1px solid rgba(255,255,255,.12)",
-      background: "rgba(18,20,32,.72)",
-      backdropFilter: "blur(14px)",
-      color: "rgba(255,255,255,.92)",
-      fontWeight: "900",
-      letterSpacing: ".01em",
-      boxShadow: "0 18px 50px rgba(0,0,0,.55)",
-      zIndex: "100000",
-      opacity: "0",
-      transition: "opacity .2s ease, transform .2s ease"
+      position:"fixed",
+      left:"50%",
+      bottom:"18px",
+      transform:"translateX(-50%)",
+      padding:"10px 12px",
+      borderRadius:"999px",
+      border:"1px solid rgba(255,255,255,.12)",
+      background:"rgba(18,20,32,.72)",
+      backdropFilter:"blur(14px)",
+      color:"rgba(255,255,255,.92)",
+      fontWeight:"900",
+      letterSpacing:".01em",
+      boxShadow:"0 18px 50px rgba(0,0,0,.55)",
+      zIndex:"100000",
+      opacity:"0",
+      transition:"opacity .2s ease, transform .2s ease"
     });
     document.body.appendChild(el);
   }
@@ -190,28 +159,17 @@ function toast(msg) {
   }, 1400);
 }
 
-/* ---------- Data Load (with error capture) ---------- */
-async function loadAthlete() {
+/* ---------- Data ---------- */
+async function loadData(){
   const res = await fetch("data/athlete.json", { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to load data/athlete.json (HTTP ${res.status})`);
+  if(!res.ok) throw new Error("Failed to load data/athlete.json");
   const json = await res.json();
-  if (!json || !json.athlete) throw new Error("athlete.json missing { athlete: {...} }");
   return json.athlete;
 }
 
-/* ---------- Modal Content Builders ---------- */
-function openBioModal() {
-  const a = state.athlete;
-  if (!a) {
-    return openModal("Bio", `
-      <div class="modalSection">
-        <h3>Data not loaded</h3>
-        <p>Your athlete data didn’t load, so the bio can’t render.</p>
-        <p style="margin-top:10px;opacity:.85">Open DevTools → Console for the error. If you’re opening this via <strong>file://</strong>, use GitHub Pages or a local server.</p>
-      </div>
-    `);
-  }
-
+/* ---------- Modals ---------- */
+function openBioModal(){
+  const a = state.data;
   const lines = (a.bio || []).map(p => `<p>${escapeHTML(p)}</p>`).join("");
   openModal("Athlete Bio", `
     <div class="modalSection">
@@ -226,19 +184,42 @@ function openBioModal() {
       <h3>Support</h3>
       <p>Every sponsor helps cover coaching, meet fees, travel, and training—so the athlete can focus on growth and confidence.</p>
       <div class="modalActions">
-        <button class="btn btn--primary" type="button" data-action="donate">Support / Donate</button>
-        <button class="btn btn--ghost" type="button" data-action="copylink">Copy Link</button>
+        <button class="btn btn--primary" type="button" id="bioDonateBtn">Support / Donate</button>
+        <button class="btn btn--ghost" type="button" id="bioCopyBtn">Copy Link</button>
       </div>
     </div>
   `);
+
+  $("#bioDonateBtn").onclick = () => safeOpen(a.fundraising?.ctaUrl);
+  $("#bioCopyBtn").onclick = () => copyToClipboard(a.share?.publicUrl || location.href);
 }
 
-function openShareModal() {
-  const a = state.athlete;
-  const publicUrl = a?.share?.publicUrl || location.href;
-  const title = a ? `${a.name} · ${a.club}` : "Digital Athlete Card";
+function openSponsorModal(){
+  openModal("Become a Sponsor", `
+    <div class="modalSection">
+      <h3>Why sponsor?</h3>
+      <p>Sponsorship helps families cover the season—travel, coaching, meet fees—and it puts your business in front of a community that loves to support local.</p>
+    </div>
+    <div class="modalSection">
+      <h3>Fast option</h3>
+      <p>Tap “Share” and send this card to 3 potential sponsors. It’s the simplest way to fund the season.</p>
+      <div class="modalActions">
+        <button class="btn btn--primary" type="button" id="sponsorShareBtn">Open Share Options</button>
+        <button class="btn btn--ghost" type="button" id="sponsorCopyBtn">Copy Link</button>
+      </div>
+    </div>
+  `);
+  const a = state.data;
+  $("#sponsorShareBtn").onclick = () => openShareModal();
+  $("#sponsorCopyBtn").onclick = () => copyToClipboard(a.share?.publicUrl || location.href);
+}
 
+function openShareModal(){
+  const a = state.data;
+  const publicUrl = a.share?.publicUrl || location.href;
+  const title = `${a.name} · ${a.club}`;
   const links = buildShareLinks(publicUrl, title);
+
   const htmlLinks = links.map(x => `
     <a class="shareLink" href="${escapeAttr(x.href)}" target="_blank" rel="noopener noreferrer">
       <div>
@@ -254,10 +235,11 @@ function openShareModal() {
       <h3>Copy link</h3>
       <p>Share this card with family & sponsors in seconds.</p>
       <div class="modalActions">
-        <button class="btn btn--primary" type="button" data-action="copyshare">Copy Link</button>
-        <button class="btn btn--ghost" type="button" data-action="donate">Open Support</button>
+        <button class="btn btn--primary" type="button" id="copyShareLinkBtn">Copy Link</button>
+        <button class="btn btn--ghost" type="button" id="openDonateBtn">Open Support</button>
       </div>
     </div>
+
     <div class="modalSection">
       <h3>Social & Messaging</h3>
       <div class="shareGrid">${htmlLinks}</div>
@@ -266,26 +248,12 @@ function openShareModal() {
       </p>
     </div>
   `);
+
+  $("#copyShareLinkBtn").onclick = () => copyToClipboard(publicUrl);
+  $("#openDonateBtn").onclick = () => safeOpen(a.fundraising?.ctaUrl);
 }
 
-function openSponsorModal() {
-  openModal("Become a Sponsor", `
-    <div class="modalSection">
-      <h3>Why sponsor?</h3>
-      <p>Sponsorship helps families cover the season—travel, coaching, meet fees—and it puts your business in front of a community that loves to support local.</p>
-    </div>
-    <div class="modalSection">
-      <h3>Fast option</h3>
-      <p>Tap “Share” and send this card to 3 potential sponsors. It’s the simplest way to fund the season.</p>
-      <div class="modalActions">
-        <button class="btn btn--primary" type="button" data-action="openshare">Open Share Options</button>
-        <button class="btn btn--ghost" type="button" data-action="copylink">Copy Link</button>
-      </div>
-    </div>
-  `);
-}
-
-function openBuiltModal() {
+function openBuiltModal(){
   openModal("Built to be shared", `
     <div class="brandMark" aria-label="Senxia">
       <div class="brandMark__halo"></div>
@@ -301,17 +269,26 @@ function openBuiltModal() {
     </div>
 
     <div class="modalSection">
+      <h3>Sponsors get clarity</h3>
+      <p>Businesses see the story, the goal, and the impact — with sponsor logos, links, and quick share buttons that drive action.</p>
+    </div>
+
+    <div class="modalSection">
       <h3>Launch your custom card</h3>
       <p>“Showcase the Journey” custom cards starting at <strong>$199.99</strong>. Premium design, easy sharing, sponsor-ready.</p>
       <div class="modalActions">
-        <button class="btn btn--primary" type="button" data-action="showcase">Showcase the Journey</button>
-        <button class="btn btn--ghost" type="button" data-action="openshare">Share This Card</button>
+        <button class="btn btn--primary" type="button" id="showcaseBtn">Showcase the Journey</button>
+        <button class="btn btn--ghost" type="button" id="shareFromBuiltBtn">Share This Card</button>
       </div>
     </div>
   `);
+
+  $("#showcaseBtn").onclick = () => safeOpen("https://example.com/showcase");
+  $("#shareFromBuiltBtn").onclick = () => openShareModal();
 }
 
-function openImageModal(item, index, total) {
+/* ---------- Image Modal ---------- */
+function openImageModal(item, index, total){
   openModal(`Photo ${index}/${total}`, `
     <div class="modalSection">
       <h3>${escapeHTML(item.title || "Photo")}</h3>
@@ -323,35 +300,35 @@ function openImageModal(item, index, total) {
   `);
 }
 
-/* ---------- Tilt ---------- */
-function attachBrandMarkTilt() {
+/* ---------- SENXIA Tilt ---------- */
+function attachBrandMarkTilt(){
   const card = document.querySelector(".brandMark__card");
-  if (!card) return;
-  if (card.dataset.tiltBound === "1") return;
+  if(!card) return;
+  if(card.dataset.tiltBound === "1") return;
   card.dataset.tiltBound = "1";
 
   const strength = 9;
-  card.addEventListener("mousemove", (e) => {
+  const onMove = (e) => {
     const r = card.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
     const rx = (py - 0.5) * -strength;
     const ry = (px - 0.5) * strength;
     card.style.transform = `translateY(-2px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-  }, { passive: true });
+  };
+  const onLeave = () => { card.style.transform = ""; };
 
-  card.addEventListener("mouseleave", () => {
-    card.style.transform = "";
-  }, { passive: true });
+  card.addEventListener("mousemove", onMove, { passive:true });
+  card.addEventListener("mouseleave", onLeave, { passive:true });
 }
 
 /* ---------- FX Background ---------- */
-function startFX() {
+function startFX(){
   const c = $("#fx");
-  if (!c) return;
+  if(!c) return;
   const ctx = c.getContext("2d", { alpha: true });
 
-  let w = 0, h = 0, dpr = 1;
+  let w=0,h=0, dpr=1;
   const particles = [];
   const N = 70;
 
@@ -361,49 +338,41 @@ function startFX() {
     h = c.clientHeight = window.innerHeight;
     c.width = Math.floor(w * dpr);
     c.height = Math.floor(h * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   };
-
-  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("resize", resize, { passive:true });
   resize();
 
-  const rand = (a, b) => a + Math.random() * (b - a);
+  const rand = (a,b) => a + Math.random()*(b-a);
 
-  for (let i = 0; i < N; i++) {
-    particles.push({
-      x: rand(0, w),
-      y: rand(0, h),
-      r: rand(0.7, 2.1),
-      vx: rand(-0.18, 0.18),
-      vy: rand(-0.10, 0.22),
-      a: rand(0.08, 0.22)
-    });
+  for(let i=0;i<N;i++){
+    particles.push({ x: rand(0,w), y: rand(0,h), r: rand(0.7, 2.1), vx: rand(-0.18, 0.18), vy: rand(-0.10, 0.22), a: rand(0.08, 0.22) });
   }
 
-  function frame() {
-    ctx.clearRect(0, 0, w, h);
-    for (const p of particles) {
+  function frame(){
+    ctx.clearRect(0,0,w,h);
+
+    for(const p of particles){
       p.x += p.vx; p.y += p.vy;
-      if (p.x < -20) p.x = w + 20;
-      if (p.x > w + 20) p.x = -20;
-      if (p.y < -20) p.y = h + 20;
-      if (p.y > h + 20) p.y = -20;
+      if(p.x < -20) p.x = w + 20;
+      if(p.x > w + 20) p.x = -20;
+      if(p.y < -20) p.y = h + 20;
+      if(p.y > h + 20) p.y = -20;
 
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
       ctx.fillStyle = `rgba(180, 220, 255, ${p.a})`;
       ctx.fill();
     }
+
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }
 
-/* ---------- Render UI ---------- */
-function render() {
-  const a = state.athlete;
-  if (!a) return;
-
+/* ---------- Render ---------- */
+function render(){
+  const a = state.data;
   document.title = `${a.name} · ${a.club}`;
 
   $("#athleteName").textContent = a.name;
@@ -415,8 +384,9 @@ function render() {
   img.src = a.photo || "";
   img.alt = `${a.name} photo`;
 
-  const f = a.fundraising || { raised: 0, goal: 1, currency: "USD", title: "" };
-  $("#fundTitle").textContent = f.title || "Support the season.";
+  // Fund
+  const f = a.fundraising;
+  $("#fundTitle").textContent = f.title;
   $("#fundNumbers").textContent = `${money(f.raised, f.currency)} / ${money(f.goal, f.currency)}`;
 
   const pct = clamp01(f.goal ? (f.raised / f.goal) : 0);
@@ -427,7 +397,7 @@ function render() {
   // Chips
   const chips = $("#shareChips");
   chips.innerHTML = "";
-  ["💬 Text", "💚 WhatsApp", "📘 Facebook", "✉️ Email", "📸 Instagram", "𝕏 X"].forEach(t => {
+  ["💬 Text","💚 WhatsApp","📘 Facebook","✉️ Email","📸 Instagram","𝕏 X"].forEach(t=>{
     const s = document.createElement("span");
     s.className = "chip";
     s.textContent = t;
@@ -443,6 +413,7 @@ function render() {
     link.href = sp.url || "#";
     link.target = "_blank";
     link.rel = "noopener noreferrer";
+
     link.innerHTML = `
       <div class="sponsor__logo">
         ${sp.image ? `<img src="${escapeAttr(sp.image)}" alt="${escapeAttr(sp.name || "Sponsor")}" loading="lazy" decoding="async" />` : ""}
@@ -528,76 +499,34 @@ function render() {
         <span>${escapeHTML(it.tag || "Moment")}</span>
       </div>
     `;
-    card.addEventListener("click", () => openImageModal(it, idx + 1, g.length));
+    card.addEventListener("click", () => openImageModal(it, idx+1, g.length));
     gallery.appendChild(card);
   });
+
+  // Buttons
+  $("#donateBtn").onclick = () => safeOpen(f.ctaUrl);
+  $("#supportBtn").onclick = () => safeOpen(f.ctaUrl);
+
+  // Bind modal openers
+  $("#bioBtn").onclick = () => openBioModal();
+  $("#bioBtnPhoto").onclick = () => openBioModal();
+  $("#becomeSponsorBtn").onclick = () => openSponsorModal();
+  $("#shareBtn").onclick = () => openShareModal();
+  $("#openShareModalBtn").onclick = () => openShareModal();
+  $("#builtBtn").onclick = () => openBuiltModal();
+
+  $("#copyLinkBtn").onclick = () => copyToClipboard(a.share?.publicUrl || location.href);
 
   bindSpotlights();
   requestAnimationFrame(() => document.body.classList.add("isLoaded"));
 }
 
-/* ---------- Event Delegation: Modals always open ---------- */
-function bindGlobalClicks() {
-  document.addEventListener("click", (e) => {
-    const t = e.target;
-
-    // Close modal
-    if (t?.id === "modalClose" || t?.id === "modalBackdrop") {
-      closeModal();
-      return;
-    }
-
-    // Main buttons (by id)
-    const id = t?.closest?.("button")?.id || t?.id;
-
-    if (id === "bioBtn" || id === "bioBtnPhoto") return openBioModal();
-    if (id === "shareBtn" || id === "openShareModalBtn") return openShareModal();
-    if (id === "becomeSponsorBtn") return openSponsorModal();
-    if (id === "builtBtn") return openBuiltModal();
-    if (id === "copyLinkBtn") return copyToClipboard(state.athlete?.share?.publicUrl || location.href);
-    if (id === "donateBtn" || id === "supportBtn") return safeOpen(state.athlete?.fundraising?.ctaUrl);
-
-    // Modal action buttons (data-action)
-    const actionBtn = t?.closest?.("[data-action]");
-    if (!actionBtn) return;
-
-    const action = actionBtn.getAttribute("data-action");
-    const url = state.athlete?.share?.publicUrl || location.href;
-
-    if (action === "copylink" || action === "copyshare") return copyToClipboard(url);
-    if (action === "openshare") return openShareModal();
-    if (action === "donate") return safeOpen(state.athlete?.fundraising?.ctaUrl);
-    if (action === "showcase") return safeOpen("https://example.com/showcase");
-  }, { passive: true });
-}
-
 /* ---------- Boot ---------- */
-(async function init() {
+(async function init(){
   setVH();
-  window.addEventListener("resize", setVH, { passive: true });
+  window.addEventListener("resize", setVH, { passive:true });
 
-  ensureModalHost();
-  bindGlobalClicks();
   startFX();
-
-  try {
-    state.athlete = await loadAthlete();
-    render();
-  } catch (err) {
-    state.dataError = err;
-    console.error(err);
-
-    // STILL allow modals; show a helpful error modal once
-    openModal("Data loading error", `
-      <div class="modalSection">
-        <h3>athlete.json didn’t load</h3>
-        <p>This is why your modals looked “dead” before (no handlers were being bound in render). This build fixes that.</p>
-        <p style="margin-top:10px;opacity:.85"><strong>Error:</strong> ${escapeHTML(err.message)}</p>
-        <p style="margin-top:10px;opacity:.85">
-          If you opened this page with <strong>file://</strong>, the browser blocks fetch() for JSON.
-          Use GitHub Pages or run a local server (VS Code “Live Server”).
-        </p>
-      </div>
-    `);
-  }
+  state.data = await loadData();
+  render();
 })();
