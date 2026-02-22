@@ -1,328 +1,153 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0b0610" />
+  <meta name="theme-color" content="#070A12" />
+  <title>Digital Athlete Card</title>
 
-  <!-- ✅ IMPORTANT: Social preview scrapers often DO NOT run JS
-       These default tags will be updated in-browser by app.js, but MUST exist here. -->
-  <title>Digital Athlete Card | Youth Sports Fundraising</title>
-  <meta name="description" content="Support a youth athlete. View meet scores, performance charts, season highlights, and sponsor their journey." />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://digitalathletecards.github.io/gymnastics/" />
-
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Digital Athlete Card" />
-  <meta property="og:title" content="Support a Gymnast's Season Journey ✨" />
-  <meta property="og:description" content="View scores, season highlights, and sponsor this athlete's season." />
-  <meta property="og:url" content="https://digitalathletecards.github.io/gymnastics/" />
-  <meta property="og:image" content="https://digitalathletecards.github.io/gymnastics/images/senxia.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Support a Gymnast's Season ✨" />
-  <meta name="twitter:description" content="Tap to view scores, meet history, and sponsor this athlete's season." />
-  <meta name="twitter:image" content="https://digitalathletecards.github.io/gymnastics/images/senxia.png" />
-
-  <!-- JSON-LD (filled by JS too, but placeholder helps) -->
-  <script id="jsonLd" type="application/ld+json">{}</script>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-
-  <link rel="stylesheet" href="style/main.css" />
+  <link rel="stylesheet" href="main.css" />
 </head>
 
 <body>
-  <!-- Ambient FX -->
-  <div class="float-deco" id="floatDeco" aria-hidden="true"></div>
-  <canvas id="fx-canvas" aria-hidden="true"></canvas>
-  <div class="grain" aria-hidden="true"></div>
+  <!-- Ambient background layers -->
+  <div class="bg">
+    <div class="bg__grid"></div>
+    <div class="bg__glow bg__glow--a"></div>
+    <div class="bg__glow bg__glow--b"></div>
+    <canvas id="fx" aria-hidden="true"></canvas>
+  </div>
 
-  <main class="shell">
-
-    <!-- Top Bar -->
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-dot" aria-hidden="true"></div>
-        <div class="brand-text">
-          <div class="brand-title">✨ Digital Athlete Card</div>
-          <div class="brand-sub">Fundraising · Sponsors · Journey</div>
-        </div>
+  <header class="topbar">
+    <div class="topbar__left">
+      <div class="pill pill--spark">
+        ✨ <span id="cardType">Digital Athlete Card</span>
       </div>
+      <div class="crumbs" id="crumbs">Fundraising · Sponsors · Journey</div>
+    </div>
 
-      <div class="topbar-actions">
-        <button class="chip" id="btnCopyLink" type="button" title="Copy share link">
-          <span class="chip-icon" aria-hidden="true">↗</span>
-          <span>Copy Link</span>
-        </button>
-        <button class="chip" id="btnNativeShare" type="button" title="Share">
-          <span class="chip-icon" aria-hidden="true">📤</span>
-          <span>Share</span>
-        </button>
-        <button class="chip ghost" id="btnOpenSponsors" type="button" title="View sponsors">
-          <span class="chip-icon" aria-hidden="true">💎</span>
-          <span>Sponsors</span>
-        </button>
-      </div>
-    </header>
-
-    <!-- Hero -->
-    <section class="hero">
-
-      <button class="nameHero" id="openBioModal" type="button" aria-haspopup="dialog" aria-controls="bioModal">
-        <span class="nameGlow" aria-hidden="true"></span>
-        <span class="orbit" aria-hidden="true"></span>
-
-        <span class="levelBadge" id="levelBadge" aria-label="Level">🏅 Bronze</span>
-
-        <span class="nameLine" id="athleteFirstName">Layla</span>
-        <span class="nameLine last" id="athleteLastName">Neitenbach</span>
-
-        <span class="nameMeta">
-          <span class="badge" id="athleteTeam">KP Gymnastics</span>
-          <span class="badge soft" id="athleteDiscipline">Gymnastics</span>
-          <span class="tapHint">Tap to view bio</span>
-        </span>
+    <div class="topbar__right">
+      <button class="btn btn--ghost" id="copyLinkBtn" type="button" title="Copy Link">
+        ↗ Copy Link
       </button>
+      <button class="btn btn--primary" id="shareBtn" type="button">
+        📤 Share
+      </button>
+    </div>
+  </header>
 
-      <div class="heroRight">
-        <div class="goalCard" id="goalCard">
-          <div class="goalTop">
-            <div>
-              <div class="goalTitle">🎀 Season Fundraising</div>
-              <div class="goalSub" id="goalSubtitle">Help cover travel, coaching, meet fees.</div>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero__left">
+        <div class="athlete">
+          <div class="athlete__photo">
+            <img id="athletePhoto" alt="Athlete photo" loading="lazy" decoding="async" />
+          </div>
+
+          <div class="athlete__meta">
+            <div class="badgeRow">
+              <span class="badge" id="tierBadge">🏅 Bronze</span>
+              <span class="badge badge--soft" id="clubBadge">KP Gymnastics</span>
+              <span class="badge badge--soft" id="sportBadge">Gymnastics</span>
             </div>
-            <div class="goalPill" id="goalPill">$0 / $0</div>
+
+            <h1 class="athlete__name" id="athleteName">Athlete Name</h1>
+            <div class="athlete__sub" id="athleteSub">Tap to view bio</div>
+
+            <div class="ctaRow">
+              <button class="btn btn--soft" id="bioBtn" type="button">View Bio</button>
+              <button class="btn btn--glow" id="supportBtn" type="button">💕 Support this athlete</button>
+            </div>
           </div>
-
-          <div class="progress" aria-label="Fundraising progress">
-            <div class="progressBar" id="progressBar"></div>
-            <div class="progressGlow" aria-hidden="true"></div>
-          </div>
-
-          <div class="milestoneTrack" aria-hidden="true">
-            <span class="milestoneMark" style="left:25%"><span>25%</span></span>
-            <span class="milestoneMark" style="left:50%"><span>50%</span></span>
-            <span class="milestoneMark" style="left:75%"><span>75%</span></span>
-            <span class="milestoneMark" style="left:100%"><span>🏆</span></span>
-          </div>
-
-          <div class="goalBottom">
-            <button class="cta" id="ctaDonate" type="button">
-              <span class="ctaText">💕 Support this athlete</span>
-              <span class="ctaArrow" aria-hidden="true">→</span>
-            </button>
-            <button class="cta secondary" id="ctaShare" type="button">
-              <span class="ctaText">Share with sponsors</span>
-              <span class="ctaArrow" aria-hidden="true">↗</span>
-            </button>
-          </div>
-
-          <button class="shareProgressBtn" id="btnShareProgress" type="button">
-            <span id="shareProgressText">Share progress 📊</span>
-          </button>
-
-          <div class="suggestRow" id="suggestRow" aria-label="Suggested amounts"></div>
         </div>
 
-        <div class="microNote" id="microNote">
-          <span class="dotLive" aria-hidden="true"></span>
-          <span id="microNoteText">Live updates: scores · meets · sponsors</span>
+        <div class="fund card">
+          <div class="fund__head">
+            <div>
+              <div class="kicker">🎀 Season Fundraising</div>
+              <div class="title" id="fundTitle">Help cover travel, coaching, meet fees.</div>
+            </div>
+            <div class="fund__numbers" id="fundNumbers">$650 / $2,000</div>
+          </div>
+
+          <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="meter__bar" id="meterBar"></div>
+            <div class="meter__spark" aria-hidden="true"></div>
+          </div>
+
+          <div class="fund__foot">
+            <div class="note" id="fundNote">Layla is 33% to the season goal! Help finish strong 💕</div>
+            <button class="btn btn--primary" id="donateBtn" type="button">Support / Donate</button>
+          </div>
         </div>
 
-        <div class="quickShareRow">
-          <div class="quickShareLabel">Share via</div>
-          <div class="quickShareBtns">
-            <a class="qsBtn" id="qsSms" href="#" title="Text Message">💬 Text</a>
-            <a class="qsBtn" id="qsWhatsapp" href="#" title="WhatsApp" target="_blank" rel="noopener">💚 WhatsApp</a>
-            <a class="qsBtn" id="qsFacebook" href="#" title="Facebook" target="_blank" rel="noopener">📘 Facebook</a>
-            <a class="qsBtn" id="qsEmail" href="#" title="Email">✉️ Email</a>
+        <div class="share card">
+          <div class="share__head">
+            <div class="kicker">Share via</div>
+            <div class="share__chips" id="shareChips"></div>
+          </div>
+          <div class="share__foot">
+            <div class="note">The easiest way to raise funds is sharing the card with 3 sponsors today.</div>
+            <button class="btn btn--ghost" id="openShareModalBtn" type="button">Open Share Options</button>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- Cards + Events -->
-    <section class="stage">
-      <div class="cardsWrap">
-        <div class="cardsHeader">
-          <div class="cardsTitle">🌸 Showcasing the journey</div>
-          <div class="cardsSub">Auto-rotates · tap to enlarge ✨</div>
-        </div>
+      <aside class="hero__right">
+        <div class="card sponsors">
+          <div class="sponsors__head">
+            <div class="titleRow">
+              <div class="title">💎 Sponsors</div>
+              <div class="pill">Tap to visit</div>
+            </div>
+            <div class="sub" id="sponsorSub">Thank you for helping build the journey.</div>
+          </div>
 
-        <div class="cardsFan" id="cardsFan" aria-label="Athlete photo cards"></div>
+          <div class="sponsorGrid" id="sponsorGrid"></div>
 
-        <div class="cardsHint">
-          <span class="kbd">Drag</span><span class="sep">·</span>
-          <span class="kbd">Tap</span><span class="sep">·</span>
-          <span class="kbd">Share</span>
-        </div>
-      </div>
-
-      <aside class="eventsWrap" aria-label="Event scores">
-        <div class="eventsTitle">🏆 Events</div>
-        <div class="eventsSub">Tap an event for chart + meet history</div>
-
-        <div class="eventGrid" id="eventGrid"></div>
-
-        <div class="sponsorRail">
-          <div class="sponsorTitle">These local businesses power this season 💎</div>
-          <div class="sponsorStrip" id="sponsorStrip"></div>
-          <div class="sponsorFoot">
-            Tap a logo to visit · Want to sponsor?
-            <button class="inlineLink" id="btnBecomeSponsor">Learn more →</button>
+          <div class="sponsors__cta">
+            <button class="btn btn--soft" id="becomeSponsorBtn" type="button">Become a Sponsor</button>
           </div>
         </div>
 
-        <div class="spotlight" id="spotlight" aria-label="Sponsor spotlight"></div>
+        <div class="card journey">
+          <div class="titleRow">
+            <div class="title">⭐ Journey</div>
+            <div class="pill pill--spark">Live updates</div>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
       </aside>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
-      <div class="footerLeft">
-        <div class="footTitle" id="footerTitle">Built to be shared. ✨</div>
-        <div class="footSub">A digital fundraising tool athletes are proud to show off.</div>
-      </div>
-      <div class="footerRight">
-        <button class="chip" id="btnOpenAbout" type="button">About</button>
-        <button class="chip ghost" id="btnReduceMotion" type="button" title="Toggle reduced motion">Reduce Motion</button>
+      <div class="footer__banner">
+        <span class="footer__spark">✨</span>
+        <span class="footer__text">Built to be shared</span>
+        <button class="btn btn--ghost btn--tiny" id="builtBtn" type="button">Open</button>
       </div>
     </footer>
   </main>
 
-  <!-- Mobile Sticky Action Bar -->
-  <nav class="stickyBar" id="stickyBar" aria-label="Quick actions">
-    <button class="sbBtn primary" id="sbDonate">💕 Support</button>
-    <button class="sbBtn" id="sbShare">📤 Share</button>
-    <button class="sbBtn" id="sbSponsors">💎 Sponsors</button>
-  </nav>
+  <!-- MODAL HOST -->
+  <div class="modalHost" id="modalHost" aria-hidden="true">
+    <div class="modalHost__backdrop" id="modalBackdrop"></div>
 
-  <!-- BIO MODAL -->
-  <div class="modalOverlay" id="bioModal" role="dialog" aria-modal="true" aria-labelledby="bioTitle" aria-hidden="true">
-    <div class="modalCard">
-      <button class="modalClose" type="button" data-close="bioModal" aria-label="Close bio">✕</button>
-      <div class="modalHead">
-        <div class="modalKicker">Athlete Bio</div>
-        <h2 class="modalTitle" id="bioTitle"></h2>
-        <div class="modalBadges" id="bioBadges"></div>
-      </div>
-      <div class="modalBody">
-        <div class="bioGrid">
-          <div class="bioLeft">
-            <div class="bioPhoto" id="bioPhoto" aria-hidden="true"></div>
-            <div class="bioQuick" id="bioQuick"></div>
-          </div>
-          <div class="bioRight">
-            <div class="bioStory" id="bioStory"></div>
-            <div class="bioLinks" id="bioLinks"></div>
-          </div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__chrome">
+        <div class="modal__top">
+          <div class="modal__title" id="modalTitle">Modal</div>
+          <button class="iconBtn" id="modalClose" type="button" aria-label="Close">✕</button>
         </div>
+        <div class="modal__body" id="modalBody"></div>
       </div>
     </div>
   </div>
 
-  <!-- PHOTO MODAL -->
-  <div class="modalOverlay" id="photoModal" role="dialog" aria-modal="true" aria-labelledby="photoTitle" aria-hidden="true">
-    <div class="modalCard wide">
-      <button class="modalClose" type="button" data-close="photoModal" aria-label="Close photo">✕</button>
-      <div class="modalHead">
-        <div class="modalKicker">Journey Moment</div>
-        <h2 class="modalTitle" id="photoTitle">Photo</h2>
-      </div>
-      <div class="modalBody">
-        <div class="photoLightbox">
-          <img id="photoFull" alt="Athlete photo" />
-          <div class="photoCaption" id="photoCaption"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EVENT MODAL -->
-  <div class="modalOverlay" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="eventTitle" aria-hidden="true">
-    <div class="modalCard wide">
-      <button class="modalClose" type="button" data-close="eventModal" aria-label="Close event">✕</button>
-      <div class="modalHead">
-        <div class="modalKicker">Event Performance</div>
-        <h2 class="modalTitle" id="eventTitle">Event</h2>
-        <div class="modalMeta">
-          <span class="metaPill">Avg: <strong id="eventAvg">0.00</strong></span>
-          <span class="metaPill soft">Last: <strong id="eventLast">0.00</strong></span>
-          <span class="metaPill soft">Best: <strong id="eventBest">0.00</strong></span>
-        </div>
-      </div>
-      <div class="modalBody">
-        <div class="eventLayout">
-          <div class="chartBox">
-            <canvas id="eventScoreChart" aria-label="Event score chart"></canvas>
-          </div>
-          <div class="meetList" id="meetList"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SPONSORS MODAL -->
-  <div class="modalOverlay" id="sponsorsModal" role="dialog" aria-modal="true" aria-labelledby="sponsorsTitle" aria-hidden="true">
-    <div class="modalCard">
-      <button class="modalClose" type="button" data-close="sponsorsModal" aria-label="Close sponsors">✕</button>
-      <div class="modalHead">
-        <div class="modalKicker">Sponsors</div>
-        <h2 class="modalTitle" id="sponsorsTitle">💎 Advertisers & Supporters</h2>
-        <div class="modalMeta"><span class="metaPill soft">Tap a sponsor to visit their link</span></div>
-      </div>
-      <div class="modalBody">
-        <div class="sponsorGrid" id="sponsorGrid"></div>
-        <div class="sponsorCtaBox" id="sponsorCtaBox"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ABOUT MODAL -->
-  <div class="modalOverlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" aria-hidden="true">
-    <div class="modalCard">
-      <button class="modalClose" type="button" data-close="aboutModal" aria-label="Close about">✕</button>
-      <div class="modalHead">
-        <div class="modalKicker">What is this?</div>
-        <h2 class="modalTitle" id="aboutTitle">A shareable athlete fundraising page ✨</h2>
-      </div>
-      <div class="modalBody">
-        <div class="aboutCopy" id="aboutCopy">
-          <p>This page is designed to be shared with sponsors, friends, and family — showcasing an athlete’s journey and making it easy to support the season.</p>
-          <ul>
-            <li>🌸 Tap the athlete name for the full bio</li>
-            <li>🏆 Tap events for charts and meet history</li>
-            <li>💎 Tap sponsor logos to visit their site</li>
-            <li>📤 Share buttons are one-tap friendly</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Milestone Overlay -->
-  <div id="milestoneOverlay" class="milestoneOverlay" style="display:none" aria-hidden="true">
-    <div id="milestoneBadge" class="milestoneBadge">
-      <div class="milestoneEmoji" id="milestoneEmoji">🎉</div>
-      <div class="milestoneMsg" id="milestoneMsg">Milestone reached!</div>
-      <div class="milestoneSub" id="milestoneSub">Thank you for the support!</div>
-    </div>
-  </div>
-
-  <script src="scripts/app.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
