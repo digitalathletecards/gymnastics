@@ -5,22 +5,10 @@
   --muted:rgba(255,255,255,.68);
   --muted2:rgba(255,255,255,.52);
 
-  --card:rgba(14,18,34,.72);
-  --card2:rgba(11,14,26,.58);
-
-  --stroke:rgba(255,255,255,.14);
-  --stroke2:rgba(255,255,255,.10);
-
-  --hot1:#ff4fd8;
-  --hot2:#ff7bd5;
-  --hot3:#b55cff;
-
   --shadow: 0 22px 80px rgba(0,0,0,.55);
   --shadow2: 0 10px 34px rgba(0,0,0,.45);
 
   --r:22px;
-  --r2:16px;
-
   --ease: cubic-bezier(.2,.8,.2,1);
 }
 
@@ -162,12 +150,8 @@ body{
   background: linear-gradient(180deg, rgba(255,79,216,.22), rgba(181,92,255,.14));
   box-shadow: 0 0 0 1px rgba(255,79,216,.14) inset;
 }
-.btn--ghost{
-  background: rgba(255,255,255,.03);
-}
-.btn--soft{
-  background: rgba(255,255,255,.05);
-}
+.btn--ghost{ background: rgba(255,255,255,.03); }
+.btn--soft{ background: rgba(255,255,255,.05); }
 .btn--glow{
   border-color: rgba(255,79,216,.42);
   background: linear-gradient(180deg, rgba(255,79,216,.24), rgba(255,123,213,.12));
@@ -386,7 +370,7 @@ body{
 .footer__text{ font-weight:900; }
 
 /* ---------------------------
-   Modal
+   Modal (GitHub Pages-safe)
 --------------------------- */
 .modalHost{
   position:fixed; inset:0;
@@ -396,7 +380,11 @@ body{
   padding: 18px;
   z-index: 50;
 }
+
+/* SAFETY: show modals using class OR aria-hidden */
+.modalHost.is-open{ display:flex; }
 .modalHost[aria-hidden="false"]{ display:flex; }
+
 .modalHost__backdrop{
   position:absolute; inset:0;
   background: rgba(0,0,0,.55);
@@ -451,16 +439,10 @@ body.modalOpen{ overflow:hidden; }
   overflow:auto;
 }
 
-/* Collapsed modal state (your request: collapsible modals) */
-.modal--collapsed{
-  max-height: 70px;
-}
-.modal--collapsed .modal__body{
-  display:none;
-}
-.modal--collapsed .modal__top{
-  border-bottom: none;
-}
+/* Collapsed modal state */
+.modal--collapsed{ max-height: 70px; }
+.modal--collapsed .modal__body{ display:none; }
+.modal--collapsed .modal__top{ border-bottom: none; }
 
 /* Modal content blocks */
 .modalMedia{
