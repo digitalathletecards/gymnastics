@@ -1,4 +1,4 @@
-/* Ultra Premium Baseline + "Showcase the Journey" 3D Glass Balloons + Themed Modals */
+/* Ultra Premium Baseline + "Showcase the Journey" REALISTIC drifting glass balloons + Themed Modals */
 :root{
   --bg:#070A12;
   --ink:rgba(255,255,255,.92);
@@ -288,7 +288,7 @@ body{
 }
 @media (max-width: 980px){ .showcase__stage{ height: 430px; } }
 
-/* subtle premium “light rays” */
+/* subtle premium sweep */
 .showcase__stage::before{
   content:"";
   position:absolute; inset:-30%;
@@ -301,16 +301,26 @@ body{
   pointer-events:none;
 }
 @keyframes stageSweep{
-  0%{ transform: translateX(-10%) rotate(0deg); }
-  50%{ transform: translateX(10%) rotate(0deg); }
-  100%{ transform: translateX(-10%) rotate(0deg); }
+  0%{ transform: translateX(-10%) }
+  50%{ transform: translateX(10%) }
+  100%{ transform: translateX(-10%) }
 }
 
-/* Balloon button */
-.balloon{
+/* DRIFT WRAPPER (JS moves these around) */
+.balloonWrap{
   position:absolute;
-  width: min(200px, 46%);
-  aspect-ratio: 1/1.14;
+  left:0; top:0;
+  width: 100px;
+  height: 100px;
+  pointer-events:none; /* allow inner button to be click target only */
+  will-change: transform;
+}
+
+/* Balloon button: smaller + more realistic shape (not perfect circle) */
+.balloon{
+  pointer-events:auto;
+  position:absolute;
+  inset:0;
   border:0;
   padding:0;
   background: transparent;
@@ -318,95 +328,99 @@ body{
   transform-style: preserve-3d;
   -webkit-tap-highlight-color: transparent;
   user-select:none;
-  animation: floaty 6.1s var(--ease2) infinite;
-  filter: drop-shadow(0 18px 40px rgba(0,0,0,.44));
+
+  /* smaller footprint */
+  width: 140px;
+  height: 170px;
+
+  /* gentle bob + tiny rotation */
+  animation: balloonBob 4.8s var(--ease2) infinite;
+  filter: drop-shadow(0 18px 42px rgba(0,0,0,.44));
   will-change: transform;
 }
-.balloon:nth-child(2){ animation-duration: 6.6s; }
-.balloon:nth-child(3){ animation-duration: 5.4s; }
-.balloon:nth-child(4){ animation-duration: 7.0s; }
-.balloon:nth-child(5){ animation-duration: 6.0s; }
-
-@keyframes floaty{
-  0%   { transform: translate3d(var(--tx,0px), 0px, 0px) rotate(var(--rot, -2deg)); }
-  50%  { transform: translate3d(var(--tx,0px), -11px, 0px) rotate(calc(var(--rot, -2deg) * -1)); }
-  100% { transform: translate3d(var(--tx,0px), 0px, 0px) rotate(var(--rot, -2deg)); }
+@media (max-width: 980px){
+  .balloon{ width: 128px; height: 156px; }
 }
+@keyframes balloonBob{
+  0%   { transform: translateY(0px) rotate(-1.2deg); }
+  50%  { transform: translateY(-10px) rotate(1.2deg); }
+  100% { transform: translateY(0px) rotate(-1.2deg); }
+}
+.balloon:active{ transform: translateY(2px) scale(.985); }
 
-.balloon:active{ transform: translate3d(var(--tx,0px), 2px, 0px) scale(.985); }
-
-/* Each balloon defines its own accent colors */
+/* Balloon color themes */
 .balloon[data-c="pink"]  { --b1:#ff4fd8; --b2:#b55cff; --b3:#ff7bd5; }
 .balloon[data-c="aqua"]  { --b1:#2df7ff; --b2:#5b7cff; --b3:#7dfff0; }
 .balloon[data-c="gold"]  { --b1:#ffd56a; --b2:#ff6a9e; --b3:#fff0b3; }
 .balloon[data-c="violet"]{ --b1:#b55cff; --b2:#3df3ff; --b3:#ff4fd8; }
 .balloon[data-c="lime"]  { --b1:#a7ff4f; --b2:#2df7ff; --b3:#ffe06a; }
 
-/* Balloon body — ultra premium glass, colorized per balloon */
+/* Realistic balloon body:
+   - slight "tear-drop" balloon shape via asymmetric radii
+   - latex/glass highlights + specular streak
+*/
 .balloon__body{
-  position:absolute; inset: 0;
-  border-radius: 999px;
+  position:absolute; inset:0;
+  border-radius: 58% 58% 54% 54% / 60% 60% 46% 46%;
   background:
-    radial-gradient(140px 160px at 28% 18%, rgba(255,255,255,.40), rgba(255,255,255,.06) 40%, rgba(0,0,0,0) 72%),
-    radial-gradient(260px 220px at 70% 32%, color-mix(in oklab, var(--b1) 46%, transparent), rgba(0,0,0,0) 72%),
-    radial-gradient(260px 220px at 55% 78%, color-mix(in oklab, var(--b2) 34%, transparent), rgba(0,0,0,0) 70%),
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.18));
-  border: 1px solid color-mix(in oklab, var(--b1) 38%, rgba(255,255,255,.10));
+    /* specular streak */
+    linear-gradient(110deg, rgba(255,255,255,0) 35%, rgba(255,255,255,.18) 45%, rgba(255,255,255,0) 56%),
+    /* main tint */
+    radial-gradient(260px 240px at 55% 74%, color-mix(in oklab, var(--b2) 36%, transparent), transparent 72%),
+    radial-gradient(220px 220px at 65% 30%, color-mix(in oklab, var(--b1) 46%, transparent), transparent 72%),
+    /* latex depth */
+    radial-gradient(220px 190px at 45% 85%, rgba(0,0,0,.22), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.22));
+  border: 1px solid color-mix(in oklab, var(--b1) 40%, rgba(255,255,255,.10));
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.08),
-    inset 0 -18px 60px rgba(0,0,0,.24),
+    inset 0 -22px 64px rgba(0,0,0,.28),
     0 0 0 1px color-mix(in oklab, var(--b1) 18%, transparent);
   overflow:hidden;
-  backdrop-filter: blur(14px);
-  transition: transform .28s var(--ease2), filter .28s var(--ease2), box-shadow .28s var(--ease2);
+  backdrop-filter: blur(12px);
+  transition: filter .25s var(--ease2), transform .25s var(--ease2), box-shadow .25s var(--ease2);
 }
 
-/* metallic ring + prismatic edge */
+/* prismatic edge / glow */
 .balloon__body::before{
   content:"";
-  position:absolute; inset:-2px;
+  position:absolute; inset:-3px;
   border-radius: inherit;
   background:
-    conic-gradient(from 230deg,
+    conic-gradient(from 220deg,
       rgba(255,255,255,0) 0%,
-      color-mix(in oklab, var(--b1) 72%, transparent) 18%,
+      color-mix(in oklab, var(--b1) 70%, transparent) 18%,
       color-mix(in oklab, var(--b2) 62%, transparent) 42%,
-      color-mix(in oklab, var(--b3) 62%, transparent) 70%,
+      color-mix(in oklab, var(--b3) 60%, transparent) 70%,
       rgba(255,255,255,0) 100%);
-  opacity:.34;
-  filter: blur(11px);
+  opacity:.26;
+  filter: blur(12px);
   mix-blend-mode: screen;
   pointer-events:none;
 }
 
-/* micro sparkle sweep */
+/* small “shine blob” */
 .balloon__body::after{
   content:"";
-  position:absolute; inset:-35%;
-  background:
-    radial-gradient(9px 9px at 18% 22%, rgba(255,255,255,.58), transparent 60%),
-    radial-gradient(7px 7px at 52% 28%, rgba(255,255,255,.46), transparent 60%),
-    radial-gradient(6px 6px at 78% 58%, rgba(255,255,255,.44), transparent 60%),
-    linear-gradient(120deg, rgba(255,255,255,0) 35%, rgba(255,255,255,.12) 50%, rgba(255,255,255,0) 65%);
-  transform: translateX(-32%) rotate(10deg);
-  animation: sparkleSweep 3.1s var(--ease2) infinite;
-  opacity:.34;
+  position:absolute;
+  left: 16%;
+  top: 12%;
+  width: 42%;
+  height: 52%;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.38), rgba(255,255,255,.10) 40%, rgba(255,255,255,0) 70%);
+  transform: rotate(-14deg);
+  opacity:.75;
   pointer-events:none;
 }
-@keyframes sparkleSweep{
-  0%{ transform: translateX(-36%) rotate(10deg); }
-  50%{ transform: translateX(12%) rotate(10deg); }
-  100%{ transform: translateX(-36%) rotate(10deg); }
-}
 
-/* inner “depth” highlight */
 .balloon__depth{
-  position:absolute; inset: 12px;
-  border-radius: 999px;
+  position:absolute; inset: 10px 12px 18px;
+  border-radius: 58% 58% 54% 54% / 60% 60% 46% 46%;
   background:
-    radial-gradient(220px 160px at 40% 25%, rgba(255,255,255,.18), transparent 62%),
-    radial-gradient(240px 180px at 70% 75%, color-mix(in oklab, var(--b2) 14%, transparent), transparent 70%);
-  opacity:.65;
+    radial-gradient(240px 160px at 36% 25%, rgba(255,255,255,.16), transparent 62%),
+    radial-gradient(260px 210px at 70% 82%, color-mix(in oklab, var(--b2) 18%, transparent), transparent 70%);
+  opacity:.72;
   pointer-events:none;
   transform: translateZ(12px);
 }
@@ -417,7 +431,7 @@ body{
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   gap:8px;
-  padding: 16px 14px;
+  padding: 18px 14px 22px;
   text-align:center;
   z-index:2;
   transform: translateZ(18px);
@@ -426,46 +440,37 @@ body{
   font-size: 22px;
   filter: drop-shadow(0 12px 24px rgba(0,0,0,.50));
 }
-.balloon__label{
-  font-weight: 950;
-  letter-spacing: -.2px;
-  line-height:1.05;
-}
-.balloon__sub{
-  font-size: 12px;
-  font-weight: 800;
-  color: rgba(255,255,255,.72);
-}
+.balloon__label{ font-weight: 950; letter-spacing: -.2px; line-height:1.05; }
+.balloon__sub{ font-size: 12px; font-weight: 850; color: rgba(255,255,255,.72); }
 
-/* string */
+/* knot + string */
+.balloon__knot{
+  position:absolute; left:50%; bottom:-8px;
+  width: 18px; height: 14px;
+  transform: translateX(-50%) rotate(14deg);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,.22));
+  border:1px solid rgba(255,255,255,.10);
+  opacity:.92;
+}
 .balloon__string{
   position:absolute; left:50%; bottom:-88px;
-  width: 2px; height: 98px;
+  width: 2px; height: 96px;
   transform: translateX(-50%);
-  background: linear-gradient(180deg, rgba(255,255,255,.30), rgba(255,255,255,0));
+  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,0));
   opacity:.62;
-}
-.balloon__knot{
-  position:absolute; left:50%; bottom:-10px;
-  width: 16px; height: 14px;
-  transform: translateX(-50%) rotate(15deg);
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(0,0,0,.18));
-  border:1px solid rgba(255,255,255,.12);
-  opacity:.92;
 }
 
 /* Hover lift */
 .balloon:hover .balloon__body{
+  filter: brightness(1.06) saturate(1.12);
   transform: translateY(-2px) scale(1.01);
-  filter: brightness(1.06) saturate(1.10);
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.10),
-    inset 0 -18px 60px rgba(0,0,0,.22),
-    0 24px 70px rgba(0,0,0,.55),
+    inset 0 -22px 64px rgba(0,0,0,.26),
+    0 26px 70px rgba(0,0,0,.55),
     0 0 0 1px color-mix(in oklab, var(--b1) 22%, transparent);
 }
-
 .balloon:focus-visible{ outline:none; }
 .balloon:focus-visible .balloon__body{
   box-shadow:
@@ -549,7 +554,6 @@ body.modalOpen{ overflow:hidden; }
   pointer-events:none;
   mix-blend-mode: screen;
 }
-
 @keyframes modalIn{ to { transform: translateY(0) scale(1); } }
 
 .modal__chrome{ display:flex; flex-direction:column; max-height:inherit; }
@@ -648,7 +652,6 @@ details[open] .acc__chev{ transform: rotate(180deg); }
 .noteTitle{ color: var(--ink); font-weight: 950; margin-bottom:6px; }
 .noteText{ color: var(--muted); font-weight: 650; line-height: 1.35; }
 
-/* Generic list styling for modal data */
 .mList{ display:flex; flex-direction:column; gap:10px; }
 .mItem{
   border-radius: 18px;
