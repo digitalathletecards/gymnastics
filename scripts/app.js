@@ -1,7 +1,6 @@
-/* Digital Athlete Card — Realistic drifting balloons inside Showcase panel
-   - Balloons are smaller + more realistic (CSS)
-   - Balloons drift slowly within the Showcase stage (JS)
-   - Each balloon opens themed modal matching its color
+/* Digital Athlete Card — Candy Crush style premium drifting pieces in Showcase stage
+   - Candy pieces (gem/jelly/wrapped/donut/pill) drift slowly inside stage
+   - Each candy opens themed modal matching its color
    - Collapsible modals + gallery video remain supported
 */
 
@@ -41,7 +40,6 @@ const els = {
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  // Support both IDs (older HTML compatibility)
   showcaseStage: $("#showcaseStage") || $("#bouquetStage"),
 
   builtBtn: $("#builtBtn"),
@@ -229,12 +227,11 @@ function renderAll() {
   if (els.gallerySub) els.gallerySub.textContent = G.subtitle || "Highlights from training + meets.";
   buildGallery(G.items || []);
 
-  // Realistic drifting balloons
-  buildShowcaseDrift();
+  buildCandyShowcase();
 }
 
 /* ---------------------------
-   Gallery (includes silent looping video)
+   Gallery (silent looping video)
 --------------------------- */
 function buildVideoSourcesHtml() {
   const candidates = [
@@ -326,71 +323,72 @@ function openVideoModal() {
 }
 
 /* ---------------------------
-   SHOWCASE: realistic balloons drifting inside stage
+   Candy Showcase Drift
 --------------------------- */
 let driftRAF = null;
 
-function buildShowcaseDrift() {
+function buildCandyShowcase() {
   const stage = els.showcaseStage;
   if (!stage) return;
 
   stage.innerHTML = "";
 
-  const balloons = [
-    { theme: "gold",   emoji: "💎", label: "Sponsors",       sub: "Tap to view",   onClick: openSponsorsModal },
-    { theme: "aqua",   emoji: "⚡", label: "Season Snapshot", sub: "Quick stats",   onClick: openSnapshotModal },
-    { theme: "pink",   emoji: "⭐", label: "Journey",         sub: "Updates",       onClick: openJourneyModal },
-    { theme: "violet", emoji: "📅", label: "Upcoming",       sub: "Next events",   onClick: openUpcomingModal },
-    { theme: "lime",   emoji: "🏆", label: "Achievements",   sub: "This season",   onClick: openAchievementsModal },
+  const candies = [
+    { theme: "gold",   kind: "wrap",  emoji: "💎", label: "Sponsors",       sub: "Tap to view",   onClick: openSponsorsModal },
+    { theme: "aqua",   kind: "gem",   emoji: "⚡", label: "Season Snapshot", sub: "Quick stats",   onClick: openSnapshotModal },
+    { theme: "pink",   kind: "jelly", emoji: "⭐", label: "Journey",         sub: "Updates",       onClick: openJourneyModal },
+    { theme: "violet", kind: "donut", emoji: "📅", label: "Upcoming",       sub: "Next events",   onClick: openUpcomingModal },
+    { theme: "lime",   kind: "pill",  emoji: "🏆", label: "Achievements",   sub: "This season",   onClick: openAchievementsModal },
   ];
 
-  // Create drifting wrappers
-  const wraps = balloons.map((b, i) => {
+  const wraps = candies.map((c, i) => {
     const wrap = document.createElement("div");
-    wrap.className = "balloonWrap";
+    wrap.className = "candyWrap";
 
-    // inner balloon button
     const btn = document.createElement("button");
-    btn.className = "balloon";
+    btn.className = "candy";
     btn.type = "button";
-    btn.setAttribute("data-c", b.theme);
-    btn.setAttribute("aria-label", b.label);
+    btn.setAttribute("data-c", c.theme);
+    btn.setAttribute("data-kind", c.kind);
+    btn.setAttribute("aria-label", c.label);
+
+    // donut gets a hole; wrap gets wrapper ends
+    const wrapEnds = c.kind === "wrap" ? `<span class="candy__wrapLeft"></span><span class="candy__wrapRight"></span>` : "";
+    const hole = c.kind === "donut" ? `<span class="candy__hole"></span>` : "";
 
     btn.innerHTML = `
-      <span class="balloon__body"></span>
-      <span class="balloon__depth"></span>
-      <span class="balloon__content">
-        <span class="balloon__emoji">${b.emoji}</span>
-        <span class="balloon__label">${escapeHtml(b.label)}</span>
-        <span class="balloon__sub">${escapeHtml(b.sub)}</span>
+      ${wrapEnds}
+      <span class="candy__shell"></span>
+      <span class="candy__jelly"></span>
+      ${hole}
+      <span class="candy__content">
+        <span class="candy__emoji">${c.emoji}</span>
+        <span class="candy__label">${escapeHtml(c.label)}</span>
+        <span class="candy__sub">${escapeHtml(c.sub)}</span>
       </span>
-      <span class="balloon__knot"></span>
-      <span class="balloon__string"></span>
     `;
 
-    btn.addEventListener("click", () => b.onClick(b.theme));
+    btn.addEventListener("click", () => c.onClick(c.theme));
     wrap.appendChild(btn);
     stage.appendChild(wrap);
 
-    // Drift state (very slow, premium)
-    const seed = 0.7 + (i * 0.15);
+    const seed = 0.9 + i * 0.22;
     wrap._state = {
-      x: 30 + i * 18,
-      y: 30 + i * 22,
-      vx: (Math.sin(seed * 3.1) * 0.10) + 0.08,
-      vy: (Math.cos(seed * 2.7) * 0.10) + 0.06,
+      x: 26 + (i * 26),
+      y: 26 + (i * 22),
+      vx: (Math.sin(seed * 3.0) * 0.095) + 0.075,
+      vy: (Math.cos(seed * 2.7) * 0.095) + 0.060,
       wob: seed * 1000,
     };
 
     return wrap;
   });
 
-  // Start/Restart drift loop safely
   if (driftRAF) cancelAnimationFrame(driftRAF);
-  startDrift(stage, wraps);
+  startCandyDrift(stage, wraps);
 }
 
-function startDrift(stage, wraps) {
+function startCandyDrift(stage, wraps) {
   let last = performance.now();
 
   const tick = (t) => {
@@ -398,7 +396,6 @@ function startDrift(stage, wraps) {
     last = t;
 
     const rect = stage.getBoundingClientRect();
-    // Safe fallback if stage isn't visible yet
     const W = Math.max(320, rect.width);
     const H = Math.max(320, rect.height);
 
@@ -406,29 +403,24 @@ function startDrift(stage, wraps) {
       const s = wrap._state;
       if (!s) return;
 
-      // balloon size (approx) — keep inside bounds
-      const bw = window.innerWidth < 980 ? 128 : 140;
-      const bh = window.innerWidth < 980 ? 156 : 170;
+      const size = window.innerWidth < 980 ? 112 : 126;
 
-      // micro “current” changes (ultra subtle)
       s.wob += dt;
-      const driftX = Math.sin((s.wob + idx * 400) / 2200) * 0.028;
-      const driftY = Math.cos((s.wob + idx * 500) / 2400) * 0.024;
+      const driftX = Math.sin((s.wob + idx * 440) / 2200) * 0.030;
+      const driftY = Math.cos((s.wob + idx * 520) / 2500) * 0.026;
 
       s.x += (s.vx + driftX) * dt;
       s.y += (s.vy + driftY) * dt;
 
-      // bounce edges softly
       const pad = 10;
-      const maxX = W - bw - pad;
-      const maxY = H - bh - pad;
+      const maxX = W - size - pad;
+      const maxY = H - size - pad;
 
-      if (s.x < pad) { s.x = pad; s.vx = Math.abs(s.vx) * 0.96; }
+      if (s.x < pad)  { s.x = pad;  s.vx = Math.abs(s.vx) * 0.96; }
       if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx) * 0.96; }
-      if (s.y < pad) { s.y = pad; s.vy = Math.abs(s.vy) * 0.96; }
+      if (s.y < pad)  { s.y = pad;  s.vy = Math.abs(s.vy) * 0.96; }
       if (s.y > maxY) { s.y = maxY; s.vy = -Math.abs(s.vy) * 0.96; }
 
-      // tiny variation so they don't sync
       s.vx *= 0.9996;
       s.vy *= 0.9996;
 
@@ -442,7 +434,7 @@ function startDrift(stage, wraps) {
 }
 
 /* ---------------------------
-   Balloon popups (theme passed in)
+   Candy Popups (theme passed in)
 --------------------------- */
 function openSponsorsModal(theme = "gold") {
   const sp = DATA.sponsors?.items || [];
