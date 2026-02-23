@@ -103,24 +103,24 @@
 
         </div>
 
-        <!-- RIGHT SIDE: BALLOON BOUQUET (replaces the stacked cards) -->
+        <!-- RIGHT SIDE: SHOWCASE THE JOURNEY (balloon bouquet) -->
         <aside class="hero__right">
-          <div class="bouquet fxCard" id="bouquet">
-            <div class="bouquet__head">
-              <div class="titleRow bouquet__titleRow">
-                <div class="title">🎈 Bouquet</div>
+          <div class="showcase fxCard" id="showcase">
+            <div class="showcase__head">
+              <div class="titleRow showcase__titleRow">
+                <div class="title">✨ Showcase the Journey</div>
                 <div class="pill pill--spark">Tap a balloon</div>
               </div>
               <div class="sub">Sponsors · Snapshot · Journey · Upcoming · Achievements</div>
             </div>
 
-            <div class="bouquet__stage" id="bouquetStage" aria-label="Bouquet of sections">
-              <!-- Balloons are rendered by app.js to ensure data + labels always match -->
+            <div class="showcase__stage" id="showcaseStage" aria-label="Showcase balloons">
+              <!-- Balloons rendered by app.js -->
             </div>
 
-            <div class="bouquet__hint">
-              <span class="bouquet__hintDot"></span>
-              <span>Apple-fluid motion · premium pop-ups · collapsible details</span>
+            <div class="showcase__hint">
+              <span class="showcase__hintDot"></span>
+              <span>3D glass · Apple-fluid motion · pop-ups match balloon color</span>
             </div>
           </div>
         </aside>
@@ -140,7 +140,8 @@
   <div class="modalHost" id="modalHost" aria-hidden="true">
     <div class="modalHost__backdrop" id="modalBackdrop"></div>
 
-    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <!-- Theme vars applied here via JS -->
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" data-theme="pink">
       <div class="modal__chrome">
         <div class="modal__top">
           <div class="modal__title" id="modalTitle">Modal</div>
