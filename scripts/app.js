@@ -1,13 +1,8 @@
-/* Ultra-premium athlete card baseline:
-   - Collapsible sections inside every modal (accordion)
-   - Modal chrome can minimize/collapse
-   - Photo Cards includes an always-looping muted video card while page is open
-*/
+/* Digital Athlete Card — GitHub Pages-safe modals + collapsible sections + looping silent video */
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const els = {
-  // Core
   modalHost: $("#modalHost"),
   modalBackdrop: $("#modalBackdrop"),
   modal: $("#modal"),
@@ -16,11 +11,9 @@ const els = {
   modalClose: $("#modalClose"),
   modalMinimize: $("#modalMinimize"),
 
-  // Header
   copyLinkBtn: $("#copyLinkBtn"),
   shareBtn: $("#shareBtn"),
 
-  // Hero
   athletePhoto: $("#athletePhoto"),
   athleteName: $("#athleteName"),
   athleteSub: $("#athleteSub"),
@@ -31,22 +24,18 @@ const els = {
   bioBtnPhoto: $("#bioBtnPhoto"),
   supportBtn: $("#supportBtn"),
 
-  // Fundraising
   fundTitle: $("#fundTitle"),
   fundNumbers: $("#fundNumbers"),
   meterBar: $("#meterBar"),
   fundNote: $("#fundNote"),
   donateBtn: $("#donateBtn"),
 
-  // Share section card
   shareChips: $("#shareChips"),
   openShareModalBtn: $("#openShareModalBtn"),
 
-  // Gallery
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  // Right rail
   sponsorGrid: $("#sponsorGrid"),
   sponsorSub: $("#sponsorSub"),
   becomeSponsorBtn: $("#becomeSponsorBtn"),
@@ -55,18 +44,17 @@ const els = {
   upcomingList: $("#upcomingList"),
   achList: $("#achList"),
 
-  // Footer
   builtBtn: $("#builtBtn"),
 };
 
 let DATA = null;
 
 /* ---------------------------
-   Modal System (collapsible)
+   Modal System
 --------------------------- */
 
 function openModal({ title = "Modal", sections = [], compact = false } = {}) {
-  // Ensure expanded state every time
+  // Always start expanded
   els.modal.classList.remove("modal--collapsed");
   els.modalMinimize.setAttribute("aria-expanded", "true");
   els.modalMinimize.textContent = "▾";
@@ -75,15 +63,17 @@ function openModal({ title = "Modal", sections = [], compact = false } = {}) {
   els.modalTitle.textContent = title;
   els.modalBody.innerHTML = buildAccordion(sections, compact);
 
+  // GitHub Pages safe: toggle BOTH aria + class
   els.modalHost.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modalOpen");
+  els.modalHost.classList.add("is-open");
 
-  // Focus close for accessibility
-  setTimeout(() => els.modalClose?.focus(), 0);
+  document.body.classList.add("modalOpen");
+  setTimeout(() => els.modalClose?.focus?.(), 0);
 }
 
 function closeModal() {
   els.modalHost.setAttribute("aria-hidden", "true");
+  els.modalHost.classList.remove("is-open");
   document.body.classList.remove("modalOpen");
   els.modalBody.innerHTML = "";
 }
@@ -99,22 +89,20 @@ function buildAccordion(sections, compact = false) {
   const cls = compact ? "acc acc--compact" : "acc";
   return `
     <div class="${cls}">
-      ${sections
-        .map((s, idx) => {
-          const openAttr = s.open ?? idx === 0 ? "open" : "";
-          return `
-            <details class="acc__item" ${openAttr}>
-              <summary class="acc__sum">
-                <span class="acc__sumText">${escapeHtml(s.label || "Details")}</span>
-                <span class="acc__chev" aria-hidden="true">▾</span>
-              </summary>
-              <div class="acc__panel">
-                ${typeof s.html === "function" ? s.html() : (s.html || "")}
-              </div>
-            </details>
-          `;
-        })
-        .join("")}
+      ${sections.map((s, idx) => {
+        const openAttr = (s.open ?? (idx === 0)) ? "open" : "";
+        return `
+          <details class="acc__item" ${openAttr}>
+            <summary class="acc__sum">
+              <span class="acc__sumText">${escapeHtml(s.label || "Details")}</span>
+              <span class="acc__chev" aria-hidden="true">▾</span>
+            </summary>
+            <div class="acc__panel">
+              ${typeof s.html === "function" ? s.html() : (s.html || "")}
+            </div>
+          </details>
+        `;
+      }).join("")}
     </div>
   `;
 }
@@ -129,35 +117,35 @@ function escapeHtml(str = "") {
 }
 
 /* ---------------------------
-   Data Loading
+   Data
 --------------------------- */
 
 async function loadData() {
-  // Use your existing athlete.json structure; fallback to a safe default if missing
   try {
     const res = await fetch("data/athlete.json", { cache: "no-store" });
     if (!res.ok) throw new Error("athlete.json not found");
     return await res.json();
-  } catch (e) {
+  } catch {
+    // Safe fallback (so page never breaks)
     return {
       athlete: {
-        name: "Athlete Name",
+        name: "Layla Neitenbach",
         club: "KP Gymnastics",
         sport: "Gymnastics",
         tier: "Bronze",
         subtitle: "Tap to view bio",
         photo: "images/card1.PNG",
         bio: {
-          headline: "Meet our athlete",
-          about: "Add a short bio in data/athlete.json",
-          strengths: ["Consistency", "Coachability", "Confidence"],
+          headline: "Meet Layla",
+          about: "A bright, hard-working gymnast who loves learning new skills and sharing the journey with family + sponsors.",
+          strengths: ["Coachability", "Confidence", "Consistency"],
         },
       },
       fundraising: {
         title: "Help cover travel, coaching, meet fees.",
         current: 650,
         goal: 2000,
-        note: "Athlete is 33% to the season goal! Help finish strong 💕",
+        note: "Layla is 33% to the season goal! Help finish strong 💕",
       },
       share: {
         chips: [
@@ -175,6 +163,7 @@ async function loadData() {
           { src: "images/card1.PNG", title: "Training day" },
           { src: "images/card2.PNG", title: "Meet moment" },
           { src: "images/card3.png", title: "New skill" },
+          { src: "images/card4.png", title: "Team energy" },
         ],
       },
       sponsors: {
@@ -200,8 +189,8 @@ async function loadData() {
         { date: "Next weekend", title: "Winter Invitational", note: "Cheering squad ready 💕" },
       ],
       achievements: [
-        { title: "First place on beam", note: "Great focus + control." },
-        { title: "New level readiness", note: "Progress you can feel." },
+        { title: "Beam first place", note: "Great focus + control." },
+        { title: "Level progress", note: "Strong momentum this season." },
       ],
     };
   }
@@ -230,14 +219,13 @@ function renderAll() {
   els.fundTitle.textContent = F.title || "Help cover travel, coaching, meet fees.";
   const current = Number(F.current || 0);
   const goal = Math.max(1, Number(F.goal || 1));
-  els.fundNumbers.textContent = `$${formatNumber(current)} / $${formatNumber(goal)}`;
   const pct = clamp(Math.round((current / goal) * 100), 0, 100);
+  els.fundNumbers.textContent = `$${formatNumber(current)} / $${formatNumber(goal)}`;
   els.meterBar.style.width = `${pct}%`;
-  const meter = document.querySelector(".meter");
-  meter?.setAttribute("aria-valuenow", String(pct));
+  document.querySelector(".meter")?.setAttribute("aria-valuenow", String(pct));
   els.fundNote.textContent = F.note || `Athlete is ${pct}% to the season goal! Help finish strong 💕`;
 
-  // Share chips (quick actions)
+  // Share chips
   els.shareChips.innerHTML = "";
   (S.chips || []).forEach(ch => {
     const b = document.createElement("button");
@@ -248,7 +236,7 @@ function renderAll() {
     els.shareChips.appendChild(b);
   });
 
-  // Gallery (prepend looping silent video)
+  // Gallery (prepends looping silent video)
   els.gallerySub.textContent = G.subtitle || "Highlights from training + meets.";
   buildGallery(G.items || []);
 
@@ -266,18 +254,13 @@ function renderAll() {
 function buildGallery(items) {
   els.galleryGrid.innerHTML = "";
 
-  // 1) Video Card (always present)
+  // Video Card (silent + loops while page open)
   const videoCard = document.createElement("button");
   videoCard.className = "gCard gCard--video";
   videoCard.type = "button";
   videoCard.innerHTML = `
     <div class="gMedia">
-      <video class="gVideo"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="metadata">
+      <video class="gVideo" autoplay muted loop playsinline preload="metadata">
         <source src="images/layla-video.mp4" type="video/mp4" />
         <source src="images/layla-video.mov" type="video/quicktime" />
       </video>
@@ -287,19 +270,16 @@ function buildGallery(items) {
       </div>
     </div>
   `;
-  videoCard.addEventListener("click", () => openVideoModal());
+  videoCard.addEventListener("click", openVideoModal);
   els.galleryGrid.appendChild(videoCard);
 
-  // Attempt to ensure autoplay kicks in on picky browsers (muted + playsinline should work)
+  // Ensure autoplay kicks in after first gesture (mobile-friendly)
   const vid = videoCard.querySelector("video");
-  if (vid) {
-    const tryPlay = () => vid.play().catch(() => {});
-    // Try immediately + after first user gesture
-    tryPlay();
-    window.addEventListener("pointerdown", tryPlay, { once: true, passive: true });
-  }
+  const tryPlay = () => vid?.play?.().catch(() => {});
+  tryPlay();
+  window.addEventListener("pointerdown", tryPlay, { once: true, passive: true });
 
-  // 2) Image cards from data
+  // Image cards
   items.forEach((it, idx) => {
     const src = it.src || it.image || it.url;
     if (!src) return;
@@ -351,31 +331,21 @@ function openVideoModal() {
         open: true,
         html: `
           <div class="modalMedia">
-            <video class="modalVideo"
-              autoplay
-              muted
-              loop
-              playsinline
-              controls
-              preload="metadata">
+            <video class="modalVideo" autoplay muted loop playsinline controls preload="metadata">
               <source src="images/layla-video.mp4" type="video/mp4" />
               <source src="images/layla-video.mov" type="video/quicktime" />
             </video>
           </div>
-          <div class="tinyNote">Tip: If the .mov doesn’t play in a browser, export an .mp4 (H.264) and keep the same filename above.</div>
+          <div class="tinyNote">
+            If .mov won’t autoplay in a browser, add an mp4 export named <strong>images/layla-video.mp4</strong>.
+          </div>
         `,
       },
-      {
-        label: "Share this card",
-        open: false,
-        html: shareBlockHtml(),
-      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
 
-  // Encourage play if needed
-  const mv = document.querySelector(".modalVideo");
-  mv?.play?.().catch(() => {});
+  document.querySelector(".modalVideo")?.play?.().catch(() => {});
 }
 
 function buildSponsors(items) {
@@ -475,7 +445,7 @@ function shareBlockHtml() {
         <button class="btn btn--soft" type="button" data-share="x">𝕏 X</button>
         <button class="btn btn--soft" type="button" data-share="email">✉ Email</button>
       </div>
-      <div class="tinyNote">Pro move: send this to 3 local businesses today (gym, dentist, restaurant) 💎</div>
+      <div class="tinyNote">Pro move: send this to 3 local businesses today 💎</div>
     </div>
   `;
 }
@@ -484,7 +454,6 @@ function runShare(kind) {
   const url = location.href;
   const text = `Check out this digital athlete card 💕 ${url}`;
 
-  // Some platforms don’t support direct share URLs cleanly (Instagram especially).
   switch (kind) {
     case "text":
       window.open(`sms:?&body=${encodeURIComponent(text)}`, "_blank");
@@ -502,27 +471,24 @@ function runShare(kind) {
       window.open(`mailto:?subject=${encodeURIComponent("Support our athlete 💕")}&body=${encodeURIComponent(text)}`, "_blank");
       break;
     case "instagram":
-      // No official web-based prefill share like others; best UX is copy + open IG
       copyText(url);
       openModal({
         title: "Instagram Share",
-        sections: [
-          {
-            label: "Copy link (done) ✅",
-            open: true,
-            html: `
-              <div class="noteCard">
-                Instagram doesn’t allow pre-filling a post from a web link.
-                <br/><br/>
-                ✅ Link copied — open Instagram and paste it into your Story / bio / DM.
-              </div>
-              <div class="shareGrid">
-                <button class="btn btn--primary" type="button" data-openig>Open Instagram</button>
-                <button class="btn btn--soft" type="button" data-copylink>Copy again</button>
-              </div>
-            `,
-          },
-        ],
+        sections: [{
+          label: "Link copied ✅",
+          open: true,
+          html: `
+            <div class="noteCard">
+              Instagram doesn’t allow a direct web prefill for posts/stories.
+              <br/><br/>
+              ✅ Your card link is copied — paste it into a Story / DM / bio.
+            </div>
+            <div class="shareGrid">
+              <button class="btn btn--primary" type="button" data-openig>Open Instagram</button>
+              <button class="btn btn--soft" type="button" data-copylink>Copy again</button>
+            </div>
+          `
+        }],
         compact: true,
       });
       break;
@@ -543,15 +509,13 @@ async function copyText(txt) {
 }
 
 /* ---------------------------
-   Events
+   Modal Delegation + Buttons
 --------------------------- */
 
 function wireModalDelegates() {
-  // Delegate clicks inside modal body
   els.modalBody.addEventListener("click", (e) => {
     const t = e.target;
 
-    // Copy link buttons
     if (t?.matches?.("[data-copylink]")) {
       copyText(location.href);
       t.textContent = "Copied ✓";
@@ -559,16 +523,13 @@ function wireModalDelegates() {
       return;
     }
 
-    // Share buttons
     const shareBtn = t?.closest?.("[data-share]");
     if (shareBtn) {
       runShare(shareBtn.getAttribute("data-share"));
       return;
     }
 
-    // Open Instagram
     if (t?.matches?.("[data-openig]")) {
-      // Opens IG website; app handoff depends on device
       window.open("https://www.instagram.com/", "_blank");
       return;
     }
@@ -576,7 +537,7 @@ function wireModalDelegates() {
 }
 
 function openBioModal() {
-  const bio = (DATA.athlete && DATA.athlete.bio) || {};
+  const bio = DATA.athlete?.bio || {};
   const strengths = Array.isArray(bio.strengths) ? bio.strengths : [];
 
   openModal({
@@ -595,17 +556,9 @@ function openBioModal() {
       {
         label: "Strengths",
         open: false,
-        html: `
-          <div class="pillRow">
-            ${strengths.map(s => `<span class="pill pill--spark">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `,
+        html: `<div class="pillRow">${strengths.map(s => `<span class="pill pill--spark">${escapeHtml(s)}</span>`).join("")}</div>`,
       },
-      {
-        label: "Share this card",
-        open: false,
-        html: shareBlockHtml(),
-      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
 }
@@ -640,18 +593,12 @@ function openSupportModal() {
               <div class="progressNum">$${formatNumber(current)} raised</div>
               <div class="progressGoal">Goal: $${formatNumber(goal)} (${pct}%)</div>
             </div>
-            <div class="progressBar">
-              <div class="progressFill" style="width:${pct}%"></div>
-            </div>
-            <div class="tinyNote">Add real donation links + amounts in your implementation.</div>
+            <div class="progressBar"><div class="progressFill" style="width:${pct}%"></div></div>
+            <div class="tinyNote">Hook your real donation link here when ready.</div>
           </div>
         `,
       },
-      {
-        label: "Share with sponsors",
-        open: false,
-        html: shareBlockHtml(),
-      },
+      { label: "Share with sponsors", open: false, html: shareBlockHtml() },
     ],
   });
 }
@@ -662,11 +609,11 @@ function openShareModal() {
     sections: [
       { label: "Fast share", open: true, html: shareBlockHtml() },
       {
-        label: "Sponsor script (copy/paste)",
+        label: "Sponsor message template",
         open: false,
         html: `
           <div class="noteCard">
-            <div class="noteTitle">Message template</div>
+            <div class="noteTitle">Copy/Paste</div>
             <div class="noteText">
               Hi! We’re raising support for ${escapeHtml(DATA.athlete?.name || "our athlete")}’s season.
               Would you consider sponsoring? Here’s the digital card with her journey + sponsor placements:
@@ -700,33 +647,30 @@ function openBuiltModal() {
         `,
       },
       {
-        label: "Get one made",
+        label: "Showcase the Journey",
         open: false,
         html: `
           <div class="noteCard">
-            <div class="noteTitle">Showcase the Journey</div>
-            <div class="noteText">Custom cards starting at <strong>$199.99</strong>.</div>
+            <div class="noteTitle">Custom cards starting at $199.99</div>
+            <div class="noteText">Turn your athlete’s season into a sponsor-ready story in days.</div>
           </div>
           <div class="shareRow">
             <button class="btn btn--primary" type="button" onclick="window.open('#','_blank')">Showcase the Journey</button>
           </div>
         `,
       },
-      {
-        label: "Share this page",
-        open: false,
-        html: shareBlockHtml(),
-      },
+      { label: "Share this page", open: false, html: shareBlockHtml() },
     ],
     compact: true,
   });
 }
 
 function wireButtons() {
-  // Modal
+  // Modal controls
   els.modalClose.addEventListener("click", closeModal);
   els.modalBackdrop.addEventListener("click", closeModal);
   els.modalMinimize.addEventListener("click", toggleModalCollapse);
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && document.body.classList.contains("modalOpen")) closeModal();
   });
@@ -754,7 +698,7 @@ function wireButtons() {
 }
 
 /* ---------------------------
-   Utilities
+   Utils
 --------------------------- */
 
 function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
