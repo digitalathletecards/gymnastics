@@ -24,9 +24,7 @@
 
   <header class="topbar">
     <div class="topbar__left">
-      <div class="pill pill--spark">
-        ✨ <span id="cardType">Digital Athlete Card</span>
-      </div>
+      <div class="pill pill--spark">✨ <span id="cardType">Digital Athlete Card</span></div>
       <div class="crumbs" id="crumbs">Fundraising · Sponsors · Journey</div>
     </div>
 
@@ -106,6 +104,7 @@
         </div>
 
         <aside class="hero__right">
+
           <div class="card sponsors fxCard">
             <div class="sponsors__head">
               <div class="titleRow">
@@ -153,6 +152,7 @@
             </div>
             <div class="achList" id="achList"></div>
           </div>
+
         </aside>
       </section>
 
@@ -166,7 +166,7 @@
     </div>
   </main>
 
-  <!-- MODAL HOST (keep at END of body, outside stage) -->
+  <!-- MODAL HOST (MUST be at end of body) -->
   <div class="modalHost" id="modalHost" aria-hidden="true">
     <div class="modalHost__backdrop" id="modalBackdrop"></div>
 
@@ -176,7 +176,6 @@
           <div class="modal__title" id="modalTitle">Modal</div>
 
           <div class="modal__actions">
-            <!-- NEW: Collapse/Expand -->
             <button class="iconBtn iconBtn--min" id="modalMinimize" type="button" aria-label="Minimize" aria-expanded="true" title="Collapse">▾</button>
             <button class="iconBtn" id="modalClose" type="button" aria-label="Close">✕</button>
           </div>
@@ -187,6 +186,7 @@
     </div>
   </div>
 
+  <!-- IMPORTANT: this path must match your repo exactly -->
   <script src="scripts/app.js" defer></script>
 </body>
 </html>
