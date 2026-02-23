@@ -76,7 +76,7 @@
             </div>
 
             <div class="fund__foot">
-              <div class="note" id="fundNote">Athlete is 33% to the season goal! Help finish strong 💕</div>
+              <div class="note" id="fundNote">Layla is 33% to the season goal! Help finish strong 💕</div>
               <button class="btn btn--primary" id="donateBtn" type="button">Support / Donate</button>
             </div>
           </div>
@@ -103,56 +103,26 @@
 
         </div>
 
+        <!-- RIGHT SIDE: BALLOON BOUQUET (replaces the stacked cards) -->
         <aside class="hero__right">
-
-          <div class="card sponsors fxCard">
-            <div class="sponsors__head">
-              <div class="titleRow">
-                <div class="title">💎 Sponsors</div>
-                <div class="pill">Tap to visit</div>
+          <div class="bouquet fxCard" id="bouquet">
+            <div class="bouquet__head">
+              <div class="titleRow bouquet__titleRow">
+                <div class="title">🎈 Bouquet</div>
+                <div class="pill pill--spark">Tap a balloon</div>
               </div>
-              <div class="sub" id="sponsorSub">Thank you for helping build the journey.</div>
+              <div class="sub">Sponsors · Snapshot · Journey · Upcoming · Achievements</div>
             </div>
 
-            <div class="sponsorGrid" id="sponsorGrid"></div>
+            <div class="bouquet__stage" id="bouquetStage" aria-label="Bouquet of sections">
+              <!-- Balloons are rendered by app.js to ensure data + labels always match -->
+            </div>
 
-            <div class="sponsors__cta">
-              <button class="btn btn--soft" id="becomeSponsorBtn" type="button">Become a Sponsor</button>
+            <div class="bouquet__hint">
+              <span class="bouquet__hintDot"></span>
+              <span>Apple-fluid motion · premium pop-ups · collapsible details</span>
             </div>
           </div>
-
-          <div class="card stats fxCard">
-            <div class="titleRow">
-              <div class="title">⚡ Season Snapshot</div>
-              <div class="pill">Live</div>
-            </div>
-            <div class="statsGrid" id="statsGrid"></div>
-          </div>
-
-          <div class="card journey fxCard">
-            <div class="titleRow">
-              <div class="title">⭐ Journey</div>
-              <div class="pill pill--spark">Live updates</div>
-            </div>
-            <div class="timeline" id="timeline"></div>
-          </div>
-
-          <div class="card upcoming fxCard">
-            <div class="titleRow">
-              <div class="title">📅 Upcoming</div>
-              <div class="pill pill--spark">Events</div>
-            </div>
-            <div class="upcomingList" id="upcomingList"></div>
-          </div>
-
-          <div class="card achievements fxCard">
-            <div class="titleRow">
-              <div class="title">🏆 Achievements</div>
-              <div class="pill">This season</div>
-            </div>
-            <div class="achList" id="achList"></div>
-          </div>
-
         </aside>
       </section>
 
@@ -186,7 +156,6 @@
     </div>
   </div>
 
-  <!-- IMPORTANT: this path must match your repo exactly -->
   <script src="scripts/app.js" defer></script>
 </body>
 </html>
