@@ -1,8 +1,14 @@
-/* Digital Athlete Card — GitHub Pages-safe modals + collapsible sections + looping silent video */
+/* Digital Athlete Card — Balloon Bouquet Right Rail
+   - Right side cards replaced with floating balloon bouquet
+   - Each balloon opens an ultra-premium modal with that section’s data
+   - Modals: GitHub Pages safe (aria + class)
+   - Photo cards include looping silent video (if file exists)
+*/
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const els = {
+  // Modal
   modalHost: $("#modalHost"),
   modalBackdrop: $("#modalBackdrop"),
   modal: $("#modal"),
@@ -11,9 +17,11 @@ const els = {
   modalClose: $("#modalClose"),
   modalMinimize: $("#modalMinimize"),
 
+  // Header
   copyLinkBtn: $("#copyLinkBtn"),
   shareBtn: $("#shareBtn"),
 
+  // Athlete
   athletePhoto: $("#athletePhoto"),
   athleteName: $("#athleteName"),
   athleteSub: $("#athleteSub"),
@@ -24,37 +32,37 @@ const els = {
   bioBtnPhoto: $("#bioBtnPhoto"),
   supportBtn: $("#supportBtn"),
 
+  // Fundraising
   fundTitle: $("#fundTitle"),
   fundNumbers: $("#fundNumbers"),
   meterBar: $("#meterBar"),
   fundNote: $("#fundNote"),
   donateBtn: $("#donateBtn"),
 
+  // Share section card
   shareChips: $("#shareChips"),
   openShareModalBtn: $("#openShareModalBtn"),
 
+  // Gallery
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  sponsorGrid: $("#sponsorGrid"),
-  sponsorSub: $("#sponsorSub"),
-  becomeSponsorBtn: $("#becomeSponsorBtn"),
-  statsGrid: $("#statsGrid"),
-  timeline: $("#timeline"),
-  upcomingList: $("#upcomingList"),
-  achList: $("#achList"),
+  // Bouquet
+  bouquetStage: $("#bouquetStage"),
 
+  // Footer
   builtBtn: $("#builtBtn"),
 };
 
 let DATA = null;
+let bouquetParallaxOn = false;
 
 /* ---------------------------
    Modal System
 --------------------------- */
 
 function openModal({ title = "Modal", sections = [], compact = false } = {}) {
-  // Always start expanded
+  // Start expanded each time
   els.modal.classList.remove("modal--collapsed");
   els.modalMinimize.setAttribute("aria-expanded", "true");
   els.modalMinimize.textContent = "▾";
@@ -126,7 +134,7 @@ async function loadData() {
     if (!res.ok) throw new Error("athlete.json not found");
     return await res.json();
   } catch {
-    // Safe fallback (so page never breaks)
+    // Safe fallback so page never breaks
     return {
       athlete: {
         name: "Layla Neitenbach",
@@ -205,7 +213,6 @@ function renderAll() {
   const F = DATA.fundraising || {};
   const S = DATA.share || {};
   const G = DATA.gallery || {};
-  const SP = DATA.sponsors || {};
 
   // Athlete
   els.athleteName.textContent = A.name || "Athlete Name";
@@ -236,19 +243,12 @@ function renderAll() {
     els.shareChips.appendChild(b);
   });
 
-  // Gallery (prepends looping silent video)
+  // Gallery
   els.gallerySub.textContent = G.subtitle || "Highlights from training + meets.";
   buildGallery(G.items || []);
 
-  // Sponsors
-  els.sponsorSub.textContent = SP.subtitle || "Thank you for helping build the journey.";
-  buildSponsors(SP.items || []);
-
-  // Stats / Journey / Upcoming / Achievements
-  buildStats(DATA.stats || []);
-  buildTimeline(DATA.journey || []);
-  buildUpcoming(DATA.upcoming || []);
-  buildAchievements(DATA.achievements || []);
+  // Bouquet balloons
+  buildBouquet();
 }
 
 function buildGallery(items) {
@@ -273,7 +273,7 @@ function buildGallery(items) {
   videoCard.addEventListener("click", openVideoModal);
   els.galleryGrid.appendChild(videoCard);
 
-  // Ensure autoplay kicks in after first gesture (mobile-friendly)
+  // Autoplay nudge
   const vid = videoCard.querySelector("video");
   const tryPlay = () => vid?.play?.().catch(() => {});
   tryPlay();
@@ -309,11 +309,7 @@ function buildGallery(items) {
               </div>
             `,
           },
-          {
-            label: "Share this moment",
-            open: false,
-            html: shareBlockHtml(),
-          },
+          { label: "Share this moment", open: false, html: shareBlockHtml() },
         ],
       });
     });
@@ -337,7 +333,7 @@ function openVideoModal() {
             </video>
           </div>
           <div class="tinyNote">
-            If .mov won’t autoplay in a browser, add an mp4 export named <strong>images/layla-video.mp4</strong>.
+            Best compatibility: add an MP4 named <strong>images/layla-video.mp4</strong>.
           </div>
         `,
       },
@@ -348,193 +344,250 @@ function openVideoModal() {
   document.querySelector(".modalVideo")?.play?.().catch(() => {});
 }
 
-function buildSponsors(items) {
-  els.sponsorGrid.innerHTML = "";
-  items.forEach((sp) => {
-    const a = document.createElement("a");
-    a.className = "sCard";
-    a.href = sp.url || "#";
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.innerHTML = `
-      <img class="sLogo" src="${escapeHtml(sp.logo || "")}" alt="${escapeHtml(sp.name || "Sponsor")}" loading="lazy" decoding="async" />
-      <div class="sName">${escapeHtml(sp.name || "Sponsor")}</div>
+/* ---------------------------
+   Bouquet (balloons)
+--------------------------- */
+
+function buildBouquet() {
+  const stage = els.bouquetStage;
+  if (!stage) return;
+
+  stage.innerHTML = "";
+
+  const balloons = [
+    { key: "sponsors", emoji: "💎", label: "Sponsors", sub: "Tap to view", onClick: openSponsorsModal },
+    { key: "snapshot", emoji: "⚡", label: "Season Snapshot", sub: "Quick stats", onClick: openSnapshotModal },
+    { key: "journey", emoji: "⭐", label: "Journey", sub: "Updates", onClick: openJourneyModal },
+    { key: "upcoming", emoji: "📅", label: "Upcoming", sub: "Next events", onClick: openUpcomingModal },
+    { key: "achievements", emoji: "🏆", label: "Achievements", sub: "This season", onClick: openAchievementsModal },
+  ];
+
+  // positions are tuned to feel like a “bouquet cluster”
+  const positions = [
+    { left: "10%", top: "18%", tx: "-6px", rot: "-2.5deg" },  // Sponsors
+    { left: "52%", top: "10%", tx: "4px",  rot: "2.2deg" },   // Snapshot
+    { left: "28%", top: "44%", tx: "7px",  rot: "1.4deg" },   // Journey
+    { left: "62%", top: "40%", tx: "-4px", rot: "-1.8deg" },  // Upcoming
+    { left: "40%", top: "68%", tx: "2px",  rot: "-1.2deg" },  // Achievements
+  ];
+
+  balloons.forEach((b, i) => {
+    const pos = positions[i] || positions[0];
+
+    const btn = document.createElement("button");
+    btn.className = "balloon";
+    btn.type = "button";
+    btn.setAttribute("aria-label", b.label);
+    btn.style.left = pos.left;
+    btn.style.top = pos.top;
+    btn.style.setProperty("--tx", pos.tx);
+    btn.style.setProperty("--rot", pos.rot);
+
+    btn.innerHTML = `
+      <span class="balloon__body"></span>
+      <span class="balloon__content">
+        <span class="balloon__emoji">${b.emoji}</span>
+        <span class="balloon__label">${escapeHtml(b.label)}</span>
+        <span class="balloon__sub">${escapeHtml(b.sub)}</span>
+      </span>
+      <span class="balloon__knot"></span>
+      <span class="balloon__string"></span>
     `;
-    els.sponsorGrid.appendChild(a);
+
+    btn.addEventListener("click", b.onClick);
+    stage.appendChild(btn);
   });
+
+  enableBouquetParallax(stage);
 }
 
-function buildStats(items) {
-  els.statsGrid.innerHTML = "";
-  items.forEach(st => {
-    const d = document.createElement("div");
-    d.className = "stat";
-    d.innerHTML = `
-      <div class="stat__v">${escapeHtml(st.value ?? "")}</div>
-      <div class="stat__l">${escapeHtml(st.label ?? "")}</div>
-    `;
-    els.statsGrid.appendChild(d);
-  });
-}
+function enableBouquetParallax(stage) {
+  if (bouquetParallaxOn) return;
+  bouquetParallaxOn = true;
 
-function buildTimeline(items) {
-  els.timeline.innerHTML = "";
-  items.forEach(j => {
-    const row = document.createElement("div");
-    row.className = "tItem";
-    row.innerHTML = `
-      <div class="tDot"></div>
-      <div class="tBody">
-        <div class="tTop">
-          <div class="tTitle">${escapeHtml(j.title || "")}</div>
-          <div class="tDate">${escapeHtml(j.date || "")}</div>
-        </div>
-        <div class="tNote">${escapeHtml(j.note || "")}</div>
-      </div>
-    `;
-    els.timeline.appendChild(row);
-  });
-}
+  const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  if (prefersReduced) return;
 
-function buildUpcoming(items) {
-  els.upcomingList.innerHTML = "";
-  items.forEach(u => {
-    const row = document.createElement("div");
-    row.className = "uItem";
-    row.innerHTML = `
-      <div class="uDate">${escapeHtml(u.date || "")}</div>
-      <div class="uMain">
-        <div class="uTitle">${escapeHtml(u.title || "")}</div>
-        <div class="uNote">${escapeHtml(u.note || "")}</div>
-      </div>
-    `;
-    els.upcomingList.appendChild(row);
-  });
-}
+  const apply = (x, y) => {
+    const balloons = stage.querySelectorAll(".balloon");
+    balloons.forEach((el, idx) => {
+      const depth = (idx + 1) / 10; // subtle
+      const rx = (y * 6 * depth).toFixed(2);
+      const ry = (x * -8 * depth).toFixed(2);
+      el.style.transform = `rotate(var(--rot)) translate3d(var(--tx), 0px, 0px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+  };
 
-function buildAchievements(items) {
-  els.achList.innerHTML = "";
-  items.forEach(a => {
-    const row = document.createElement("div");
-    row.className = "aItem";
-    row.innerHTML = `
-      <div class="aTitle">${escapeHtml(a.title || "")}</div>
-      <div class="aNote">${escapeHtml(a.note || "")}</div>
-    `;
-    els.achList.appendChild(row);
-  });
+  const onMove = (ev) => {
+    const rect = stage.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const x = (ev.clientX - cx) / (rect.width / 2);
+    const y = (ev.clientY - cy) / (rect.height / 2);
+    apply(clamp(x, -1, 1), clamp(y, -1, 1));
+  };
+
+  stage.addEventListener("pointermove", onMove, { passive: true });
+  stage.addEventListener("pointerleave", () => apply(0, 0), { passive: true });
 }
 
 /* ---------------------------
-   Share / Actions
+   Popups for balloons
 --------------------------- */
 
-function shareBlockHtml() {
-  const url = location.href;
+function openSponsorsModal() {
+  const sp = DATA.sponsors?.items || [];
+  openModal({
+    title: "💎 Sponsors",
+    sections: [
+      {
+        label: "Sponsor list",
+        open: true,
+        html: () => sponsorsHtml(sp),
+      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
+  });
+}
+
+function sponsorsHtml(items) {
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">No sponsors yet</div><div class="noteText">Add sponsors in <strong>data/athlete.json</strong> to show them here.</div></div>`;
+  }
   return `
-    <div class="shareBlock">
-      <div class="shareRow">
-        <input class="shareInput" value="${escapeHtml(url)}" readonly />
-        <button class="btn btn--primary" type="button" data-copylink>Copy</button>
-      </div>
-      <div class="shareGrid">
-        <button class="btn btn--soft" type="button" data-share="text">💬 Text</button>
-        <button class="btn btn--soft" type="button" data-share="whatsapp">💚 WhatsApp</button>
-        <button class="btn btn--soft" type="button" data-share="facebook">📘 Facebook</button>
-        <button class="btn btn--soft" type="button" data-share="instagram">📸 Instagram</button>
-        <button class="btn btn--soft" type="button" data-share="x">𝕏 X</button>
-        <button class="btn btn--soft" type="button" data-share="email">✉ Email</button>
-      </div>
-      <div class="tinyNote">Pro move: send this to 3 local businesses today 💎</div>
+    <div class="mList">
+      ${items.map(s => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(s.name || "Sponsor")}</div>
+            <div class="mMeta">${s.url ? "Tap to visit" : ""}</div>
+          </div>
+          <div class="mNote">${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.82);font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)">Open sponsor link</a>` : "Link not provided"}</div>
+        </div>
+      `).join("")}
     </div>
   `;
 }
 
-function runShare(kind) {
-  const url = location.href;
-  const text = `Check out this digital athlete card 💕 ${url}`;
-
-  switch (kind) {
-    case "text":
-      window.open(`sms:?&body=${encodeURIComponent(text)}`, "_blank");
-      break;
-    case "whatsapp":
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-      break;
-    case "facebook":
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
-      break;
-    case "x":
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
-      break;
-    case "email":
-      window.open(`mailto:?subject=${encodeURIComponent("Support our athlete 💕")}&body=${encodeURIComponent(text)}`, "_blank");
-      break;
-    case "instagram":
-      copyText(url);
-      openModal({
-        title: "Instagram Share",
-        sections: [{
-          label: "Link copied ✅",
-          open: true,
-          html: `
-            <div class="noteCard">
-              Instagram doesn’t allow a direct web prefill for posts/stories.
-              <br/><br/>
-              ✅ Your card link is copied — paste it into a Story / DM / bio.
-            </div>
-            <div class="shareGrid">
-              <button class="btn btn--primary" type="button" data-openig>Open Instagram</button>
-              <button class="btn btn--soft" type="button" data-copylink>Copy again</button>
-            </div>
-          `
-        }],
-        compact: true,
-      });
-      break;
-  }
+function openSnapshotModal() {
+  const stats = DATA.stats || [];
+  openModal({
+    title: "⚡ Season Snapshot",
+    sections: [
+      {
+        label: "Quick stats",
+        open: true,
+        html: () => statsHtml(stats),
+      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
+  });
 }
 
-async function copyText(txt) {
-  try {
-    await navigator.clipboard.writeText(txt);
-  } catch {
-    const ta = document.createElement("textarea");
-    ta.value = txt;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    ta.remove();
+function statsHtml(items) {
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">No stats yet</div><div class="noteText">Add stats in <strong>data/athlete.json</strong>.</div></div>`;
   }
+  return `
+    <div class="mList">
+      ${items.map(s => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(s.label || "Stat")}</div>
+            <div class="mMeta">${escapeHtml(s.value ?? "")}</div>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function openJourneyModal() {
+  const items = DATA.journey || [];
+  openModal({
+    title: "⭐ Journey",
+    sections: [
+      {
+        label: "Updates",
+        open: true,
+        html: () => timelineHtml(items),
+      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
+  });
+}
+
+function openUpcomingModal() {
+  const items = DATA.upcoming || [];
+  openModal({
+    title: "📅 Upcoming",
+    sections: [
+      {
+        label: "Next events",
+        open: true,
+        html: () => timelineHtml(items, true),
+      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
+  });
+}
+
+function openAchievementsModal() {
+  const items = DATA.achievements || [];
+  openModal({
+    title: "🏆 Achievements",
+    sections: [
+      {
+        label: "This season",
+        open: true,
+        html: () => achievementsHtml(items),
+      },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
+  });
+}
+
+function timelineHtml(items, isUpcoming = false) {
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">${isUpcoming ? "No upcoming events" : "No updates yet"}</div><div class="noteText">Add items in <strong>data/athlete.json</strong>.</div></div>`;
+  }
+  return `
+    <div class="mList">
+      ${items.map(it => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(it.title || it.name || "Item")}</div>
+            <div class="mMeta">${escapeHtml(it.date || "")}</div>
+          </div>
+          ${it.note ? `<div class="mNote">${escapeHtml(it.note)}</div>` : ""}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function achievementsHtml(items) {
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">No achievements yet</div><div class="noteText">Add achievements in <strong>data/athlete.json</strong>.</div></div>`;
+  }
+  return `
+    <div class="mList">
+      ${items.map(a => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(a.title || "Achievement")}</div>
+            <div class="mMeta">⭐</div>
+          </div>
+          ${a.note ? `<div class="mNote">${escapeHtml(a.note)}</div>` : ""}
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 /* ---------------------------
-   Modal Delegation + Buttons
+   Other Modals
 --------------------------- */
-
-function wireModalDelegates() {
-  els.modalBody.addEventListener("click", (e) => {
-    const t = e.target;
-
-    if (t?.matches?.("[data-copylink]")) {
-      copyText(location.href);
-      t.textContent = "Copied ✓";
-      setTimeout(() => (t.textContent = "Copy"), 900);
-      return;
-    }
-
-    const shareBtn = t?.closest?.("[data-share]");
-    if (shareBtn) {
-      runShare(shareBtn.getAttribute("data-share"));
-      return;
-    }
-
-    if (t?.matches?.("[data-openig]")) {
-      window.open("https://www.instagram.com/", "_blank");
-      return;
-    }
-  });
-}
 
 function openBioModal() {
   const bio = DATA.athlete?.bio || {};
@@ -588,13 +641,9 @@ function openSupportModal() {
         label: "Goal progress",
         open: false,
         html: `
-          <div class="progressCard">
-            <div class="progressTop">
-              <div class="progressNum">$${formatNumber(current)} raised</div>
-              <div class="progressGoal">Goal: $${formatNumber(goal)} (${pct}%)</div>
-            </div>
-            <div class="progressBar"><div class="progressFill" style="width:${pct}%"></div></div>
-            <div class="tinyNote">Hook your real donation link here when ready.</div>
+          <div class="noteCard">
+            <div class="noteTitle">$${formatNumber(current)} raised</div>
+            <div class="noteText">Goal: $${formatNumber(goal)} (${pct}%)</div>
           </div>
         `,
       },
@@ -620,9 +669,6 @@ function openShareModal() {
               <br/><br/><strong>${escapeHtml(location.href)}</strong>
             </div>
           </div>
-          <div class="shareRow">
-            <button class="btn btn--primary" type="button" data-copylink>Copy card link</button>
-          </div>
         `,
       },
     ],
@@ -646,22 +692,111 @@ function openBuiltModal() {
           </div>
         `,
       },
-      {
-        label: "Showcase the Journey",
-        open: false,
-        html: `
-          <div class="noteCard">
-            <div class="noteTitle">Custom cards starting at $199.99</div>
-            <div class="noteText">Turn your athlete’s season into a sponsor-ready story in days.</div>
-          </div>
-          <div class="shareRow">
-            <button class="btn btn--primary" type="button" onclick="window.open('#','_blank')">Showcase the Journey</button>
-          </div>
-        `,
-      },
       { label: "Share this page", open: false, html: shareBlockHtml() },
     ],
     compact: true,
+  });
+}
+
+/* ---------------------------
+   Share
+--------------------------- */
+
+function shareBlockHtml() {
+  const url = location.href;
+  return `
+    <div class="shareBlock">
+      <div class="shareRow">
+        <input class="shareInput" value="${escapeHtml(url)}" readonly />
+        <button class="btn btn--primary" type="button" data-copylink>Copy</button>
+      </div>
+      <div class="shareGrid">
+        <button class="btn btn--soft" type="button" data-share="text">💬 Text</button>
+        <button class="btn btn--soft" type="button" data-share="whatsapp">💚 WhatsApp</button>
+        <button class="btn btn--soft" type="button" data-share="facebook">📘 Facebook</button>
+        <button class="btn btn--soft" type="button" data-share="instagram">📸 Instagram</button>
+        <button class="btn btn--soft" type="button" data-share="x">𝕏 X</button>
+        <button class="btn btn--soft" type="button" data-share="email">✉ Email</button>
+      </div>
+      <div class="tinyNote">Pro move: send this to 3 local businesses today 💎</div>
+    </div>
+  `;
+}
+
+function runShare(kind) {
+  const url = location.href;
+  const text = `Check out this digital athlete card 💕 ${url}`;
+
+  switch (kind) {
+    case "text":
+      window.open(`sms:?&body=${encodeURIComponent(text)}`, "_blank");
+      break;
+    case "whatsapp":
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+      break;
+    case "facebook":
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
+      break;
+    case "x":
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+      break;
+    case "email":
+      window.open(`mailto:?subject=${encodeURIComponent("Support our athlete 💕")}&body=${encodeURIComponent(text)}`, "_blank");
+      break;
+    case "instagram":
+      copyText(url);
+      openModal({
+        title: "Instagram Share",
+        sections: [{
+          label: "Link copied ✅",
+          open: true,
+          html: `
+            <div class="noteCard">
+              Instagram doesn’t allow direct web prefill for posts/stories.
+              <br/><br/>
+              ✅ Link copied — paste into a Story / DM / bio.
+            </div>
+          `
+        }],
+        compact: true,
+      });
+      break;
+  }
+}
+
+async function copyText(txt) {
+  try {
+    await navigator.clipboard.writeText(txt);
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  }
+}
+
+/* ---------------------------
+   Events
+--------------------------- */
+
+function wireModalDelegates() {
+  els.modalBody.addEventListener("click", (e) => {
+    const t = e.target;
+
+    if (t?.matches?.("[data-copylink]")) {
+      copyText(location.href);
+      t.textContent = "Copied ✓";
+      setTimeout(() => (t.textContent = "Copy"), 900);
+      return;
+    }
+
+    const shareBtn = t?.closest?.("[data-share]");
+    if (shareBtn) {
+      runShare(shareBtn.getAttribute("data-share"));
+      return;
+    }
   });
 }
 
@@ -670,7 +805,6 @@ function wireButtons() {
   els.modalClose.addEventListener("click", closeModal);
   els.modalBackdrop.addEventListener("click", closeModal);
   els.modalMinimize.addEventListener("click", toggleModalCollapse);
-
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && document.body.classList.contains("modalOpen")) closeModal();
   });
@@ -689,9 +823,6 @@ function wireButtons() {
 
   // Share card
   els.openShareModalBtn.addEventListener("click", openShareModal);
-
-  // Sponsors CTA
-  els.becomeSponsorBtn.addEventListener("click", openShareModal);
 
   // Footer
   els.builtBtn.addEventListener("click", openBuiltModal);
