@@ -1,8 +1,9 @@
-/* Digital Athlete Card — Balloon Bouquet Right Rail
-   - Right side cards replaced with floating balloon bouquet
-   - Each balloon opens an ultra-premium modal with that section’s data
-   - Modals: GitHub Pages safe (aria + class)
-   - Photo cards include looping silent video (if file exists)
+/* Digital Athlete Card — Showcase the Journey (3D glass balloons + themed modals)
+   - Right side is a balloon bouquet
+   - Each balloon has its own premium glass color
+   - Modal theme matches balloon color (border/glow/accent)
+   - Collapsible modals + accordion
+   - Photo Cards includes silent looping video
 */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -47,22 +48,29 @@ const els = {
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  // Bouquet
-  bouquetStage: $("#bouquetStage"),
+  // Showcase
+  showcaseStage: $("#showcaseStage"),
 
   // Footer
   builtBtn: $("#builtBtn"),
 };
 
 let DATA = null;
-let bouquetParallaxOn = false;
+let stageParallaxOn = false;
 
 /* ---------------------------
-   Modal System
+   Modal System + Theme
 --------------------------- */
 
-function openModal({ title = "Modal", sections = [], compact = false } = {}) {
-  // Start expanded each time
+function setModalTheme(theme = "pink") {
+  // theme values: pink | aqua | gold | violet | lime
+  els.modal.setAttribute("data-theme", theme);
+}
+
+function openModal({ title = "Modal", sections = [], compact = false, theme = "pink" } = {}) {
+  setModalTheme(theme);
+
+  // Start expanded
   els.modal.classList.remove("modal--collapsed");
   els.modalMinimize.setAttribute("aria-expanded", "true");
   els.modalMinimize.textContent = "▾";
@@ -247,8 +255,8 @@ function renderAll() {
   els.gallerySub.textContent = G.subtitle || "Highlights from training + meets.";
   buildGallery(G.items || []);
 
-  // Bouquet balloons
-  buildBouquet();
+  // Showcase balloons
+  buildShowcase();
 }
 
 function buildGallery(items) {
@@ -270,10 +278,9 @@ function buildGallery(items) {
       </div>
     </div>
   `;
-  videoCard.addEventListener("click", openVideoModal);
+  videoCard.addEventListener("click", () => openVideoModal());
   els.galleryGrid.appendChild(videoCard);
 
-  // Autoplay nudge
   const vid = videoCard.querySelector("video");
   const tryPlay = () => vid?.play?.().catch(() => {});
   tryPlay();
@@ -299,6 +306,7 @@ function buildGallery(items) {
     btn.addEventListener("click", () => {
       openModal({
         title: "Photo Card",
+        theme: "pink",
         sections: [
           {
             label: it.title || "Photo",
@@ -321,6 +329,7 @@ function buildGallery(items) {
 function openVideoModal() {
   openModal({
     title: "Highlight Reel",
+    theme: "pink",
     sections: [
       {
         label: "Video (silent loop)",
@@ -345,30 +354,31 @@ function openVideoModal() {
 }
 
 /* ---------------------------
-   Bouquet (balloons)
+   Showcase Balloons + matching popups
 --------------------------- */
 
-function buildBouquet() {
-  const stage = els.bouquetStage;
+function buildShowcase() {
+  const stage = els.showcaseStage;
   if (!stage) return;
 
   stage.innerHTML = "";
 
+  // Each balloon has its own color theme key = matches CSS and modal themes
   const balloons = [
-    { key: "sponsors", emoji: "💎", label: "Sponsors", sub: "Tap to view", onClick: openSponsorsModal },
-    { key: "snapshot", emoji: "⚡", label: "Season Snapshot", sub: "Quick stats", onClick: openSnapshotModal },
-    { key: "journey", emoji: "⭐", label: "Journey", sub: "Updates", onClick: openJourneyModal },
-    { key: "upcoming", emoji: "📅", label: "Upcoming", sub: "Next events", onClick: openUpcomingModal },
-    { key: "achievements", emoji: "🏆", label: "Achievements", sub: "This season", onClick: openAchievementsModal },
+    { theme: "gold",  emoji: "💎", label: "Sponsors",       sub: "Tap to view",   onClick: openSponsorsModal },
+    { theme: "aqua",  emoji: "⚡", label: "Season Snapshot", sub: "Quick stats",   onClick: openSnapshotModal },
+    { theme: "pink",  emoji: "⭐", label: "Journey",         sub: "Updates",       onClick: openJourneyModal },
+    { theme: "violet",emoji: "📅", label: "Upcoming",       sub: "Next events",   onClick: openUpcomingModal },
+    { theme: "lime",  emoji: "🏆", label: "Achievements",   sub: "This season",   onClick: openAchievementsModal },
   ];
 
-  // positions are tuned to feel like a “bouquet cluster”
+  // bouquet cluster layout
   const positions = [
-    { left: "10%", top: "18%", tx: "-6px", rot: "-2.5deg" },  // Sponsors
-    { left: "52%", top: "10%", tx: "4px",  rot: "2.2deg" },   // Snapshot
-    { left: "28%", top: "44%", tx: "7px",  rot: "1.4deg" },   // Journey
-    { left: "62%", top: "40%", tx: "-4px", rot: "-1.8deg" },  // Upcoming
-    { left: "40%", top: "68%", tx: "2px",  rot: "-1.2deg" },  // Achievements
+    { left: "10%", top: "16%", tx: "-6px", rot: "-2.6deg" },
+    { left: "52%", top: "9%",  tx: "4px",  rot: "2.3deg"  },
+    { left: "28%", top: "44%", tx: "7px",  rot: "1.4deg"  },
+    { left: "62%", top: "40%", tx: "-4px", rot: "-1.9deg" },
+    { left: "40%", top: "70%", tx: "2px",  rot: "-1.2deg" },
   ];
 
   balloons.forEach((b, i) => {
@@ -378,6 +388,7 @@ function buildBouquet() {
     btn.className = "balloon";
     btn.type = "button";
     btn.setAttribute("aria-label", b.label);
+    btn.setAttribute("data-c", b.theme);
     btn.style.left = pos.left;
     btn.style.top = pos.top;
     btn.style.setProperty("--tx", pos.tx);
@@ -385,6 +396,7 @@ function buildBouquet() {
 
     btn.innerHTML = `
       <span class="balloon__body"></span>
+      <span class="balloon__depth"></span>
       <span class="balloon__content">
         <span class="balloon__emoji">${b.emoji}</span>
         <span class="balloon__label">${escapeHtml(b.label)}</span>
@@ -394,16 +406,16 @@ function buildBouquet() {
       <span class="balloon__string"></span>
     `;
 
-    btn.addEventListener("click", b.onClick);
+    btn.addEventListener("click", () => b.onClick(b.theme));
     stage.appendChild(btn);
   });
 
-  enableBouquetParallax(stage);
+  enableStageParallax(stage);
 }
 
-function enableBouquetParallax(stage) {
-  if (bouquetParallaxOn) return;
-  bouquetParallaxOn = true;
+function enableStageParallax(stage) {
+  if (stageParallaxOn) return;
+  stageParallaxOn = true;
 
   const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   if (prefersReduced) return;
@@ -412,8 +424,8 @@ function enableBouquetParallax(stage) {
     const balloons = stage.querySelectorAll(".balloon");
     balloons.forEach((el, idx) => {
       const depth = (idx + 1) / 10; // subtle
-      const rx = (y * 6 * depth).toFixed(2);
-      const ry = (x * -8 * depth).toFixed(2);
+      const rx = (y * 6.5 * depth).toFixed(2);
+      const ry = (x * -8.5 * depth).toFixed(2);
       el.style.transform = `rotate(var(--rot)) translate3d(var(--tx), 0px, 0px) rotateX(${rx}deg) rotateY(${ry}deg)`;
     });
   };
@@ -432,19 +444,16 @@ function enableBouquetParallax(stage) {
 }
 
 /* ---------------------------
-   Popups for balloons
+   Popups for balloons (theme passed in)
 --------------------------- */
 
-function openSponsorsModal() {
+function openSponsorsModal(theme = "gold") {
   const sp = DATA.sponsors?.items || [];
   openModal({
     title: "💎 Sponsors",
+    theme,
     sections: [
-      {
-        label: "Sponsor list",
-        open: true,
-        html: () => sponsorsHtml(sp),
-      },
+      { label: "Sponsor list", open: true, html: () => sponsorsHtml(sp) },
       { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
@@ -469,16 +478,13 @@ function sponsorsHtml(items) {
   `;
 }
 
-function openSnapshotModal() {
+function openSnapshotModal(theme = "aqua") {
   const stats = DATA.stats || [];
   openModal({
     title: "⚡ Season Snapshot",
+    theme,
     sections: [
-      {
-        label: "Quick stats",
-        open: true,
-        html: () => statsHtml(stats),
-      },
+      { label: "Quick stats", open: true, html: () => statsHtml(stats) },
       { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
@@ -502,46 +508,37 @@ function statsHtml(items) {
   `;
 }
 
-function openJourneyModal() {
+function openJourneyModal(theme = "pink") {
   const items = DATA.journey || [];
   openModal({
     title: "⭐ Journey",
+    theme,
     sections: [
-      {
-        label: "Updates",
-        open: true,
-        html: () => timelineHtml(items),
-      },
+      { label: "Updates", open: true, html: () => timelineHtml(items) },
       { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
 }
 
-function openUpcomingModal() {
+function openUpcomingModal(theme = "violet") {
   const items = DATA.upcoming || [];
   openModal({
     title: "📅 Upcoming",
+    theme,
     sections: [
-      {
-        label: "Next events",
-        open: true,
-        html: () => timelineHtml(items, true),
-      },
+      { label: "Next events", open: true, html: () => timelineHtml(items, true) },
       { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
 }
 
-function openAchievementsModal() {
+function openAchievementsModal(theme = "lime") {
   const items = DATA.achievements || [];
   openModal({
     title: "🏆 Achievements",
+    theme,
     sections: [
-      {
-        label: "This season",
-        open: true,
-        html: () => achievementsHtml(items),
-      },
+      { label: "This season", open: true, html: () => achievementsHtml(items) },
       { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
@@ -595,6 +592,7 @@ function openBioModal() {
 
   openModal({
     title: "Athlete Bio",
+    theme: "pink",
     sections: [
       {
         label: bio.headline || "About",
@@ -624,6 +622,7 @@ function openSupportModal() {
 
   openModal({
     title: "Support / Donate",
+    theme: "pink",
     sections: [
       {
         label: "Why it matters",
@@ -655,6 +654,7 @@ function openSupportModal() {
 function openShareModal() {
   openModal({
     title: "Share Options",
+    theme: "pink",
     sections: [
       { label: "Fast share", open: true, html: shareBlockHtml() },
       {
@@ -678,6 +678,7 @@ function openShareModal() {
 function openBuiltModal() {
   openModal({
     title: "Built to be shared",
+    theme: "pink",
     sections: [
       {
         label: "Parents + sponsors love it",
@@ -747,6 +748,7 @@ function runShare(kind) {
       copyText(url);
       openModal({
         title: "Instagram Share",
+        theme: "pink",
         sections: [{
           label: "Link copied ✅",
           open: true,
