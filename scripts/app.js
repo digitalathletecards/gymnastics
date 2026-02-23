@@ -1,14 +1,13 @@
-/* Digital Athlete Card — Showcase the Journey (3D glass balloons + themed modals)
-   FIXES:
-   - Works with either id="showcaseStage" OR id="bouquetStage" (older HTML)
-   - Video tries multiple filenames (including "layal video.mov")
-   - Defensive guards so one missing element doesn't break the rest
+/* Digital Athlete Card — Realistic drifting balloons inside Showcase panel
+   - Balloons are smaller + more realistic (CSS)
+   - Balloons drift slowly within the Showcase stage (JS)
+   - Each balloon opens themed modal matching its color
+   - Collapsible modals + gallery video remain supported
 */
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const els = {
-  // Modal
   modalHost: $("#modalHost"),
   modalBackdrop: $("#modalBackdrop"),
   modal: $("#modal"),
@@ -17,11 +16,9 @@ const els = {
   modalClose: $("#modalClose"),
   modalMinimize: $("#modalMinimize"),
 
-  // Header
   copyLinkBtn: $("#copyLinkBtn"),
   shareBtn: $("#shareBtn"),
 
-  // Athlete
   athletePhoto: $("#athletePhoto"),
   athleteName: $("#athleteName"),
   athleteSub: $("#athleteSub"),
@@ -32,30 +29,25 @@ const els = {
   bioBtnPhoto: $("#bioBtnPhoto"),
   supportBtn: $("#supportBtn"),
 
-  // Fundraising
   fundTitle: $("#fundTitle"),
   fundNumbers: $("#fundNumbers"),
   meterBar: $("#meterBar"),
   fundNote: $("#fundNote"),
   donateBtn: $("#donateBtn"),
 
-  // Share section card
   shareChips: $("#shareChips"),
   openShareModalBtn: $("#openShareModalBtn"),
 
-  // Gallery
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  // Stage (support BOTH IDs so balloons never "disappear")
+  // Support both IDs (older HTML compatibility)
   showcaseStage: $("#showcaseStage") || $("#bouquetStage"),
 
-  // Footer
   builtBtn: $("#builtBtn"),
 };
 
 let DATA = null;
-let stageParallaxOn = false;
 
 /* ---------------------------
    Modal System + Theme
@@ -70,7 +62,6 @@ function openModal({ title = "Modal", sections = [], compact = false, theme = "p
 
   setModalTheme(theme);
 
-  // Start expanded
   els.modal.classList.remove("modal--collapsed");
   if (els.modalMinimize) {
     els.modalMinimize.setAttribute("aria-expanded", "true");
@@ -81,7 +72,6 @@ function openModal({ title = "Modal", sections = [], compact = false, theme = "p
   els.modalTitle.textContent = title;
   els.modalBody.innerHTML = buildAccordion(sections, compact);
 
-  // GitHub Pages safe: toggle BOTH aria + class
   els.modalHost.setAttribute("aria-hidden", "false");
   els.modalHost.classList.add("is-open");
   document.body.classList.add("modalOpen");
@@ -145,7 +135,6 @@ async function loadData() {
     if (!res.ok) throw new Error("athlete.json not found");
     return await res.json();
   } catch {
-    // Safe fallback so page never breaks
     return {
       athlete: {
         name: "Layla Neitenbach",
@@ -208,7 +197,6 @@ function renderAll() {
   const S = DATA.share || {};
   const G = DATA.gallery || {};
 
-  // Athlete
   if (els.athleteName) els.athleteName.textContent = A.name || "Athlete Name";
   if (els.athleteSub) els.athleteSub.textContent = A.subtitle || "Tap to view bio";
   if (els.clubBadge) els.clubBadge.textContent = A.club || "Club";
@@ -216,7 +204,6 @@ function renderAll() {
   if (els.tierBadge) els.tierBadge.textContent = `🏅 ${A.tier || "Bronze"}`;
   if (els.athletePhoto && A.photo) els.athletePhoto.src = A.photo;
 
-  // Fundraising
   const current = Number(F.current || 0);
   const goal = Math.max(1, Number(F.goal || 1));
   const pct = clamp(Math.round((current / goal) * 100), 0, 100);
@@ -227,7 +214,6 @@ function renderAll() {
   document.querySelector(".meter")?.setAttribute("aria-valuenow", String(pct));
   if (els.fundNote) els.fundNote.textContent = F.note || `Athlete is ${pct}% to the season goal! Help finish strong 💕`;
 
-  // Share chips
   if (els.shareChips) {
     els.shareChips.innerHTML = "";
     (S.chips || []).forEach(ch => {
@@ -240,32 +226,30 @@ function renderAll() {
     });
   }
 
-  // Gallery (if missing element, do not crash)
   if (els.gallerySub) els.gallerySub.textContent = G.subtitle || "Highlights from training + meets.";
   buildGallery(G.items || []);
 
-  // Showcase balloons
-  buildShowcase();
+  // Realistic drifting balloons
+  buildShowcaseDrift();
 }
 
+/* ---------------------------
+   Gallery (includes silent looping video)
+--------------------------- */
 function buildVideoSourcesHtml() {
-  // Try multiple names (INCLUDING your uploaded filename with a space)
-  // Put the actual file you have into /images/ and this will pick it up.
   const candidates = [
     { src: "images/layla-video.mp4", type: "video/mp4" },
     { src: "images/layla-video.mov", type: "video/quicktime" },
-    { src: "images/layal%20video.mov", type: "video/quicktime" }, // <-- your uploaded name
+    { src: "images/layal%20video.mov", type: "video/quicktime" },
     { src: "images/layal%20video.mp4", type: "video/mp4" },
   ];
-
   return candidates.map(c => `<source src="${c.src}" type="${c.type}">`).join("\n");
 }
 
 function buildGallery(items) {
-  if (!els.galleryGrid) return; // <-- IMPORTANT: don’t crash render pipeline
+  if (!els.galleryGrid) return;
   els.galleryGrid.innerHTML = "";
 
-  // Video Card (silent + loops while page open)
   const videoCard = document.createElement("button");
   videoCard.className = "gCard gCard--video";
   videoCard.type = "button";
@@ -283,13 +267,11 @@ function buildGallery(items) {
   videoCard.addEventListener("click", () => openVideoModal());
   els.galleryGrid.appendChild(videoCard);
 
-  // Autoplay nudge: GitHub pages / mobile sometimes needs a gesture
   const vid = videoCard.querySelector("video");
   const tryPlay = () => vid?.play?.().catch(() => {});
   tryPlay();
   window.addEventListener("pointerdown", tryPlay, { once: true, passive: true });
 
-  // Image cards
   items.forEach((it, idx) => {
     const src = it.src || it.image || it.url;
     if (!src) return;
@@ -311,15 +293,7 @@ function buildGallery(items) {
         title: "Photo Card",
         theme: "pink",
         sections: [
-          {
-            label: it.title || "Photo",
-            open: true,
-            html: `
-              <div class="modalMedia">
-                <img src="${escapeHtml(src)}" alt="${escapeHtml(it.title || "Photo")}" />
-              </div>
-            `,
-          },
+          { label: it.title || "Photo", open: true, html: `<div class="modalMedia"><img src="${escapeHtml(src)}" alt="${escapeHtml(it.title || "Photo")}"></div>` },
           { label: "Share this moment", open: false, html: shareBlockHtml() },
         ],
       });
@@ -343,23 +317,20 @@ function openVideoModal() {
               ${buildVideoSourcesHtml()}
             </video>
           </div>
-          <div class="tinyNote">
-            Put your video into <strong>/images</strong>. Best compatibility is MP4:
-            <strong>images/layla-video.mp4</strong>
-          </div>
         `,
       },
       { label: "Share this card", open: false, html: shareBlockHtml() },
     ],
   });
-
   document.querySelector(".modalVideo")?.play?.().catch(() => {});
 }
 
 /* ---------------------------
-   Showcase Balloons + matching modals
+   SHOWCASE: realistic balloons drifting inside stage
 --------------------------- */
-function buildShowcase() {
+let driftRAF = null;
+
+function buildShowcaseDrift() {
   const stage = els.showcaseStage;
   if (!stage) return;
 
@@ -373,26 +344,17 @@ function buildShowcase() {
     { theme: "lime",   emoji: "🏆", label: "Achievements",   sub: "This season",   onClick: openAchievementsModal },
   ];
 
-  const positions = [
-    { left: "10%", top: "16%", tx: "-6px", rot: "-2.6deg" },
-    { left: "52%", top: "9%",  tx: "4px",  rot: "2.3deg"  },
-    { left: "28%", top: "44%", tx: "7px",  rot: "1.4deg"  },
-    { left: "62%", top: "40%", tx: "-4px", rot: "-1.9deg" },
-    { left: "40%", top: "70%", tx: "2px",  rot: "-1.2deg" },
-  ];
+  // Create drifting wrappers
+  const wraps = balloons.map((b, i) => {
+    const wrap = document.createElement("div");
+    wrap.className = "balloonWrap";
 
-  balloons.forEach((b, i) => {
-    const pos = positions[i] || positions[0];
-
+    // inner balloon button
     const btn = document.createElement("button");
     btn.className = "balloon";
     btn.type = "button";
-    btn.setAttribute("aria-label", b.label);
     btn.setAttribute("data-c", b.theme);
-    btn.style.left = pos.left;
-    btn.style.top = pos.top;
-    btn.style.setProperty("--tx", pos.tx);
-    btn.style.setProperty("--rot", pos.rot);
+    btn.setAttribute("aria-label", b.label);
 
     btn.innerHTML = `
       <span class="balloon__body"></span>
@@ -407,44 +369,80 @@ function buildShowcase() {
     `;
 
     btn.addEventListener("click", () => b.onClick(b.theme));
-    stage.appendChild(btn);
+    wrap.appendChild(btn);
+    stage.appendChild(wrap);
+
+    // Drift state (very slow, premium)
+    const seed = 0.7 + (i * 0.15);
+    wrap._state = {
+      x: 30 + i * 18,
+      y: 30 + i * 22,
+      vx: (Math.sin(seed * 3.1) * 0.10) + 0.08,
+      vy: (Math.cos(seed * 2.7) * 0.10) + 0.06,
+      wob: seed * 1000,
+    };
+
+    return wrap;
   });
 
-  enableStageParallax(stage);
+  // Start/Restart drift loop safely
+  if (driftRAF) cancelAnimationFrame(driftRAF);
+  startDrift(stage, wraps);
 }
 
-function enableStageParallax(stage) {
-  if (stageParallaxOn) return;
-  stageParallaxOn = true;
+function startDrift(stage, wraps) {
+  let last = performance.now();
 
-  const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  if (prefersReduced) return;
+  const tick = (t) => {
+    const dt = Math.min(32, t - last);
+    last = t;
 
-  const apply = (x, y) => {
-    const balloons = stage.querySelectorAll(".balloon");
-    balloons.forEach((el, idx) => {
-      const depth = (idx + 1) / 10;
-      const rx = (y * 6.5 * depth).toFixed(2);
-      const ry = (x * -8.5 * depth).toFixed(2);
-      el.style.transform = `rotate(var(--rot)) translate3d(var(--tx), 0px, 0px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-    });
-  };
-
-  const onMove = (ev) => {
     const rect = stage.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const x = (ev.clientX - cx) / (rect.width / 2);
-    const y = (ev.clientY - cy) / (rect.height / 2);
-    apply(clamp(x, -1, 1), clamp(y, -1, 1));
+    // Safe fallback if stage isn't visible yet
+    const W = Math.max(320, rect.width);
+    const H = Math.max(320, rect.height);
+
+    wraps.forEach((wrap, idx) => {
+      const s = wrap._state;
+      if (!s) return;
+
+      // balloon size (approx) — keep inside bounds
+      const bw = window.innerWidth < 980 ? 128 : 140;
+      const bh = window.innerWidth < 980 ? 156 : 170;
+
+      // micro “current” changes (ultra subtle)
+      s.wob += dt;
+      const driftX = Math.sin((s.wob + idx * 400) / 2200) * 0.028;
+      const driftY = Math.cos((s.wob + idx * 500) / 2400) * 0.024;
+
+      s.x += (s.vx + driftX) * dt;
+      s.y += (s.vy + driftY) * dt;
+
+      // bounce edges softly
+      const pad = 10;
+      const maxX = W - bw - pad;
+      const maxY = H - bh - pad;
+
+      if (s.x < pad) { s.x = pad; s.vx = Math.abs(s.vx) * 0.96; }
+      if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx) * 0.96; }
+      if (s.y < pad) { s.y = pad; s.vy = Math.abs(s.vy) * 0.96; }
+      if (s.y > maxY) { s.y = maxY; s.vy = -Math.abs(s.vy) * 0.96; }
+
+      // tiny variation so they don't sync
+      s.vx *= 0.9996;
+      s.vy *= 0.9996;
+
+      wrap.style.transform = `translate3d(${s.x}px, ${s.y}px, 0)`;
+    });
+
+    driftRAF = requestAnimationFrame(tick);
   };
 
-  stage.addEventListener("pointermove", onMove, { passive: true });
-  stage.addEventListener("pointerleave", () => apply(0, 0), { passive: true });
+  driftRAF = requestAnimationFrame(tick);
 }
 
 /* ---------------------------
-   Balloon Popups (theme passed in)
+   Balloon popups (theme passed in)
 --------------------------- */
 function openSponsorsModal(theme = "gold") {
   const sp = DATA.sponsors?.items || [];
@@ -457,16 +455,24 @@ function openSponsorsModal(theme = "gold") {
     ],
   });
 }
+
 function sponsorsHtml(items) {
-  if (!items.length) return `<div class="noteCard"><div class="noteTitle">No sponsors yet</div><div class="noteText">Add sponsors in <strong>data/athlete.json</strong>.</div></div>`;
-  return `<div class="mList">${items.map(s => `
-    <div class="mItem">
-      <div class="mTop">
-        <div class="mTitle">${escapeHtml(s.name || "Sponsor")}</div>
-        <div class="mMeta">${s.url ? "Tap to visit" : ""}</div>
-      </div>
-      <div class="mNote">${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.82);font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)">Open sponsor link</a>` : "Link not provided"}</div>
-    </div>`).join("")}</div>`;
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">No sponsors yet</div><div class="noteText">Add sponsors in <strong>data/athlete.json</strong>.</div></div>`;
+  }
+  return `
+    <div class="mList">
+      ${items.map(s => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(s.name || "Sponsor")}</div>
+            <div class="mMeta">${s.url ? "Tap to visit" : ""}</div>
+          </div>
+          <div class="mNote">${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.82);font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)">Open sponsor link</a>` : "Link not provided"}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function openSnapshotModal(theme = "aqua") {
@@ -480,15 +486,23 @@ function openSnapshotModal(theme = "aqua") {
     ],
   });
 }
+
 function statsHtml(items) {
-  if (!items.length) return `<div class="noteCard"><div class="noteTitle">No stats yet</div><div class="noteText">Add stats in <strong>data/athlete.json</strong>.</div></div>`;
-  return `<div class="mList">${items.map(s => `
-    <div class="mItem">
-      <div class="mTop">
-        <div class="mTitle">${escapeHtml(s.label || "Stat")}</div>
-        <div class="mMeta">${escapeHtml(s.value ?? "")}</div>
-      </div>
-    </div>`).join("")}</div>`;
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">No stats yet</div><div class="noteText">Add stats in <strong>data/athlete.json</strong>.</div></div>`;
+  }
+  return `
+    <div class="mList">
+      ${items.map(s => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(s.label || "Stat")}</div>
+            <div class="mMeta">${escapeHtml(s.value ?? "")}</div>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function openJourneyModal(theme = "pink") {
@@ -502,6 +516,7 @@ function openJourneyModal(theme = "pink") {
     ],
   });
 }
+
 function openUpcomingModal(theme = "violet") {
   const items = DATA.upcoming || [];
   openModal({
@@ -513,6 +528,7 @@ function openUpcomingModal(theme = "violet") {
     ],
   });
 }
+
 function openAchievementsModal(theme = "lime") {
   const items = DATA.achievements || [];
   openModal({
@@ -529,30 +545,42 @@ function timelineHtml(items, isUpcoming = false) {
   if (!items.length) {
     return `<div class="noteCard"><div class="noteTitle">${isUpcoming ? "No upcoming events" : "No updates yet"}</div><div class="noteText">Add items in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `<div class="mList">${items.map(it => `
-    <div class="mItem">
-      <div class="mTop">
-        <div class="mTitle">${escapeHtml(it.title || it.name || "Item")}</div>
-        <div class="mMeta">${escapeHtml(it.date || "")}</div>
-      </div>
-      ${it.note ? `<div class="mNote">${escapeHtml(it.note)}</div>` : ""}
-    </div>`).join("")}</div>`;
+  return `
+    <div class="mList">
+      ${items.map(it => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(it.title || it.name || "Item")}</div>
+            <div class="mMeta">${escapeHtml(it.date || "")}</div>
+          </div>
+          ${it.note ? `<div class="mNote">${escapeHtml(it.note)}</div>` : ""}
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function achievementsHtml(items) {
-  if (!items.length) return `<div class="noteCard"><div class="noteTitle">No achievements yet</div><div class="noteText">Add achievements in <strong>data/athlete.json</strong>.</div></div>`;
-  return `<div class="mList">${items.map(a => `
-    <div class="mItem">
-      <div class="mTop">
-        <div class="mTitle">${escapeHtml(a.title || "Achievement")}</div>
-        <div class="mMeta">⭐</div>
-      </div>
-      ${a.note ? `<div class="mNote">${escapeHtml(a.note)}</div>` : ""}
-    </div>`).join("")}</div>`;
+  if (!items.length) {
+    return `<div class="noteCard"><div class="noteTitle">No achievements yet</div><div class="noteText">Add achievements in <strong>data/athlete.json</strong>.</div></div>`;
+  }
+  return `
+    <div class="mList">
+      ${items.map(a => `
+        <div class="mItem">
+          <div class="mTop">
+            <div class="mTitle">${escapeHtml(a.title || "Achievement")}</div>
+            <div class="mMeta">⭐</div>
+          </div>
+          ${a.note ? `<div class="mNote">${escapeHtml(a.note)}</div>` : ""}
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 /* ---------------------------
-   Other Modals
+   Other modals
 --------------------------- */
 function openBioModal() {
   const bio = DATA.athlete?.bio || {};
@@ -623,9 +651,7 @@ function openShareModal() {
   openModal({
     title: "Share Options",
     theme: "pink",
-    sections: [
-      { label: "Fast share", open: true, html: shareBlockHtml() },
-    ],
+    sections: [{ label: "Fast share", open: true, html: shareBlockHtml() }],
   });
 }
 
@@ -718,21 +744,18 @@ function wireModalDelegates() {
   if (!els.modalBody) return;
   els.modalBody.addEventListener("click", (e) => {
     const t = e.target;
-
     if (t?.matches?.("[data-copylink]")) {
       copyText(location.href);
       t.textContent = "Copied ✓";
       setTimeout(() => (t.textContent = "Copy"), 900);
       return;
     }
-
     const shareBtn = t?.closest?.("[data-share]");
     if (shareBtn) runShare(shareBtn.getAttribute("data-share"));
   });
 }
 
 function wireButtons() {
-  // Modal controls
   els.modalClose?.addEventListener("click", closeModal);
   els.modalBackdrop?.addEventListener("click", closeModal);
   els.modalMinimize?.addEventListener("click", toggleModalCollapse);
@@ -740,22 +763,16 @@ function wireButtons() {
     if (e.key === "Escape" && document.body.classList.contains("modalOpen")) closeModal();
   });
 
-  // Header
   els.copyLinkBtn?.addEventListener("click", () => copyText(location.href));
   els.shareBtn?.addEventListener("click", openShareModal);
 
-  // Hero
   els.bioBtn?.addEventListener("click", openBioModal);
   els.bioBtnPhoto?.addEventListener("click", openBioModal);
   els.supportBtn?.addEventListener("click", openSupportModal);
 
-  // Fundraising
   els.donateBtn?.addEventListener("click", openSupportModal);
-
-  // Share card
   els.openShareModalBtn?.addEventListener("click", openShareModal);
 
-  // Footer
   els.builtBtn?.addEventListener("click", openBuiltModal);
 }
 
