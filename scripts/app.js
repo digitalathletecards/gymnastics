@@ -1,8 +1,4 @@
-/* Digital Athlete Card — Candy Crush style premium drifting pieces in Showcase stage
-   - Candy pieces (gem/jelly/wrapped/donut/pill) drift slowly inside stage
-   - Each candy opens themed modal matching its color
-   - Collapsible modals + gallery video remain supported
-*/
+/* Candy Crush style premium drifting pieces in Showcase stage (defensive GH version) */
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -40,7 +36,11 @@ const els = {
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  showcaseStage: $("#showcaseStage") || $("#bouquetStage"),
+  // Defensive: ID OR previous ID OR class
+  showcaseStage:
+    $("#showcaseStage") ||
+    $("#bouquetStage") ||
+    document.querySelector(".showcase__stage"),
 
   builtBtn: $("#builtBtn"),
 };
@@ -147,22 +147,15 @@ async function loadData() {
           strengths: ["Coachability", "Confidence", "Consistency"],
         },
       },
-      fundraising: {
-        title: "Help cover travel, coaching, meet fees.",
-        current: 650,
-        goal: 2000,
-        note: "Layla is 33% to the season goal! Help finish strong 💕",
-      },
-      share: {
-        chips: [
-          { label: "💬 Text", action: "text" },
-          { label: "💚 WhatsApp", action: "whatsapp" },
-          { label: "📘 Facebook", action: "facebook" },
-          { label: "📸 Instagram", action: "instagram" },
-          { label: "𝕏 X", action: "x" },
-          { label: "✉ Email", action: "email" },
-        ],
-      },
+      fundraising: { title: "Help cover travel, coaching, meet fees.", current: 650, goal: 2000, note: "Layla is 33% to the season goal! Help finish strong 💕" },
+      share: { chips: [
+        { label: "💬 Text", action: "text" },
+        { label: "💚 WhatsApp", action: "whatsapp" },
+        { label: "📘 Facebook", action: "facebook" },
+        { label: "📸 Instagram", action: "instagram" },
+        { label: "𝕏 X", action: "x" },
+        { label: "✉ Email", action: "email" },
+      ]},
       gallery: {
         subtitle: "Highlights from training + meets.",
         items: [
@@ -231,7 +224,7 @@ function renderAll() {
 }
 
 /* ---------------------------
-   Gallery (silent looping video)
+   Gallery video card
 --------------------------- */
 function buildVideoSourcesHtml() {
   const candidates = [
@@ -323,7 +316,7 @@ function openVideoModal() {
 }
 
 /* ---------------------------
-   Candy Showcase Drift
+   Candy drift showcase
 --------------------------- */
 let driftRAF = null;
 
@@ -352,13 +345,16 @@ function buildCandyShowcase() {
     btn.setAttribute("data-kind", c.kind);
     btn.setAttribute("aria-label", c.label);
 
-    // donut gets a hole; wrap gets wrapper ends
-    const wrapEnds = c.kind === "wrap" ? `<span class="candy__wrapLeft"></span><span class="candy__wrapRight"></span>` : "";
+    const wrapEnds = c.kind === "wrap"
+      ? `<span class="candy__wrapLeft"></span><span class="candy__wrapRight"></span>`
+      : "";
     const hole = c.kind === "donut" ? `<span class="candy__hole"></span>` : "";
 
     btn.innerHTML = `
       ${wrapEnds}
       <span class="candy__shell"></span>
+      <span class="candy__tint"></span>
+      <span class="candy__glaze"></span>
       <span class="candy__jelly"></span>
       ${hole}
       <span class="candy__content">
@@ -372,10 +368,10 @@ function buildCandyShowcase() {
     wrap.appendChild(btn);
     stage.appendChild(wrap);
 
-    const seed = 0.9 + i * 0.22;
+    const seed = 1.0 + i * 0.27;
     wrap._state = {
-      x: 26 + (i * 26),
-      y: 26 + (i * 22),
+      x: 18 + i * 24,
+      y: 22 + i * 20,
       vx: (Math.sin(seed * 3.0) * 0.095) + 0.075,
       vy: (Math.cos(seed * 2.7) * 0.095) + 0.060,
       wob: seed * 1000,
@@ -406,7 +402,7 @@ function startCandyDrift(stage, wraps) {
       const size = window.innerWidth < 980 ? 112 : 126;
 
       s.wob += dt;
-      const driftX = Math.sin((s.wob + idx * 440) / 2200) * 0.030;
+      const driftX = Math.sin((s.wob + idx * 460) / 2200) * 0.030;
       const driftY = Math.cos((s.wob + idx * 520) / 2500) * 0.026;
 
       s.x += (s.vx + driftX) * dt;
@@ -434,247 +430,169 @@ function startCandyDrift(stage, wraps) {
 }
 
 /* ---------------------------
-   Candy Popups (theme passed in)
+   Candy modals
 --------------------------- */
-function openSponsorsModal(theme = "gold") {
+function openSponsorsModal(theme="gold"){
   const sp = DATA.sponsors?.items || [];
   openModal({
-    title: "💎 Sponsors",
+    title:"💎 Sponsors",
     theme,
-    sections: [
-      { label: "Sponsor list", open: true, html: () => sponsorsHtml(sp) },
-      { label: "Share this card", open: false, html: shareBlockHtml() },
-    ],
+    sections:[
+      { label:"Sponsor list", open:true, html: () => sponsorsHtml(sp) },
+      { label:"Share this card", open:false, html: shareBlockHtml() }
+    ]
   });
 }
-
-function sponsorsHtml(items) {
-  if (!items.length) {
+function sponsorsHtml(items){
+  if(!items.length){
     return `<div class="noteCard"><div class="noteTitle">No sponsors yet</div><div class="noteText">Add sponsors in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `
-    <div class="mList">
-      ${items.map(s => `
-        <div class="mItem">
-          <div class="mTop">
-            <div class="mTitle">${escapeHtml(s.name || "Sponsor")}</div>
-            <div class="mMeta">${s.url ? "Tap to visit" : ""}</div>
-          </div>
-          <div class="mNote">${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.82);font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)">Open sponsor link</a>` : "Link not provided"}</div>
-        </div>
-      `).join("")}
+  return `<div class="mList">${items.map(s=>`
+    <div class="mItem">
+      <div class="mTop">
+        <div class="mTitle">${escapeHtml(s.name||"Sponsor")}</div>
+        <div class="mMeta">${s.url ? "Tap to visit" : ""}</div>
+      </div>
+      <div class="mNote">${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.82);font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)">Open sponsor link</a>` : "Link not provided"}</div>
     </div>
-  `;
+  `).join("")}</div>`;
 }
 
-function openSnapshotModal(theme = "aqua") {
+function openSnapshotModal(theme="aqua"){
   const stats = DATA.stats || [];
   openModal({
-    title: "⚡ Season Snapshot",
+    title:"⚡ Season Snapshot",
     theme,
-    sections: [
-      { label: "Quick stats", open: true, html: () => statsHtml(stats) },
-      { label: "Share this card", open: false, html: shareBlockHtml() },
-    ],
+    sections:[
+      { label:"Quick stats", open:true, html: () => statsHtml(stats) },
+      { label:"Share this card", open:false, html: shareBlockHtml() }
+    ]
   });
 }
-
-function statsHtml(items) {
-  if (!items.length) {
+function statsHtml(items){
+  if(!items.length){
     return `<div class="noteCard"><div class="noteTitle">No stats yet</div><div class="noteText">Add stats in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `
-    <div class="mList">
-      ${items.map(s => `
-        <div class="mItem">
-          <div class="mTop">
-            <div class="mTitle">${escapeHtml(s.label || "Stat")}</div>
-            <div class="mMeta">${escapeHtml(s.value ?? "")}</div>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
+  return `<div class="mList">${items.map(s=>`
+    <div class="mItem"><div class="mTop">
+      <div class="mTitle">${escapeHtml(s.label||"Stat")}</div>
+      <div class="mMeta">${escapeHtml(s.value ?? "")}</div>
+    </div></div>
+  `).join("")}</div>`;
 }
 
-function openJourneyModal(theme = "pink") {
-  const items = DATA.journey || [];
+function openJourneyModal(theme="pink"){
   openModal({
-    title: "⭐ Journey",
+    title:"⭐ Journey",
     theme,
-    sections: [
-      { label: "Updates", open: true, html: () => timelineHtml(items) },
-      { label: "Share this card", open: false, html: shareBlockHtml() },
-    ],
+    sections:[
+      { label:"Updates", open:true, html: () => timelineHtml(DATA.journey || []) },
+      { label:"Share this card", open:false, html: shareBlockHtml() }
+    ]
+  });
+}
+function openUpcomingModal(theme="violet"){
+  openModal({
+    title:"📅 Upcoming",
+    theme,
+    sections:[
+      { label:"Next events", open:true, html: () => timelineHtml(DATA.upcoming || [], true) },
+      { label:"Share this card", open:false, html: shareBlockHtml() }
+    ]
+  });
+}
+function openAchievementsModal(theme="lime"){
+  openModal({
+    title:"🏆 Achievements",
+    theme,
+    sections:[
+      { label:"This season", open:true, html: () => achievementsHtml(DATA.achievements || []) },
+      { label:"Share this card", open:false, html: shareBlockHtml() }
+    ]
   });
 }
 
-function openUpcomingModal(theme = "violet") {
-  const items = DATA.upcoming || [];
-  openModal({
-    title: "📅 Upcoming",
-    theme,
-    sections: [
-      { label: "Next events", open: true, html: () => timelineHtml(items, true) },
-      { label: "Share this card", open: false, html: shareBlockHtml() },
-    ],
-  });
-}
-
-function openAchievementsModal(theme = "lime") {
-  const items = DATA.achievements || [];
-  openModal({
-    title: "🏆 Achievements",
-    theme,
-    sections: [
-      { label: "This season", open: true, html: () => achievementsHtml(items) },
-      { label: "Share this card", open: false, html: shareBlockHtml() },
-    ],
-  });
-}
-
-function timelineHtml(items, isUpcoming = false) {
-  if (!items.length) {
+function timelineHtml(items, isUpcoming=false){
+  if(!items.length){
     return `<div class="noteCard"><div class="noteTitle">${isUpcoming ? "No upcoming events" : "No updates yet"}</div><div class="noteText">Add items in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `
-    <div class="mList">
-      ${items.map(it => `
-        <div class="mItem">
-          <div class="mTop">
-            <div class="mTitle">${escapeHtml(it.title || it.name || "Item")}</div>
-            <div class="mMeta">${escapeHtml(it.date || "")}</div>
-          </div>
-          ${it.note ? `<div class="mNote">${escapeHtml(it.note)}</div>` : ""}
-        </div>
-      `).join("")}
+  return `<div class="mList">${items.map(it=>`
+    <div class="mItem">
+      <div class="mTop">
+        <div class="mTitle">${escapeHtml(it.title || it.name || "Item")}</div>
+        <div class="mMeta">${escapeHtml(it.date || "")}</div>
+      </div>
+      ${it.note ? `<div class="mNote">${escapeHtml(it.note)}</div>` : ""}
     </div>
-  `;
+  `).join("")}</div>`;
 }
-
-function achievementsHtml(items) {
-  if (!items.length) {
+function achievementsHtml(items){
+  if(!items.length){
     return `<div class="noteCard"><div class="noteTitle">No achievements yet</div><div class="noteText">Add achievements in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `
-    <div class="mList">
-      ${items.map(a => `
-        <div class="mItem">
-          <div class="mTop">
-            <div class="mTitle">${escapeHtml(a.title || "Achievement")}</div>
-            <div class="mMeta">⭐</div>
-          </div>
-          ${a.note ? `<div class="mNote">${escapeHtml(a.note)}</div>` : ""}
-        </div>
-      `).join("")}
+  return `<div class="mList">${items.map(a=>`
+    <div class="mItem">
+      <div class="mTop">
+        <div class="mTitle">${escapeHtml(a.title || "Achievement")}</div>
+        <div class="mMeta">⭐</div>
+      </div>
+      ${a.note ? `<div class="mNote">${escapeHtml(a.note)}</div>` : ""}
     </div>
-  `;
+  `).join("")}</div>`;
 }
 
 /* ---------------------------
-   Other modals
+   Bio / Support / Share
 --------------------------- */
-function openBioModal() {
+function openBioModal(){
   const bio = DATA.athlete?.bio || {};
   const strengths = Array.isArray(bio.strengths) ? bio.strengths : [];
-
   openModal({
-    title: "Athlete Bio",
-    theme: "pink",
-    sections: [
-      {
-        label: bio.headline || "About",
-        open: true,
-        html: `
-          <div class="noteCard">
-            <div class="noteTitle">${escapeHtml(DATA.athlete?.name || "Athlete")}</div>
-            <div class="noteText">${escapeHtml(bio.about || "Add bio content in data/athlete.json")}</div>
-          </div>
-        `,
-      },
-      {
-        label: "Strengths",
-        open: false,
-        html: `<div class="pillRow">${strengths.map(s => `<span class="pill pill--spark">${escapeHtml(s)}</span>`).join("")}</div>`,
-      },
-      { label: "Share this card", open: false, html: shareBlockHtml() },
-    ],
+    title:"Athlete Bio",
+    theme:"pink",
+    sections:[
+      { label: bio.headline || "About", open:true, html: `
+        <div class="noteCard">
+          <div class="noteTitle">${escapeHtml(DATA.athlete?.name || "Athlete")}</div>
+          <div class="noteText">${escapeHtml(bio.about || "Add bio content in data/athlete.json")}</div>
+        </div>
+      `},
+      { label:"Strengths", open:false, html: `<div>${strengths.map(s=>`<span class="pill pill--spark" style="margin:4px 6px 0 0;">${escapeHtml(s)}</span>`).join("")}</div>` },
+      { label:"Share this card", open:false, html: shareBlockHtml() }
+    ]
   });
 }
-
-function openSupportModal() {
+function openSupportModal(){
   const f = DATA.fundraising || {};
-  const current = Number(f.current || 0);
-  const goal = Math.max(1, Number(f.goal || 1));
-  const pct = clamp(Math.round((current / goal) * 100), 0, 100);
+  const current = Number(f.current||0);
+  const goal = Math.max(1, Number(f.goal||1));
+  const pct = clamp(Math.round((current/goal)*100), 0, 100);
 
   openModal({
-    title: "Support / Donate",
-    theme: "pink",
-    sections: [
-      {
-        label: "Why it matters",
-        open: true,
-        html: `
-          <div class="noteCard">
-            <div class="noteTitle">Every share helps 💕</div>
-            <div class="noteText">
-              Sponsorships help cover meet fees, coaching, travel, and training so the focus stays on confidence + growth.
-            </div>
-          </div>
-        `,
-      },
-      {
-        label: "Goal progress",
-        open: false,
-        html: `
-          <div class="noteCard">
-            <div class="noteTitle">$${formatNumber(current)} raised</div>
-            <div class="noteText">Goal: $${formatNumber(goal)} (${pct}%)</div>
-          </div>
-        `,
-      },
-      { label: "Share with sponsors", open: false, html: shareBlockHtml() },
-    ],
+    title:"Support / Donate",
+    theme:"pink",
+    sections:[
+      { label:"Why it matters", open:true, html: `
+        <div class="noteCard">
+          <div class="noteTitle">Every share helps 💕</div>
+          <div class="noteText">Sponsorships help cover meet fees, coaching, travel, and training so the focus stays on confidence + growth.</div>
+        </div>
+      `},
+      { label:"Goal progress", open:false, html: `
+        <div class="noteCard">
+          <div class="noteTitle">$${formatNumber(current)} raised</div>
+          <div class="noteText">Goal: $${formatNumber(goal)} (${pct}%)</div>
+        </div>
+      `},
+      { label:"Share with sponsors", open:false, html: shareBlockHtml() }
+    ]
   });
 }
-
-function openShareModal() {
-  openModal({
-    title: "Share Options",
-    theme: "pink",
-    sections: [{ label: "Fast share", open: true, html: shareBlockHtml() }],
-  });
+function openShareModal(){
+  openModal({ title:"Share Options", theme:"pink", sections:[{ label:"Fast share", open:true, html: shareBlockHtml() }] });
 }
 
-function openBuiltModal() {
-  openModal({
-    title: "Built to be shared",
-    theme: "pink",
-    sections: [
-      {
-        label: "Parents + sponsors love it",
-        open: true,
-        html: `
-          <div class="noteCard">
-            <div class="noteTitle">A feel-good fundraising tool</div>
-            <div class="noteText">
-              A premium digital card that showcases the journey — easy to share, beautiful on every screen,
-              and sponsor-friendly.
-            </div>
-          </div>
-        `,
-      },
-      { label: "Share this page", open: false, html: shareBlockHtml() },
-    ],
-    compact: true,
-  });
-}
-
-/* ---------------------------
-   Share
---------------------------- */
-function shareBlockHtml() {
+function shareBlockHtml(){
   const url = location.href;
   return `
     <div class="shareBlock">
@@ -695,11 +613,10 @@ function shareBlockHtml() {
   `;
 }
 
-function runShare(kind) {
+function runShare(kind){
   const url = location.href;
   const text = `Check out this digital athlete card 💕 ${url}`;
-
-  switch (kind) {
+  switch(kind){
     case "text": window.open(`sms:?&body=${encodeURIComponent(text)}`, "_blank"); break;
     case "whatsapp": window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank"); break;
     case "facebook": window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank"); break;
@@ -707,19 +624,13 @@ function runShare(kind) {
     case "email": window.open(`mailto:?subject=${encodeURIComponent("Support our athlete 💕")}&body=${encodeURIComponent(text)}`, "_blank"); break;
     case "instagram":
       copyText(url);
-      openModal({
-        title: "Instagram Share",
-        theme: "pink",
-        sections: [{ label: "Link copied ✅", open: true, html: `<div class="noteCard">✅ Link copied — paste into a Story / DM / bio.</div>` }],
-        compact: true,
-      });
+      openModal({ title:"Instagram Share", theme:"pink", sections:[{ label:"Link copied ✅", open:true, html:`<div class="noteCard">✅ Link copied — paste into a Story / DM / bio.</div>` }] });
       break;
   }
 }
-
-async function copyText(txt) {
-  try { await navigator.clipboard.writeText(txt); }
-  catch {
+async function copyText(txt){
+  try{ await navigator.clipboard.writeText(txt); }
+  catch{
     const ta = document.createElement("textarea");
     ta.value = txt;
     document.body.appendChild(ta);
@@ -730,32 +641,32 @@ async function copyText(txt) {
 }
 
 /* ---------------------------
-   Events
+   Wiring
 --------------------------- */
-function wireModalDelegates() {
-  if (!els.modalBody) return;
-  els.modalBody.addEventListener("click", (e) => {
+function wireModalDelegates(){
+  if(!els.modalBody) return;
+  els.modalBody.addEventListener("click", (e)=>{
     const t = e.target;
-    if (t?.matches?.("[data-copylink]")) {
+    if(t?.matches?.("[data-copylink]")){
       copyText(location.href);
       t.textContent = "Copied ✓";
-      setTimeout(() => (t.textContent = "Copy"), 900);
+      setTimeout(()=>t.textContent="Copy", 900);
       return;
     }
     const shareBtn = t?.closest?.("[data-share]");
-    if (shareBtn) runShare(shareBtn.getAttribute("data-share"));
+    if(shareBtn) runShare(shareBtn.getAttribute("data-share"));
   });
 }
 
-function wireButtons() {
+function wireButtons(){
   els.modalClose?.addEventListener("click", closeModal);
   els.modalBackdrop?.addEventListener("click", closeModal);
   els.modalMinimize?.addEventListener("click", toggleModalCollapse);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.classList.contains("modalOpen")) closeModal();
+  document.addEventListener("keydown", (e)=>{
+    if(e.key==="Escape" && document.body.classList.contains("modalOpen")) closeModal();
   });
 
-  els.copyLinkBtn?.addEventListener("click", () => copyText(location.href));
+  els.copyLinkBtn?.addEventListener("click", ()=>copyText(location.href));
   els.shareBtn?.addEventListener("click", openShareModal);
 
   els.bioBtn?.addEventListener("click", openBioModal);
@@ -764,20 +675,13 @@ function wireButtons() {
 
   els.donateBtn?.addEventListener("click", openSupportModal);
   els.openShareModalBtn?.addEventListener("click", openShareModal);
-
-  els.builtBtn?.addEventListener("click", openBuiltModal);
 }
 
-/* ---------------------------
-   Utils
---------------------------- */
-function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-function formatNumber(n) { return Number(n || 0).toLocaleString("en-US"); }
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+function formatNumber(n){ return Number(n||0).toLocaleString("en-US"); }
 
-/* ---------------------------
-   Boot
---------------------------- */
-(async function init() {
+/* Boot */
+(async function init(){
   DATA = await loadData();
   renderAll();
   wireButtons();
