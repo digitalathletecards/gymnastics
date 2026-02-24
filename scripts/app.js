@@ -72,7 +72,6 @@
     els.modalHost.setAttribute("aria-hidden", "false");
     modalState.open = true;
 
-    // Basic focus
     requestAnimationFrame(() => els.modalClose.focus());
   }
 
@@ -96,7 +95,6 @@
   els.modalBackdrop.addEventListener("click", closeModal);
   els.modalClose.addEventListener("click", closeModal);
   els.modalMinimize.addEventListener("click", toggleMinimize);
-
   window.addEventListener("keydown", (e) => {
     if (!modalState.open) return;
     if (e.key === "Escape") closeModal();
@@ -109,7 +107,6 @@
       await navigator.clipboard.writeText(url);
       toast("Link copied ✨");
     } catch {
-      // Fallback
       const ta = document.createElement("textarea");
       ta.value = url;
       document.body.appendChild(ta);
@@ -161,7 +158,6 @@
     const text = `Check out this Digital Athlete Card ✨\n${url}`;
     const enc = encodeURIComponent;
 
-    // Note: Instagram doesn't have a universal web share URL; we provide a helpful fallback.
     let target = url;
     if (kind === "sms") target = `sms:?&body=${enc(text)}`;
     if (kind === "whatsapp") target = `https://wa.me/?text=${enc(text)}`;
@@ -214,7 +210,6 @@
 
   // ---------- Data ----------
   async function loadAthlete() {
-    // Cache-bust helps GH Pages when it keeps older JSON around.
     const url = `data/athlete.json?cb=${Date.now()}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`Failed to load athlete.json (${res.status})`);
@@ -257,7 +252,6 @@
         v.setAttribute("autoplay", "");
         v.controls = false;
 
-        // Try to start playback (some browsers require user gesture; muted usually works).
         v.addEventListener("canplay", () => { try { v.play(); } catch {} }, { once: true });
 
         card.appendChild(v);
@@ -293,10 +287,7 @@
     img.style.background = "rgba(255,255,255,.03)";
     wrap.appendChild(img);
 
-    if (it.caption) {
-      wrap.appendChild(section("Caption", it.caption));
-    }
-
+    if (it.caption) wrap.appendChild(section("Caption", it.caption));
     openModal({ title: "🖼️ Photo", theme: "violet", contentNode: wrap });
   }
 
@@ -323,174 +314,219 @@
     wrap.appendChild(v);
 
     if (it.caption) wrap.appendChild(section("Clip", it.caption));
-    wrap.appendChild(ctaRow([
-      { label: "Close", kind: "ghost", onClick: closeModal }
-    ]));
+    wrap.appendChild(ctaRow([{ label: "Close", kind: "ghost", onClick: closeModal }]));
 
     openModal({ title: "▶ Video", theme: "cyan", contentNode: wrap });
-
-    // Attempt play in modal
     setTimeout(() => { try { v.play(); } catch {} }, 50);
   }
 
-  // ---------- Candy Showcase ----------
-  const candyDefs = [
-    { key: "sponsors", label: "Sponsors", theme: "pink", color: "#ff4fd8" },
-    { key: "snapshot", label: "Season Snapshot", theme: "gold", color: "#ffd86b" },
-    { key: "journey", label: "Journey", theme: "violet", color: "#a27cff" },
-    { key: "upcoming", label: "Upcoming", theme: "cyan", color: "#3ce7ff" },
-    { key: "achievements", label: "Achievements", theme: "mint", color: "#4cffc9" },
+  // ---------- Plush Showcase ----------
+  const plushDefs = [
+    { key: "sponsors", label: "Sponsors", theme: "pink", color: "#ff4fd8", symbol: "heart" },
+    { key: "snapshot", label: "Season Snapshot", theme: "gold", color: "#ffd86b", symbol: "spark" },
+    { key: "journey", label: "Journey", theme: "violet", color: "#a27cff", symbol: "path" },
+    { key: "upcoming", label: "Upcoming", theme: "cyan", color: "#3ce7ff", symbol: "calendar" },
+    { key: "achievements", label: "Achievements", theme: "mint", color: "#4cffc9", symbol: "trophy" },
   ];
 
-  function candySVG(hex) {
-    // Candy Crush–style glossy candy with highlight + inner shading
-    // (SVG uses radial gradients so it looks “real” vs a flat blob)
+  function plushSVG(hex, symbol) {
+    // Ultra-cute plush doll: fuzzy body + stitched seam + blush + patch icon
+    // Uses feTurbulence for a soft “fur” feel (still lightweight + GH safe).
     const id = Math.random().toString(16).slice(2);
+
+    const iconPath = (() => {
+      // Small patch icon in the doll’s belly
+      switch (symbol) {
+        case "heart":
+          return `M50 60
+                  C42 52 34 48 30 54
+                  C26 60 30 68 36 72
+                  C42 76 46 80 50 84
+                  C54 80 58 76 64 72
+                  C70 68 74 60 70 54
+                  C66 48 58 52 50 60 Z`;
+        case "spark":
+          return `M50 36 L56 52 L72 50 L58 60 L64 76 L50 66 L36 76 L42 60 L28 50 L44 52 Z`;
+        case "path":
+          return `M28 70 C38 58 44 62 52 52
+                  C60 42 68 44 72 34
+                  M28 70 L34 72
+                  M52 52 L56 56
+                  M72 34 L74 40`;
+        case "calendar":
+          return `M34 44 H66
+                  C70 44 72 46 72 50 V72
+                  C72 76 70 78 66 78 H34
+                  C30 78 28 76 28 72 V50
+                  C28 46 30 44 34 44 Z
+                  M34 54 H66
+                  M38 40 V48
+                  M62 40 V48`;
+        case "trophy":
+        default:
+          return `M38 40 H62
+                  C62 54 58 60 50 64
+                  C42 60 38 54 38 40 Z
+                  M34 42 H38
+                  C38 52 34 54 30 54
+                  C28 54 26 52 26 50
+                  C26 46 28 44 34 44 Z
+                  M66 42 H62
+                  C62 52 66 54 70 54
+                  C72 54 74 52 74 50
+                  C74 46 72 44 66 44 Z
+                  M44 66 H56
+                  M42 70 H58
+                  M40 74 H60`;
+      }
+    })();
+
     return `
-      <svg class="candy__svg" viewBox="0 0 100 100" aria-hidden="true">
+      <svg class="plush__svg" viewBox="0 0 100 100" aria-hidden="true">
         <defs>
-          <radialGradient id="g0_${id}" cx="30%" cy="25%" r="70%">
-            <stop offset="0%" stop-color="white" stop-opacity=".75"/>
-            <stop offset="22%" stop-color="white" stop-opacity=".18"/>
-            <stop offset="60%" stop-color="white" stop-opacity="0"/>
+          <radialGradient id="body_${id}" cx="30%" cy="25%" r="75%">
+            <stop offset="0%" stop-color="white" stop-opacity=".40"/>
+            <stop offset="35%" stop-color="${hex}" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#000" stop-opacity=".18"/>
           </radialGradient>
-          <radialGradient id="g1_${id}" cx="35%" cy="35%" r="70%">
-            <stop offset="0%" stop-color="${hex}" stop-opacity="1"/>
-            <stop offset="55%" stop-color="${hex}" stop-opacity="1"/>
-            <stop offset="100%" stop-color="#000000" stop-opacity=".22"/>
+
+          <radialGradient id="shine_${id}" cx="28%" cy="20%" r="70%">
+            <stop offset="0%" stop-color="white" stop-opacity=".78"/>
+            <stop offset="18%" stop-color="white" stop-opacity=".22"/>
+            <stop offset="55%" stop-color="white" stop-opacity="0"/>
           </radialGradient>
-          <radialGradient id="g2_${id}" cx="50%" cy="60%" r="60%">
-            <stop offset="0%" stop-color="white" stop-opacity=".22"/>
-            <stop offset="65%" stop-color="white" stop-opacity="0"/>
-          </radialGradient>
-          <linearGradient id="rim_${id}" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="white" stop-opacity=".30"/>
-            <stop offset="50%" stop-color="white" stop-opacity=".08"/>
-            <stop offset="100%" stop-color="#000" stop-opacity=".10"/>
-          </linearGradient>
-          <filter id="soft_${id}" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="0.6" />
+
+          <filter id="fur_${id}" x="-30%" y="-30%" width="160%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
           </filter>
+
+          <filter id="soft_${id}" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="0.8" />
+          </filter>
+
+          <linearGradient id="stitch_${id}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="white" stop-opacity=".32"/>
+            <stop offset="55%" stop-color="white" stop-opacity=".12"/>
+            <stop offset="100%" stop-color="#000" stop-opacity=".12"/>
+          </linearGradient>
         </defs>
 
-        <!-- Outer candy body (rounded square-ish) -->
-        <path d="M28 14
-                 C18 16 13 22 12 31
-                 L10 52
-                 C9 62 13 70 22 76
-                 L36 86
-                 C44 92 56 92 64 86
-                 L78 76
-                 C87 70 91 62 90 52
-                 L88 31
-                 C87 22 82 16 72 14
-                 L55 10
-                 C52 9 48 9 45 10
-                 Z"
-              fill="url(#g1_${id})"/>
+        <!-- Plush body (rounded teddy shape) -->
+        <g filter="url(#fur_${id})">
+          <!-- ears -->
+          <circle cx="30" cy="22" r="11" fill="url(#body_${id})" opacity=".92"/>
+          <circle cx="70" cy="22" r="11" fill="url(#body_${id})" opacity=".92"/>
 
-        <!-- Subtle rim -->
-        <path d="M28 14
-                 C18 16 13 22 12 31
-                 L10 52
-                 C9 62 13 70 22 76
-                 L36 86
-                 C44 92 56 92 64 86
-                 L78 76
-                 C87 70 91 62 90 52
-                 L88 31
-                 C87 22 82 16 72 14
-                 L55 10
-                 C52 9 48 9 45 10
-                 Z"
-              fill="none" stroke="url(#rim_${id})" stroke-width="2" opacity=".9"/>
+          <!-- main body -->
+          <path d="M26 30
+                   C18 38 16 50 20 60
+                   C24 70 34 78 50 78
+                   C66 78 76 70 80 60
+                   C84 50 82 38 74 30
+                   C68 24 60 22 50 22
+                   C40 22 32 24 26 30 Z"
+                fill="url(#body_${id})"/>
 
-        <!-- Inner “gel” highlight -->
-        <path d="M34 22
-                 C26 24 22 29 21 37
-                 L20 52
-                 C19 60 22 66 29 70
-                 L40 77
-                 C46 81 54 81 60 77
-                 L71 70
-                 C78 66 81 60 80 52
-                 L79 37
-                 C78 29 74 24 66 22
-                 L53 19
-                 C51 18.6 49 18.6 47 19
-                 Z"
-              fill="rgba(255,255,255,.08)" opacity=".55"/>
+          <!-- arms -->
+          <ellipse cx="22" cy="54" rx="12" ry="10" fill="url(#body_${id})" opacity=".95"/>
+          <ellipse cx="78" cy="54" rx="12" ry="10" fill="url(#body_${id})" opacity=".95"/>
 
-        <!-- Top glossy bloom -->
-        <ellipse cx="40" cy="30" rx="28" ry="22" fill="url(#g0_${id})"/>
+          <!-- feet -->
+          <ellipse cx="38" cy="80" rx="12" ry="9" fill="url(#body_${id})" opacity=".92"/>
+          <ellipse cx="62" cy="80" rx="12" ry="9" fill="url(#body_${id})" opacity=".92"/>
+        </g>
 
-        <!-- Small sparkle streak -->
-        <path d="M62 26 C70 30 72 38 68 44"
-              stroke="white" stroke-opacity=".32" stroke-width="4"
-              stroke-linecap="round" filter="url(#soft_${id})"/>
+        <!-- face + blush -->
+        <circle cx="42" cy="48" r="3.2" fill="rgba(0,0,0,.55)"/>
+        <circle cx="58" cy="48" r="3.2" fill="rgba(0,0,0,.55)"/>
+        <path d="M47 54 C49 56 51 56 53 54" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="2" stroke-linecap="round"/>
+        <ellipse cx="34" cy="54" rx="7" ry="4.5" fill="rgba(255,160,205,.35)" filter="url(#soft_${id})"/>
+        <ellipse cx="66" cy="54" rx="7" ry="4.5" fill="rgba(255,160,205,.35)" filter="url(#soft_${id})"/>
 
-        <!-- Bottom depth glow -->
-        <ellipse cx="55" cy="68" rx="28" ry="18" fill="url(#g2_${id})" opacity=".45"/>
+        <!-- stitched seam -->
+        <path d="M50 30 C48 40 48 52 50 74"
+              fill="none" stroke="url(#stitch_${id})" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 5" opacity=".9"/>
+
+        <!-- belly patch -->
+        <g>
+          <path d="M32 56
+                   C32 50 38 46 50 46
+                   C62 46 68 50 68 56
+                   C68 68 62 74 50 74
+                   C38 74 32 68 32 56 Z"
+                fill="rgba(255,255,255,.12)"
+                stroke="rgba(255,255,255,.18)"
+                stroke-width="1.5"/>
+          <path d="${iconPath}"
+                fill="none"
+                stroke="rgba(255,255,255,.78)"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                opacity=".95"/>
+        </g>
+
+        <!-- premium highlight bloom -->
+        <ellipse cx="40" cy="32" rx="30" ry="22" fill="url(#shine_${id})" opacity=".95"/>
       </svg>
     `.trim();
   }
 
-  function makeCandy(def, i, bounds) {
+  function makePlush(def, bounds) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "candy";
+    btn.className = "plush";
     btn.dataset.key = def.key;
     btn.dataset.theme = def.theme;
 
-    // Random scale for organic feel
-    const scale = 0.88 + Math.random() * 0.26;
-    btn.style.width = `${74 * scale}px`;
-    btn.style.height = `${74 * scale}px`;
+    const scale = 0.92 + Math.random() * 0.26;
+    btn.style.width = `${84 * scale}px`;
+    btn.style.height = `${84 * scale}px`;
 
     btn.innerHTML = `
-      ${candySVG(def.color)}
-      <div class="candy__ring"></div>
-      <div class="candy__label">${def.label}</div>
+      ${plushSVG(def.color, def.symbol)}
+      <div class="plush__halo"></div>
+      <div class="plush__fur"></div>
+      <div class="plush__label">${def.label}</div>
     `;
 
-    // initial position
     const pad = 14;
-    const x = pad + Math.random() * (bounds.w - pad * 2 - 80);
-    const y = pad + Math.random() * (bounds.h - pad * 2 - 110);
+    const x = pad + Math.random() * (bounds.w - pad * 2 - 92);
+    const y = pad + Math.random() * (bounds.h - pad * 2 - 120);
 
-    const candy = {
+    const plush = {
       el: btn,
       x, y,
-      vx: (Math.random() * 0.35 + 0.12) * (Math.random() < 0.5 ? -1 : 1),
-      vy: (Math.random() * 0.35 + 0.12) * (Math.random() < 0.5 ? -1 : 1),
+      vx: (Math.random() * 0.32 + 0.10) * (Math.random() < 0.5 ? -1 : 1),
+      vy: (Math.random() * 0.32 + 0.10) * (Math.random() < 0.5 ? -1 : 1),
       wob: Math.random() * Math.PI * 2,
-      rot: (Math.random() * 12 - 6),
+      rot: (Math.random() * 10 - 5),
       scale
     };
 
-    btn.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${candy.rot}deg)`;
+    btn.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${plush.rot}deg)`;
 
-    btn.addEventListener("click", () => openCandyModal(def));
-    btn.addEventListener("mouseenter", () => bumpCandy(candy, bounds));
-    btn.addEventListener("touchstart", () => bumpCandy(candy, bounds), { passive: true });
+    btn.addEventListener("click", () => openPlushModal(def));
+    btn.addEventListener("mouseenter", () => bump(plush, bounds));
+    btn.addEventListener("touchstart", () => bump(plush, bounds), { passive: true });
 
-    return candy;
+    return plush;
   }
 
-  function bumpCandy(c, bounds) {
-    // gentle push away from edges so it feels alive
-    const centerX = c.x + 34;
-    const centerY = c.y + 34;
+  function bump(p, bounds) {
+    const centerX = p.x + 42;
+    const centerY = p.y + 42;
     const dx = centerX - bounds.w / 2;
     const dy = centerY - bounds.h / 2;
     const len = Math.max(1, Math.hypot(dx, dy));
-    c.vx += (dx / len) * 0.08;
-    c.vy += (dy / len) * 0.08;
+    p.vx += (dx / len) * 0.08;
+    p.vy += (dy / len) * 0.08;
   }
 
-  function openCandyModal(def) {
+  function openPlushModal(def) {
     const theme = def.theme;
-    const title = `🍬 ${def.label}`;
+    const title = `🧸 ${def.label}`;
 
     const node = document.createElement("div");
 
@@ -604,59 +640,54 @@
     openModal({ title, theme, contentNode: node });
   }
 
-  // Drift simulation inside the stage
-  let candies = [];
+  // Drift simulation inside stage
+  let plushies = [];
   let driftRAF = 0;
 
-  function startCandyDrift() {
+  function startPlushDrift() {
     const stage = els.showcaseStage;
     if (!stage) return;
 
-    // Ensure stage has measurable bounds before placing candies
     const rect = stage.getBoundingClientRect();
     const bounds = { w: rect.width, h: rect.height };
 
     stage.innerHTML = "";
-    candies = [];
+    plushies = [];
 
-    // Create candies
-    candyDefs.forEach((def, i) => {
-      const c = makeCandy(def, i, bounds);
-      candies.push(c);
-      stage.appendChild(c.el);
+    plushDefs.forEach((def) => {
+      const p = makePlush(def, bounds);
+      plushies.push(p);
+      stage.appendChild(p.el);
     });
 
-    // Animate
     const pad = 10;
-    const tick = (t) => {
-      // recompute bounds in case of resize (lightweight)
+
+    const tick = () => {
       const r = stage.getBoundingClientRect();
       const w = r.width, h = r.height;
 
-      candies.forEach((c) => {
-        c.wob += 0.02;
-        const wobX = Math.cos(c.wob) * 0.22;
-        const wobY = Math.sin(c.wob) * 0.22;
+      plushies.forEach((p) => {
+        p.wob += 0.018;
+        const wobX = Math.cos(p.wob) * 0.20;
+        const wobY = Math.sin(p.wob) * 0.20;
 
-        c.x += (c.vx + wobX);
-        c.y += (c.vy + wobY);
+        p.x += (p.vx + wobX);
+        p.y += (p.vy + wobY);
 
-        // Soft edge bounce
-        const elW = c.el.offsetWidth || 74;
-        const elH = c.el.offsetHeight || 74;
+        const elW = p.el.offsetWidth || 84;
+        const elH = p.el.offsetHeight || 84;
 
-        if (c.x < pad) { c.x = pad; c.vx *= -1; }
-        if (c.y < pad) { c.y = pad; c.vy *= -1; }
-        if (c.x > w - elW - pad) { c.x = w - elW - pad; c.vx *= -1; }
-        if (c.y > h - elH - pad) { c.y = h - elH - pad; c.vy *= -1; }
+        if (p.x < pad) { p.x = pad; p.vx *= -1; }
+        if (p.y < pad) { p.y = pad; p.vy *= -1; }
+        if (p.x > w - elW - pad) { p.x = w - elW - pad; p.vx *= -1; }
+        if (p.y > h - elH - pad) { p.y = h - elH - pad; p.vy *= -1; }
 
-        // Gentle speed clamp
-        const sp = Math.hypot(c.vx, c.vy);
-        if (sp > 0.75) { c.vx *= 0.92; c.vy *= 0.92; }
+        const sp = Math.hypot(p.vx, p.vy);
+        if (sp > 0.72) { p.vx *= 0.93; p.vy *= 0.93; }
 
-        // Subtle rotate based on velocity
-        const rot = (c.vx * 10) + (Math.sin(c.wob) * 2);
-        c.el.style.transform = `translate3d(${c.x}px, ${c.y}px, 0) rotate(${rot}deg)`;
+        // “Plush wobble” rotation
+        const rot = (p.vx * 9) + (Math.sin(p.wob) * 2.2);
+        p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0) rotate(${rot}deg)`;
       });
 
       driftRAF = requestAnimationFrame(tick);
@@ -670,10 +701,10 @@
   let resizeTimer = 0;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => startCandyDrift(), 120);
+    resizeTimer = setTimeout(() => startPlushDrift(), 120);
   });
 
-  // ---------- UI sections builders ----------
+  // ---------- UI helpers ----------
   function section(title, text, opts = {}) {
     const box = document.createElement("div");
     box.className = "modalSection";
@@ -812,7 +843,6 @@
 
     const tick = () => {
       ctx.clearRect(0, 0, w, h);
-
       dots.forEach(d => {
         d.x += d.vx / 100;
         d.y += d.vy / 100;
@@ -829,7 +859,6 @@
         ctx.fillStyle = `rgba(255,255,255,${d.a})`;
         ctx.fill();
       });
-
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -839,7 +868,6 @@
   async function init() {
     startCanvasFX();
 
-    // Share chips row (always visible)
     const chipDefs = [
       { label: "💬 Text", fn: () => shareVia("sms") },
       { label: "💚 WhatsApp", fn: () => shareVia("whatsapp") },
@@ -851,7 +879,6 @@
     els.shareChips.innerHTML = "";
     chipDefs.forEach(c => els.shareChips.appendChild(chipAction(c.label, c.fn)));
 
-    // Load JSON + bind
     let data;
     try {
       data = await loadAthlete();
@@ -871,13 +898,11 @@
     if (athlete.photo) {
       els.athletePhoto.src = athlete.photo;
     } else {
-      // harmless placeholder (transparent) if missing
       els.athletePhoto.src =
         "data:image/svg+xml;charset=utf-8," +
         encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="rgba(255,255,255,.06)"/><text x="50%" y="52%" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="16" font-family="Arial">Photo</text></svg>`);
     }
 
-    // Fundraising
     const fundraising = data.fundraising || { raised: 0, goal: 0, title: "" };
     const raised = Number(fundraising.raised || 0);
     const goal = Number(fundraising.goal || 0);
@@ -888,33 +913,31 @@
     $(".meter")?.setAttribute("aria-valuenow", String(Math.round(p)));
     els.fundNote.textContent = goal > 0 ? `${Math.round(p)}% of season goal reached` : "Set a goal in athlete.json";
 
-    // Gallery
     const gallery = Array.isArray(data.gallery) ? data.gallery : [];
     els.gallerySub.textContent = data.gallerySub || "Highlights from training + meets.";
     buildGallery(gallery);
 
-    // Candy drift
-    startCandyDrift();
+    // START plush drift
+    startPlushDrift();
 
-    // Bio
     els.bioBtn.addEventListener("click", () => openBioModal(data));
     els.bioBtnPhoto.addEventListener("click", () => openBioModal(data));
 
-    // Donate (placeholder behavior)
     els.donateBtn.addEventListener("click", () => {
       if (data.links?.donate) {
         window.open(data.links.donate, "_blank", "noopener,noreferrer");
       } else {
         toast("Add a donate link in data/athlete.json → links.donate");
-        openCandyModal(candyDefs[1]); // Snapshot
+        openPlushModal(plushDefs[1]);
       }
     });
 
-    // Support button = donate for now
     els.supportBtn.addEventListener("click", () => els.donateBtn.click());
-
-    // Built to be shared
     els.builtBtn.addEventListener("click", openBuiltModal);
+
+    els.copyLinkBtn.addEventListener("click", copyLink);
+    els.shareBtn.addEventListener("click", openShareModal);
+    els.openShareModalBtn.addEventListener("click", openShareModal);
   }
 
   init();
