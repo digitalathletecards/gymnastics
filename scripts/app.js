@@ -1,4 +1,4 @@
-/* Candy Crush style premium drifting pieces in Showcase stage (defensive GH version) */
+/* Showcase the Journey — Photo-real Candy Pieces (SVG) + drift + themed modals */
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -36,7 +36,6 @@ const els = {
   galleryGrid: $("#galleryGrid"),
   gallerySub: $("#gallerySub"),
 
-  // Defensive: ID OR previous ID OR class
   showcaseStage:
     $("#showcaseStage") ||
     $("#bouquetStage") ||
@@ -46,9 +45,10 @@ const els = {
 };
 
 let DATA = null;
+let driftRAF = null;
 
 /* ---------------------------
-   Modal System + Theme
+   Modal System
 --------------------------- */
 function setModalTheme(theme = "pink") {
   if (!els.modal) return;
@@ -147,15 +147,22 @@ async function loadData() {
           strengths: ["Coachability", "Confidence", "Consistency"],
         },
       },
-      fundraising: { title: "Help cover travel, coaching, meet fees.", current: 650, goal: 2000, note: "Layla is 33% to the season goal! Help finish strong 💕" },
-      share: { chips: [
-        { label: "💬 Text", action: "text" },
-        { label: "💚 WhatsApp", action: "whatsapp" },
-        { label: "📘 Facebook", action: "facebook" },
-        { label: "📸 Instagram", action: "instagram" },
-        { label: "𝕏 X", action: "x" },
-        { label: "✉ Email", action: "email" },
-      ]},
+      fundraising: {
+        title: "Help cover travel, coaching, meet fees.",
+        current: 650,
+        goal: 2000,
+        note: "Layla is 33% to the season goal! Help finish strong 💕",
+      },
+      share: {
+        chips: [
+          { label: "💬 Text", action: "text" },
+          { label: "💚 WhatsApp", action: "whatsapp" },
+          { label: "📘 Facebook", action: "facebook" },
+          { label: "📸 Instagram", action: "instagram" },
+          { label: "𝕏 X", action: "x" },
+          { label: "✉ Email", action: "email" },
+        ],
+      },
       gallery: {
         subtitle: "Highlights from training + meets.",
         items: [
@@ -224,7 +231,7 @@ function renderAll() {
 }
 
 /* ---------------------------
-   Gallery video card
+   Gallery video card (silent loop)
 --------------------------- */
 function buildVideoSourcesHtml() {
   const candidates = [
@@ -316,22 +323,156 @@ function openVideoModal() {
 }
 
 /* ---------------------------
-   Candy drift showcase
+   Photo-real Candy SVGs
 --------------------------- */
-let driftRAF = null;
+function candySVG(kind, theme, uid) {
+  // theme palette: base / deep / highlight
+  const pal = {
+    pink:   { a:"#ff4fd8", b:"#b55cff", h:"#ffd4f3" },
+    aqua:   { a:"#2df7ff", b:"#5b7cff", h:"#e5feff" },
+    gold:   { a:"#ffb13b", b:"#ff6a9e", h:"#fff2c8" },
+    violet: { a:"#b55cff", b:"#3df3ff", h:"#f0d9ff" },
+    lime:   { a:"#7dff5a", b:"#20d9ff", h:"#f2ffd8" },
+  }[theme] || { a:"#ff4fd8", b:"#b55cff", h:"#ffd4f3" };
 
+  // SVG filters/gradients need unique IDs per candy
+  const g1 = `g1_${uid}`, g2 = `g2_${uid}`, shine = `sh_${uid}`, drop = `dp_${uid}`;
+
+  // Helpers: common defs
+  const defs = `
+    <defs>
+      <linearGradient id="${g1}" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0" stop-color="${pal.h}" stop-opacity="0.85"/>
+        <stop offset="0.38" stop-color="${pal.a}" stop-opacity="0.92"/>
+        <stop offset="1" stop-color="${pal.b}" stop-opacity="0.98"/>
+      </linearGradient>
+      <radialGradient id="${g2}" cx="35%" cy="28%" r="70%">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+        <stop offset="0.25" stop-color="#ffffff" stop-opacity="0.18"/>
+        <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="${shine}" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="${drop}" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#000000" flood-opacity="0.45"/>
+      </filter>
+    </defs>
+  `;
+
+  // Candy types inspired by your reference image:
+  // - lozenge (oval hard candy)
+  // - stripe (striped cylinder candy)
+  // - sprinkle (chocolate ball with sprinkles)
+  // - gumdrop (tear drop)
+  // - wrap (wrapped candy / cone)
+  switch (kind) {
+    case "lozenge":
+      return `
+      <svg class="candySvg" viewBox="0 0 140 140" aria-hidden="true">
+        ${defs}
+        <g filter="url(#${drop})">
+          <path d="M70 14c28 0 50 22 50 50v12c0 28-22 50-50 50S20 104 20 76V64c0-28 22-50 50-50z"
+                fill="url(#${g1})" stroke="rgba(255,255,255,.30)" stroke-width="1.2"/>
+          <path d="M70 30c20 0 36 16 36 36v8c0 20-16 36-36 36S34 94 34 74v-8c0-20 16-36 36-36z"
+                fill="rgba(255,255,255,.08)"/>
+          <ellipse cx="52" cy="42" rx="18" ry="24" fill="url(#${g2})" opacity="0.9"/>
+          <path d="M18 54h104" stroke="url(#${shine})" stroke-width="10" opacity="0.35"/>
+        </g>
+      </svg>`;
+    case "stripe":
+      return `
+      <svg class="candySvg" viewBox="0 0 140 140" aria-hidden="true">
+        ${defs}
+        <g filter="url(#${drop})" transform="translate(10,20) rotate(-18 60 50)">
+          <rect x="12" y="18" width="96" height="64" rx="32" fill="url(#${g1})" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/>
+          <rect x="34" y="18" width="16" height="64" rx="8" fill="rgba(255,255,255,.70)" opacity="0.85"/>
+          <rect x="62" y="18" width="16" height="64" rx="8" fill="rgba(255,255,255,.70)" opacity="0.85"/>
+          <rect x="90" y="18" width="16" height="64" rx="8" fill="rgba(255,255,255,.70)" opacity="0.85"/>
+          <ellipse cx="36" cy="32" rx="18" ry="24" fill="url(#${g2})" opacity="0.8"/>
+          <path d="M6 44h112" stroke="url(#${shine})" stroke-width="10" opacity="0.30"/>
+        </g>
+      </svg>`;
+    case "sprinkle":
+      return `
+      <svg class="candySvg" viewBox="0 0 140 140" aria-hidden="true">
+        ${defs}
+        <g filter="url(#${drop})">
+          <circle cx="70" cy="72" r="46" fill="#5b2b1c" stroke="rgba(255,255,255,.22)" stroke-width="1.2"/>
+          <circle cx="56" cy="52" r="22" fill="url(#${g2})" opacity="0.9"/>
+          <path d="M26 68h88" stroke="url(#${shine})" stroke-width="10" opacity="0.22"/>
+          ${sprinkles()}
+        </g>
+      </svg>`;
+    case "gumdrop":
+      return `
+      <svg class="candySvg" viewBox="0 0 140 140" aria-hidden="true">
+        ${defs}
+        <g filter="url(#${drop})">
+          <path d="M70 20c26 0 44 22 44 46 0 36-26 56-44 56S26 102 26 66c0-24 18-46 44-46z"
+                fill="url(#${g1})" stroke="rgba(255,255,255,.30)" stroke-width="1.2"/>
+          <ellipse cx="52" cy="44" rx="18" ry="24" fill="url(#${g2})" opacity="0.85"/>
+          <path d="M18 62h104" stroke="url(#${shine})" stroke-width="10" opacity="0.30"/>
+        </g>
+      </svg>`;
+    case "wrap":
+    default:
+      // Wrapped candy / cone-ish (like the blue one in your reference)
+      return `
+      <svg class="candySvg" viewBox="0 0 140 140" aria-hidden="true">
+        ${defs}
+        <g filter="url(#${drop})">
+          <!-- wrapper ends -->
+          <path d="M16 70c10-12 16-18 26-18-6 10-6 26 0 36-10 0-16-6-26-18z"
+                fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
+          <path d="M124 70c-10-12-16-18-26-18 6 10 6 26 0 36 10 0 16-6 26-18z"
+                fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
+
+          <!-- main candy body -->
+          <path d="M42 48c8-10 20-16 28-16s20 6 28 16c8 10 10 26 0 44-8 14-20 20-28 20s-20-6-28-20c-10-18-8-34 0-44z"
+                fill="url(#${g1})" stroke="rgba(255,255,255,.30)" stroke-width="1.2"/>
+
+          <!-- stripes -->
+          <path d="M54 44c8 10 8 42 0 58" stroke="rgba(255,255,255,.80)" stroke-width="10" opacity="0.75" stroke-linecap="round"/>
+          <path d="M86 44c8 10 8 42 0 58" stroke="rgba(255,255,255,.80)" stroke-width="10" opacity="0.75" stroke-linecap="round"/>
+
+          <!-- highlight -->
+          <ellipse cx="58" cy="52" rx="16" ry="22" fill="url(#${g2})" opacity="0.85"/>
+          <path d="M26 66h88" stroke="url(#${shine})" stroke-width="10" opacity="0.26"/>
+        </g>
+      </svg>`;
+  }
+}
+
+function sprinkles(){
+  // deterministic sprinkle dots
+  const dots = [
+    [40,78,"#ff4fd8"], [56,94,"#2df7ff"], [76,92,"#ffd56a"], [92,80,"#7dff5a"],
+    [46,62,"#ffffff"], [72,60,"#b55cff"], [86,64,"#ff7bd5"], [64,78,"#2df7ff"],
+    [82,96,"#ffffff"], [58,112,"#ff4fd8"], [92,100,"#ffd56a"], [48,102,"#7dff5a"],
+    [94,74,"#2df7ff"], [38,90,"#b55cff"], [70,104,"#ffffff"], [104,86,"#ff7bd5"]
+  ];
+  return dots.map(([x,y,c]) => `<circle cx="${x}" cy="${y}" r="4.6" fill="${c}" opacity="0.95"/>`).join("");
+}
+
+/* ---------------------------
+   Candy Showcase Drift (smaller, more realistic)
+--------------------------- */
 function buildCandyShowcase() {
   const stage = els.showcaseStage;
   if (!stage) return;
 
   stage.innerHTML = "";
 
+  // Match the "feel" of your reference image
   const candies = [
-    { theme: "gold",   kind: "wrap",  emoji: "💎", label: "Sponsors",       sub: "Tap to view",   onClick: openSponsorsModal },
-    { theme: "aqua",   kind: "gem",   emoji: "⚡", label: "Season Snapshot", sub: "Quick stats",   onClick: openSnapshotModal },
-    { theme: "pink",   kind: "jelly", emoji: "⭐", label: "Journey",         sub: "Updates",       onClick: openJourneyModal },
-    { theme: "violet", kind: "donut", emoji: "📅", label: "Upcoming",       sub: "Next events",   onClick: openUpcomingModal },
-    { theme: "lime",   kind: "pill",  emoji: "🏆", label: "Achievements",   sub: "This season",   onClick: openAchievementsModal },
+    { theme:"gold",   kind:"stripe",   label:"Sponsors",        sub:"Tap to view",  onClick: openSponsorsModal },
+    { theme:"aqua",   kind:"wrap",     label:"Season Snapshot", sub:"Quick stats",  onClick: openSnapshotModal },
+    { theme:"pink",   kind:"sprinkle", label:"Journey",         sub:"Updates",      onClick: openJourneyModal },
+    { theme:"violet", kind:"lozenge",  label:"Upcoming",        sub:"Next events",  onClick: openUpcomingModal },
+    { theme:"lime",   kind:"gumdrop",  label:"Achievements",    sub:"This season",  onClick: openAchievementsModal },
   ];
 
   const wraps = candies.map((c, i) => {
@@ -341,40 +482,30 @@ function buildCandyShowcase() {
     const btn = document.createElement("button");
     btn.className = "candy";
     btn.type = "button";
-    btn.setAttribute("data-c", c.theme);
-    btn.setAttribute("data-kind", c.kind);
     btn.setAttribute("aria-label", c.label);
 
-    const wrapEnds = c.kind === "wrap"
-      ? `<span class="candy__wrapLeft"></span><span class="candy__wrapRight"></span>`
-      : "";
-    const hole = c.kind === "donut" ? `<span class="candy__hole"></span>` : "";
-
+    const uid = `${c.kind}_${c.theme}_${i}_${Math.random().toString(16).slice(2)}`;
     btn.innerHTML = `
-      ${wrapEnds}
-      <span class="candy__shell"></span>
-      <span class="candy__tint"></span>
-      <span class="candy__glaze"></span>
-      <span class="candy__jelly"></span>
-      ${hole}
-      <span class="candy__content">
-        <span class="candy__emoji">${c.emoji}</span>
-        <span class="candy__label">${escapeHtml(c.label)}</span>
-        <span class="candy__sub">${escapeHtml(c.sub)}</span>
-      </span>
+      ${candySVG(c.kind, c.theme, uid)}
+      <div class="candyLabel">
+        <div class="candyLabel__t">${escapeHtml(c.label)}</div>
+        <div class="candyLabel__s">${escapeHtml(c.sub)}</div>
+      </div>
     `;
 
     btn.addEventListener("click", () => c.onClick(c.theme));
+
     wrap.appendChild(btn);
     stage.appendChild(wrap);
 
-    const seed = 1.0 + i * 0.27;
+    // slower, floaty drift like objects in gel
+    const seed = 1.05 + i * 0.29;
     wrap._state = {
-      x: 18 + i * 24,
-      y: 22 + i * 20,
-      vx: (Math.sin(seed * 3.0) * 0.095) + 0.075,
-      vy: (Math.cos(seed * 2.7) * 0.095) + 0.060,
-      wob: seed * 1000,
+      x: 24 + i * 26,
+      y: 26 + i * 22,
+      vx: (Math.sin(seed * 3.0) * 0.070) + 0.055,
+      vy: (Math.cos(seed * 2.7) * 0.070) + 0.045,
+      wob: seed * 1200,
     };
 
     return wrap;
@@ -399,11 +530,13 @@ function startCandyDrift(stage, wraps) {
       const s = wrap._state;
       if (!s) return;
 
-      const size = window.innerWidth < 980 ? 112 : 126;
+      const size = window.innerWidth < 980 ? 118 : 132;
 
       s.wob += dt;
-      const driftX = Math.sin((s.wob + idx * 460) / 2200) * 0.030;
-      const driftY = Math.cos((s.wob + idx * 520) / 2500) * 0.026;
+
+      // slower internal movement
+      const driftX = Math.sin((s.wob + idx * 420) / 2600) * 0.020;
+      const driftY = Math.cos((s.wob + idx * 520) / 2900) * 0.018;
 
       s.x += (s.vx + driftX) * dt;
       s.y += (s.vy + driftY) * dt;
@@ -412,13 +545,14 @@ function startCandyDrift(stage, wraps) {
       const maxX = W - size - pad;
       const maxY = H - size - pad;
 
-      if (s.x < pad)  { s.x = pad;  s.vx = Math.abs(s.vx) * 0.96; }
-      if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx) * 0.96; }
-      if (s.y < pad)  { s.y = pad;  s.vy = Math.abs(s.vy) * 0.96; }
-      if (s.y > maxY) { s.y = maxY; s.vy = -Math.abs(s.vy) * 0.96; }
+      if (s.x < pad)  { s.x = pad;  s.vx = Math.abs(s.vx) * 0.95; }
+      if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx) * 0.95; }
+      if (s.y < pad)  { s.y = pad;  s.vy = Math.abs(s.vy) * 0.95; }
+      if (s.y > maxY) { s.y = maxY; s.vy = -Math.abs(s.vy) * 0.95; }
 
-      s.vx *= 0.9996;
-      s.vy *= 0.9996;
+      // tiny damping
+      s.vx *= 0.9997;
+      s.vy *= 0.9997;
 
       wrap.style.transform = `translate3d(${s.x}px, ${s.y}px, 0)`;
     });
@@ -430,27 +564,27 @@ function startCandyDrift(stage, wraps) {
 }
 
 /* ---------------------------
-   Candy modals
+   Candy Modals
 --------------------------- */
-function openSponsorsModal(theme="gold"){
+function openSponsorsModal(theme = "gold") {
   const sp = DATA.sponsors?.items || [];
   openModal({
-    title:"💎 Sponsors",
+    title: "💎 Sponsors",
     theme,
-    sections:[
-      { label:"Sponsor list", open:true, html: () => sponsorsHtml(sp) },
-      { label:"Share this card", open:false, html: shareBlockHtml() }
-    ]
+    sections: [
+      { label: "Sponsor list", open: true, html: () => sponsorsHtml(sp) },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
   });
 }
-function sponsorsHtml(items){
-  if(!items.length){
+function sponsorsHtml(items) {
+  if (!items.length) {
     return `<div class="noteCard"><div class="noteTitle">No sponsors yet</div><div class="noteText">Add sponsors in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `<div class="mList">${items.map(s=>`
+  return `<div class="mList">${items.map(s => `
     <div class="mItem">
       <div class="mTop">
-        <div class="mTitle">${escapeHtml(s.name||"Sponsor")}</div>
+        <div class="mTitle">${escapeHtml(s.name || "Sponsor")}</div>
         <div class="mMeta">${s.url ? "Tap to visit" : ""}</div>
       </div>
       <div class="mNote">${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:rgba(255,255,255,.82);font-weight:900;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)">Open sponsor link</a>` : "Link not provided"}</div>
@@ -458,65 +592,65 @@ function sponsorsHtml(items){
   `).join("")}</div>`;
 }
 
-function openSnapshotModal(theme="aqua"){
+function openSnapshotModal(theme = "aqua") {
   const stats = DATA.stats || [];
   openModal({
-    title:"⚡ Season Snapshot",
+    title: "⚡ Season Snapshot",
     theme,
-    sections:[
-      { label:"Quick stats", open:true, html: () => statsHtml(stats) },
-      { label:"Share this card", open:false, html: shareBlockHtml() }
-    ]
+    sections: [
+      { label: "Quick stats", open: true, html: () => statsHtml(stats) },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
   });
 }
-function statsHtml(items){
-  if(!items.length){
+function statsHtml(items) {
+  if (!items.length) {
     return `<div class="noteCard"><div class="noteTitle">No stats yet</div><div class="noteText">Add stats in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `<div class="mList">${items.map(s=>`
+  return `<div class="mList">${items.map(s => `
     <div class="mItem"><div class="mTop">
-      <div class="mTitle">${escapeHtml(s.label||"Stat")}</div>
+      <div class="mTitle">${escapeHtml(s.label || "Stat")}</div>
       <div class="mMeta">${escapeHtml(s.value ?? "")}</div>
     </div></div>
   `).join("")}</div>`;
 }
 
-function openJourneyModal(theme="pink"){
+function openJourneyModal(theme = "pink") {
   openModal({
-    title:"⭐ Journey",
+    title: "⭐ Journey",
     theme,
-    sections:[
-      { label:"Updates", open:true, html: () => timelineHtml(DATA.journey || []) },
-      { label:"Share this card", open:false, html: shareBlockHtml() }
-    ]
+    sections: [
+      { label: "Updates", open: true, html: () => timelineHtml(DATA.journey || []) },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
   });
 }
-function openUpcomingModal(theme="violet"){
+function openUpcomingModal(theme = "violet") {
   openModal({
-    title:"📅 Upcoming",
+    title: "📅 Upcoming",
     theme,
-    sections:[
-      { label:"Next events", open:true, html: () => timelineHtml(DATA.upcoming || [], true) },
-      { label:"Share this card", open:false, html: shareBlockHtml() }
-    ]
+    sections: [
+      { label: "Next events", open: true, html: () => timelineHtml(DATA.upcoming || [], true) },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
   });
 }
-function openAchievementsModal(theme="lime"){
+function openAchievementsModal(theme = "lime") {
   openModal({
-    title:"🏆 Achievements",
+    title: "🏆 Achievements",
     theme,
-    sections:[
-      { label:"This season", open:true, html: () => achievementsHtml(DATA.achievements || []) },
-      { label:"Share this card", open:false, html: shareBlockHtml() }
-    ]
+    sections: [
+      { label: "This season", open: true, html: () => achievementsHtml(DATA.achievements || []) },
+      { label: "Share this card", open: false, html: shareBlockHtml() },
+    ],
   });
 }
 
-function timelineHtml(items, isUpcoming=false){
-  if(!items.length){
+function timelineHtml(items, isUpcoming = false) {
+  if (!items.length) {
     return `<div class="noteCard"><div class="noteTitle">${isUpcoming ? "No upcoming events" : "No updates yet"}</div><div class="noteText">Add items in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `<div class="mList">${items.map(it=>`
+  return `<div class="mList">${items.map(it => `
     <div class="mItem">
       <div class="mTop">
         <div class="mTitle">${escapeHtml(it.title || it.name || "Item")}</div>
@@ -526,11 +660,11 @@ function timelineHtml(items, isUpcoming=false){
     </div>
   `).join("")}</div>`;
 }
-function achievementsHtml(items){
-  if(!items.length){
+function achievementsHtml(items) {
+  if (!items.length) {
     return `<div class="noteCard"><div class="noteTitle">No achievements yet</div><div class="noteText">Add achievements in <strong>data/athlete.json</strong>.</div></div>`;
   }
-  return `<div class="mList">${items.map(a=>`
+  return `<div class="mList">${items.map(a => `
     <div class="mItem">
       <div class="mTop">
         <div class="mTitle">${escapeHtml(a.title || "Achievement")}</div>
@@ -542,57 +676,9 @@ function achievementsHtml(items){
 }
 
 /* ---------------------------
-   Bio / Support / Share
+   Share
 --------------------------- */
-function openBioModal(){
-  const bio = DATA.athlete?.bio || {};
-  const strengths = Array.isArray(bio.strengths) ? bio.strengths : [];
-  openModal({
-    title:"Athlete Bio",
-    theme:"pink",
-    sections:[
-      { label: bio.headline || "About", open:true, html: `
-        <div class="noteCard">
-          <div class="noteTitle">${escapeHtml(DATA.athlete?.name || "Athlete")}</div>
-          <div class="noteText">${escapeHtml(bio.about || "Add bio content in data/athlete.json")}</div>
-        </div>
-      `},
-      { label:"Strengths", open:false, html: `<div>${strengths.map(s=>`<span class="pill pill--spark" style="margin:4px 6px 0 0;">${escapeHtml(s)}</span>`).join("")}</div>` },
-      { label:"Share this card", open:false, html: shareBlockHtml() }
-    ]
-  });
-}
-function openSupportModal(){
-  const f = DATA.fundraising || {};
-  const current = Number(f.current||0);
-  const goal = Math.max(1, Number(f.goal||1));
-  const pct = clamp(Math.round((current/goal)*100), 0, 100);
-
-  openModal({
-    title:"Support / Donate",
-    theme:"pink",
-    sections:[
-      { label:"Why it matters", open:true, html: `
-        <div class="noteCard">
-          <div class="noteTitle">Every share helps 💕</div>
-          <div class="noteText">Sponsorships help cover meet fees, coaching, travel, and training so the focus stays on confidence + growth.</div>
-        </div>
-      `},
-      { label:"Goal progress", open:false, html: `
-        <div class="noteCard">
-          <div class="noteTitle">$${formatNumber(current)} raised</div>
-          <div class="noteText">Goal: $${formatNumber(goal)} (${pct}%)</div>
-        </div>
-      `},
-      { label:"Share with sponsors", open:false, html: shareBlockHtml() }
-    ]
-  });
-}
-function openShareModal(){
-  openModal({ title:"Share Options", theme:"pink", sections:[{ label:"Fast share", open:true, html: shareBlockHtml() }] });
-}
-
-function shareBlockHtml(){
+function shareBlockHtml() {
   const url = location.href;
   return `
     <div class="shareBlock">
@@ -613,10 +699,10 @@ function shareBlockHtml(){
   `;
 }
 
-function runShare(kind){
+function runShare(kind) {
   const url = location.href;
   const text = `Check out this digital athlete card 💕 ${url}`;
-  switch(kind){
+  switch (kind) {
     case "text": window.open(`sms:?&body=${encodeURIComponent(text)}`, "_blank"); break;
     case "whatsapp": window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank"); break;
     case "facebook": window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank"); break;
@@ -624,13 +710,19 @@ function runShare(kind){
     case "email": window.open(`mailto:?subject=${encodeURIComponent("Support our athlete 💕")}&body=${encodeURIComponent(text)}`, "_blank"); break;
     case "instagram":
       copyText(url);
-      openModal({ title:"Instagram Share", theme:"pink", sections:[{ label:"Link copied ✅", open:true, html:`<div class="noteCard">✅ Link copied — paste into a Story / DM / bio.</div>` }] });
+      openModal({
+        title: "Instagram Share",
+        theme: "pink",
+        sections: [{ label: "Link copied ✅", open: true, html: `<div class="noteCard">✅ Link copied — paste into a Story / DM / bio.</div>` }],
+        compact: true,
+      });
       break;
   }
 }
-async function copyText(txt){
-  try{ await navigator.clipboard.writeText(txt); }
-  catch{
+
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); }
+  catch {
     const ta = document.createElement("textarea");
     ta.value = txt;
     document.body.appendChild(ta);
@@ -641,47 +733,52 @@ async function copyText(txt){
 }
 
 /* ---------------------------
-   Wiring
+   Delegates / wiring
 --------------------------- */
-function wireModalDelegates(){
-  if(!els.modalBody) return;
-  els.modalBody.addEventListener("click", (e)=>{
+function wireModalDelegates() {
+  if (!els.modalBody) return;
+  els.modalBody.addEventListener("click", (e) => {
     const t = e.target;
-    if(t?.matches?.("[data-copylink]")){
+    if (t?.matches?.("[data-copylink]")) {
       copyText(location.href);
       t.textContent = "Copied ✓";
-      setTimeout(()=>t.textContent="Copy", 900);
+      setTimeout(() => (t.textContent = "Copy"), 900);
       return;
     }
     const shareBtn = t?.closest?.("[data-share]");
-    if(shareBtn) runShare(shareBtn.getAttribute("data-share"));
+    if (shareBtn) runShare(shareBtn.getAttribute("data-share"));
   });
 }
 
-function wireButtons(){
+function wireButtons() {
   els.modalClose?.addEventListener("click", closeModal);
   els.modalBackdrop?.addEventListener("click", closeModal);
   els.modalMinimize?.addEventListener("click", toggleModalCollapse);
-  document.addEventListener("keydown", (e)=>{
-    if(e.key==="Escape" && document.body.classList.contains("modalOpen")) closeModal();
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("modalOpen")) closeModal();
   });
 
-  els.copyLinkBtn?.addEventListener("click", ()=>copyText(location.href));
-  els.shareBtn?.addEventListener("click", openShareModal);
+  els.copyLinkBtn?.addEventListener("click", () => copyText(location.href));
+  els.shareBtn?.addEventListener("click", () => openModal({ title: "Share Options", theme: "pink", sections: [{ label: "Fast share", open: true, html: shareBlockHtml() }] }));
 
-  els.bioBtn?.addEventListener("click", openBioModal);
-  els.bioBtnPhoto?.addEventListener("click", openBioModal);
-  els.supportBtn?.addEventListener("click", openSupportModal);
+  els.bioBtn?.addEventListener("click", () => openModal({
+    title: "Athlete Bio",
+    theme: "pink",
+    sections: [{ label: "About", open: true, html: `<div class="noteCard"><div class="noteTitle">${escapeHtml(DATA.athlete?.name || "Athlete")}</div><div class="noteText">${escapeHtml(DATA.athlete?.bio?.about || "Add bio content in data/athlete.json")}</div></div>` }],
+  }));
+  els.bioBtnPhoto?.addEventListener("click", () => els.bioBtn?.click());
+  els.supportBtn?.addEventListener("click", () => openModal({ title: "Support / Donate", theme: "pink", sections: [{ label: "Share to sponsors", open: true, html: shareBlockHtml() }] }));
 
-  els.donateBtn?.addEventListener("click", openSupportModal);
-  els.openShareModalBtn?.addEventListener("click", openShareModal);
+  els.donateBtn?.addEventListener("click", () => els.supportBtn?.click());
+  els.openShareModalBtn?.addEventListener("click", () => els.shareBtn?.click());
 }
 
-function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
-function formatNumber(n){ return Number(n||0).toLocaleString("en-US"); }
+/* Utils */
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+function formatNumber(n) { return Number(n || 0).toLocaleString("en-US"); }
 
 /* Boot */
-(async function init(){
+(async function init() {
   DATA = await loadData();
   renderAll();
   wireButtons();
