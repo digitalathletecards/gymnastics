@@ -1,4 +1,5 @@
-/* Ultra Premium Baseline + "Showcase the Journey" Candy Pieces (Apple-fluid drift + themed modals) */
+/* Ultra Premium Baseline + Showcase Candy (GH-safe, no color-mix/oklab) */
+
 :root{
   --bg:#070A12;
   --ink:rgba(255,255,255,.92);
@@ -11,7 +12,6 @@
   --ease: cubic-bezier(.2,.8,.2,1);
   --ease2: cubic-bezier(.16,1,.3,1);
 
-  /* Default accent (pink) */
   --a1:#ff4fd8;
   --a2:#b55cff;
   --a3:#ff7bd5;
@@ -39,7 +39,6 @@ body{
     linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
   background-size: cover, cover, cover, 44px 44px, 44px 44px;
   opacity:.9;
-  filter: saturate(1.05);
 }
 .bg__glow{
   position:absolute; inset:auto;
@@ -83,25 +82,6 @@ body{
   box-shadow:
     0 0 0 1px rgba(255,79,216,.12),
     0 26px 90px rgba(0,0,0,.55);
-}
-.fxCard::before{
-  content:"";
-  position:absolute; inset:-1px;
-  background:
-    radial-gradient(1200px 220px at 18% 0%, rgba(255,79,216,.22), transparent 55%),
-    radial-gradient(900px 220px at 85% 10%, rgba(181,92,255,.18), transparent 55%);
-  opacity:.55;
-  pointer-events:none;
-}
-.fxCard::after{
-  content:"";
-  position:absolute; inset:-2px;
-  border-radius:inherit;
-  background: conic-gradient(from 180deg, rgba(255,79,216,.0), rgba(255,79,216,.45), rgba(181,92,255,.35), rgba(255,123,213,.35), rgba(255,79,216,.0));
-  opacity:.22;
-  filter: blur(10px);
-  pointer-events:none;
-  mix-blend-mode: screen;
 }
 
 /* Pills / badges */
@@ -149,15 +129,7 @@ body{
   background: linear-gradient(180deg, rgba(255,79,216,.22), rgba(181,92,255,.14));
   box-shadow: 0 0 0 1px rgba(255,79,216,.14) inset;
 }
-.btn--ghost{ background: rgba(255,255,255,.03); }
 .btn--soft{ background: rgba(255,255,255,.05); }
-.btn--glow{
-  border-color: rgba(255,79,216,.42);
-  background: linear-gradient(180deg, rgba(255,79,216,.24), rgba(255,123,213,.12));
-  box-shadow:
-    0 0 0 1px rgba(255,79,216,.14) inset,
-    0 12px 44px rgba(255,79,216,.12);
-}
 .btn--tiny{ padding:8px 10px; border-radius: 12px; font-size:12px; }
 
 /* Athlete */
@@ -181,7 +153,6 @@ body{
 .titleRow{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 16px 0; position:relative; z-index:1; }
 .title{ font-weight: 900; letter-spacing: -.25px; }
 .sub{ padding: 8px 16px 14px; color: var(--muted); font-weight:600; font-size:13px; position:relative; z-index:1; }
-.kicker{ color: var(--muted); font-weight:800; font-size:12px; letter-spacing:.3px; }
 
 /* Fund */
 .fund{ padding:16px; margin-top:14px; position:relative; z-index:1; }
@@ -205,7 +176,6 @@ body{
   background: radial-gradient(120px 18px at 30% 50%, rgba(255,255,255,.20), transparent 60%);
   opacity:.55; pointer-events:none;
 }
-.fund__foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .note{ color: var(--muted); font-weight:650; }
 
 /* Share */
@@ -224,7 +194,6 @@ body{
   transition: transform .18s var(--ease), filter .18s var(--ease);
 }
 .chip:hover{ transform: translateY(-1px); filter: brightness(1.06); }
-.share__foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; flex-wrap:wrap; }
 
 /* Gallery */
 .gallery{ margin-top:14px; position:relative; z-index:1; }
@@ -263,17 +232,9 @@ body{
 }
 
 /* --------------------------------
-   SHOWCASE THE JOURNEY (Candy drift)
+   SHOWCASE THE JOURNEY (Candy stage)
 --------------------------------- */
-.showcase{
-  border-radius: 26px;
-  padding-bottom: 14px;
-  overflow:hidden;
-  position:relative;
-}
-.showcase__head{ position:relative; z-index:2; }
-.showcase__titleRow{ padding-bottom: 2px; }
-
+.showcase{ border-radius: 26px; padding-bottom: 14px; overflow:hidden; position:relative; }
 .showcase__stage{
   position:relative;
   height: 540px;
@@ -289,154 +250,132 @@ body{
 }
 @media (max-width: 980px){ .showcase__stage{ height: 430px; } }
 
-/* subtle premium sweep */
-.showcase__stage::before{
-  content:"";
-  position:absolute; inset:-30%;
-  background:
-    radial-gradient(520px 260px at 20% 10%, rgba(255,255,255,.06), transparent 60%),
-    radial-gradient(520px 260px at 80% 0%, rgba(255,255,255,.05), transparent 60%),
-    linear-gradient(120deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.06) 50%, rgba(255,255,255,0) 60%);
-  opacity:.55;
-  animation: stageSweep 6s var(--ease2) infinite;
-  pointer-events:none;
-}
-@keyframes stageSweep{
-  0%{ transform: translateX(-10%) }
-  50%{ transform: translateX(10%) }
-  100%{ transform: translateX(-10%) }
-}
-
-/* drift wrapper moved by JS */
+/* drift wrapper (JS moves it) */
 .candyWrap{
-  position:absolute; left:0; top:0;
-  width: 100px; height: 100px;
-  will-change: transform;
+  position:absolute;
+  left:0; top:0;
+  width: 140px;
+  height: 140px;
+  overflow: visible;
   pointer-events:none;
+  will-change: transform;
 }
 
 /* Candy button */
 .candy{
   pointer-events:auto;
+  position:relative;
+  width: 126px;
+  height: 126px;
   border:0;
   padding:0;
-  background:transparent;
+  background: transparent;
   cursor:pointer;
   -webkit-tap-highlight-color: transparent;
   user-select:none;
   transform-style: preserve-3d;
-
-  /* smaller than balloons */
-  width: 126px;
-  height: 126px;
-
   filter: drop-shadow(0 18px 44px rgba(0,0,0,.45));
   animation: candyFloat 5.2s var(--ease2) infinite;
-  will-change: transform;
 }
 @media (max-width:980px){
   .candy{ width: 112px; height: 112px; }
+  .candyWrap{ width: 126px; height: 126px; }
 }
 @keyframes candyFloat{
-  0%   { transform: translateY(0px) rotate(-1deg); }
-  50%  { transform: translateY(-8px) rotate(1.3deg); }
-  100% { transform: translateY(0px) rotate(-1deg); }
+  0%{ transform: translateY(0px) rotate(-1deg); }
+  50%{ transform: translateY(-8px) rotate(1.2deg); }
+  100%{ transform: translateY(0px) rotate(-1deg); }
 }
 .candy:active{ transform: translateY(2px) scale(.985); }
 
-/* Candy theme variables */
+/* Theme colors */
 .candy[data-c="pink"]  { --c1:#ff4fd8; --c2:#b55cff; --c3:#ff7bd5; }
 .candy[data-c="aqua"]  { --c1:#2df7ff; --c2:#5b7cff; --c3:#7dfff0; }
 .candy[data-c="gold"]  { --c1:#ffd56a; --c2:#ff6a9e; --c3:#fff0b3; }
 .candy[data-c="violet"]{ --c1:#b55cff; --c2:#3df3ff; --c3:#ff4fd8; }
 .candy[data-c="lime"]  { --c1:#a7ff4f; --c2:#2df7ff; --c3:#ffe06a; }
 
-/* Candy "piece" variants */
-.candy[data-kind="gem"]     { --shape: 22px; }
-.candy[data-kind="jelly"]   { --shape: 34px; }
-.candy[data-kind="donut"]   { --shape: 999px; }
-.candy[data-kind="wrap"]    { --shape: 28px; }
-.candy[data-kind="pill"]    { --shape: 38px; }
+/* Shapes per kind */
+.candy[data-kind="gem"]   { --rr: 22px; }
+.candy[data-kind="jelly"] { --rr: 34px; }
+.candy[data-kind="donut"] { --rr: 999px; }
+.candy[data-kind="wrap"]  { --rr: 28px; }
+.candy[data-kind="pill"]  { --rr: 42px; }
 
-/* Outer shell */
+/* Shell (premium candy gloss) */
 .candy__shell{
-  position:absolute; inset:0;
-  border-radius: var(--shape, 26px);
+  position:absolute;
+  inset:0;
+  border-radius: var(--rr, 26px);
   background:
-    /* sparkle dust */
-    radial-gradient(2px 2px at 18% 20%, rgba(255,255,255,.65), transparent 55%),
-    radial-gradient(2px 2px at 70% 28%, rgba(255,255,255,.55), transparent 55%),
-    radial-gradient(2px 2px at 32% 68%, rgba(255,255,255,.45), transparent 55%),
-    radial-gradient(2px 2px at 82% 76%, rgba(255,255,255,.40), transparent 55%),
+    radial-gradient(2px 2px at 20% 18%, rgba(255,255,255,.65), transparent 60%),
+    radial-gradient(2px 2px at 78% 28%, rgba(255,255,255,.55), transparent 60%),
+    radial-gradient(2px 2px at 36% 72%, rgba(255,255,255,.45), transparent 60%),
+    linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,.22) 46%, rgba(255,255,255,0) 58%),
+    radial-gradient(140px 140px at 32% 28%, rgba(255,255,255,.10), transparent 62%),
+    radial-gradient(160px 160px at 70% 78%, rgba(0,0,0,.15), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,.12), rgba(0,0,0,.18)),
+    radial-gradient(170px 170px at 35% 30%, rgba(255,79,216,.0), rgba(0,0,0,0));
 
-    /* specular streak */
-    linear-gradient(115deg, rgba(255,255,255,0) 36%, rgba(255,255,255,.22) 46%, rgba(255,255,255,0) 56%),
-
-    /* candy color depth */
-    radial-gradient(120px 120px at 35% 30%, color-mix(in oklab, var(--c1) 64%, transparent), transparent 68%),
-    radial-gradient(140px 140px at 70% 78%, color-mix(in oklab, var(--c2) 55%, transparent), transparent 72%),
-    linear-gradient(180deg, rgba(255,255,255,.14), rgba(0,0,0,.18));
-
-  border:1px solid color-mix(in oklab, var(--c1) 40%, rgba(255,255,255,.12));
+  /* color overlay via box-shadow + inner gradients below */
   box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.12),
-    inset 0 -18px 42px rgba(0,0,0,.26),
-    0 0 0 1px color-mix(in oklab, var(--c1) 14%, transparent);
+    inset 0 0 0 1px rgba(255,255,255,.14),
+    inset 0 -18px 44px rgba(0,0,0,.26),
+    0 0 0 1px rgba(255,255,255,.08);
   overflow:hidden;
-  backdrop-filter: blur(10px);
   transform: translateZ(8px);
-  transition: filter .24s var(--ease2), transform .24s var(--ease2), box-shadow .24s var(--ease2);
 }
 
-/* Candy rim glow */
-.candy__shell::before{
-  content:"";
-  position:absolute; inset:-3px;
+/* color glaze layer */
+.candy__glaze{
+  position:absolute;
+  inset:0;
   border-radius: inherit;
   background:
-    conic-gradient(from 230deg,
-      rgba(255,255,255,0),
-      color-mix(in oklab, var(--c1) 75%, transparent),
-      color-mix(in oklab, var(--c2) 60%, transparent),
-      color-mix(in oklab, var(--c3) 55%, transparent),
-      rgba(255,255,255,0));
-  opacity:.24;
-  filter: blur(12px);
-  mix-blend-mode: screen;
+    radial-gradient(180px 160px at 35% 28%, rgba(255,255,255,.10), transparent 62%),
+    radial-gradient(200px 180px at 70% 78%, rgba(0,0,0,.16), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.12)),
+    radial-gradient(180px 180px at 35% 30%, rgba(255,255,255,0), rgba(255,255,255,0));
+  opacity: .95;
   pointer-events:none;
+  transform: translateZ(10px);
 }
 
-/* Inner shine blob */
-.candy__shell::after{
-  content:"";
+/* tinted underlay (actual candy color) */
+.candy__tint{
   position:absolute;
-  left: 14%;
-  top: 12%;
-  width: 44%;
-  height: 54%;
-  border-radius: 999px;
-  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.42), rgba(255,255,255,.10) 42%, rgba(255,255,255,0) 70%);
-  transform: rotate(-14deg);
-  opacity:.80;
+  inset:0;
+  border-radius: inherit;
+  background:
+    radial-gradient(170px 170px at 30% 30%, rgba(255,255,255,.08), transparent 62%),
+    radial-gradient(180px 180px at 70% 78%, rgba(0,0,0,.16), transparent 70%),
+    linear-gradient(135deg, rgba(255,255,255,.06), rgba(0,0,0,.16)),
+    radial-gradient(220px 220px at 35% 30%, var(--c1), transparent 70%),
+    radial-gradient(240px 240px at 70% 78%, var(--c2), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.16));
+  opacity:.78;
   pointer-events:none;
+  transform: translateZ(6px);
 }
 
-/* "Jelly wobble" layer */
+/* Jelly inner wobble */
 .candy__jelly{
-  position:absolute; inset:10px;
-  border-radius: calc(var(--shape, 26px) - 8px);
+  position:absolute;
+  inset:10px;
+  border-radius: calc(var(--rr, 26px) - 8px);
   background:
     radial-gradient(140px 120px at 40% 30%, rgba(255,255,255,.16), transparent 64%),
-    radial-gradient(160px 140px at 65% 78%, color-mix(in oklab, var(--c2) 18%, transparent), transparent 72%),
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12));
-  opacity:.65;
-  transform: translateZ(14px);
+    radial-gradient(170px 150px at 70% 78%, rgba(255,255,255,.08), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.14));
+  opacity:.60;
   pointer-events:none;
+  transform: translateZ(14px);
 }
 
-/* Candy label content */
+/* Label content */
 .candy__content{
-  position:absolute; inset:0;
+  position:absolute;
+  inset:0;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -456,24 +395,24 @@ body{
 /* Wrapped candy ends */
 .candy__wrapLeft, .candy__wrapRight{
   position:absolute;
-  top: 28%;
+  top: 30%;
   width: 28%;
-  height: 44%;
+  height: 42%;
   border-radius: 18px;
   background:
     linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,.18)),
-    radial-gradient(80px 80px at 40% 30%, color-mix(in oklab, var(--c3) 50%, transparent), transparent 70%),
-    radial-gradient(80px 80px at 70% 80%, color-mix(in oklab, var(--c1) 45%, transparent), transparent 70%);
+    radial-gradient(80px 80px at 40% 30%, rgba(255,255,255,.10), transparent 70%),
+    radial-gradient(80px 80px at 70% 80%, rgba(0,0,0,.12), transparent 70%),
+    linear-gradient(135deg, var(--c3), var(--c1));
   border:1px solid rgba(255,255,255,.12);
-  opacity:.92;
-  filter: blur(.2px);
+  opacity:.95;
   pointer-events:none;
   transform: translateZ(6px);
 }
 .candy__wrapLeft{ left:-14%; transform: translateZ(6px) rotate(14deg) skewY(12deg); }
 .candy__wrapRight{ right:-14%; transform: translateZ(6px) rotate(-14deg) skewY(-12deg); }
 
-/* Donut hole (for donut kind) */
+/* Donut hole */
 .candy__hole{
   position:absolute;
   left:50%; top:50%;
@@ -481,47 +420,31 @@ body{
   height: 38%;
   transform: translate(-50%,-50%) translateZ(20px);
   border-radius: 999px;
-  background: radial-gradient(circle at 40% 40%, rgba(0,0,0,.35), rgba(0,0,0,.10) 55%, rgba(255,255,255,.08) 70%, rgba(255,255,255,0) 100%);
+  background: radial-gradient(circle at 40% 40%, rgba(0,0,0,.35), rgba(0,0,0,.12) 55%, rgba(255,255,255,.08) 72%, rgba(255,255,255,0) 100%);
   border: 1px solid rgba(255,255,255,.10);
   opacity:.88;
   pointer-events:none;
 }
 
-/* Hover premium */
+/* Hover */
 .candy:hover .candy__shell{
-  filter: brightness(1.08) saturate(1.16);
-  transform: translateZ(10px) scale(1.012);
+  filter: brightness(1.08) saturate(1.12);
   box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.14),
-    inset 0 -18px 42px rgba(0,0,0,.24),
+    inset 0 0 0 1px rgba(255,255,255,.16),
+    inset 0 -18px 44px rgba(0,0,0,.24),
     0 26px 70px rgba(0,0,0,.55),
-    0 0 0 1px color-mix(in oklab, var(--c1) 22%, transparent);
+    0 0 0 1px rgba(255,255,255,.10);
 }
 .candy:focus-visible{ outline:none; }
 .candy:focus-visible .candy__shell{
   box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.14),
-    0 0 0 3px color-mix(in oklab, var(--c1) 42%, transparent),
+    inset 0 0 0 1px rgba(255,255,255,.16),
+    0 0 0 3px rgba(255,79,216,.35),
     0 26px 70px rgba(0,0,0,.52);
 }
 
-/* hint */
-.showcase__hint{
-  display:flex; align-items:center; gap:10px;
-  padding: 12px 16px 0;
-  color: rgba(255,255,255,.70);
-  font-weight: 800;
-  font-size: 12px;
-  position:relative; z-index:2;
-}
-.showcase__hintDot{
-  width: 8px; height:8px; border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,79,216,.95), rgba(181,92,255,.75));
-  box-shadow: 0 0 0 3px rgba(255,79,216,.12);
-}
-
 /* ---------------------------
-   Modal (Themed + GH Pages-safe)
+   Modal
 --------------------------- */
 .modalHost{
   position:fixed; inset:0;
@@ -541,7 +464,6 @@ body{
 }
 body.modalOpen{ overflow:hidden; }
 
-/* Theme mapping via data-theme */
 .modal[data-theme="pink"]  { --a1:#ff4fd8; --a2:#b55cff; --a3:#ff7bd5; }
 .modal[data-theme="aqua"]  { --a1:#2df7ff; --a2:#5b7cff; --a3:#7dfff0; }
 .modal[data-theme="gold"]  { --a1:#ffd56a; --a2:#ff6a9e; --a3:#fff0b3; }
@@ -554,7 +476,7 @@ body.modalOpen{ overflow:hidden; }
   position:relative;
   z-index: 2;
   border-radius: 26px;
-  border:1px solid color-mix(in oklab, var(--a1) 34%, rgba(255,255,255,.10));
+  border:1px solid rgba(255,255,255,.12);
   background: linear-gradient(180deg, rgba(16,18,35,.92), rgba(9,10,20,.86));
   box-shadow: var(--shadow);
   overflow:hidden;
@@ -565,20 +487,10 @@ body.modalOpen{ overflow:hidden; }
   content:"";
   position:absolute; inset:-1px;
   background:
-    radial-gradient(1200px 260px at 20% 0%, color-mix(in oklab, var(--a1) 26%, transparent), transparent 55%),
-    radial-gradient(900px 260px at 85% 10%, color-mix(in oklab, var(--a2) 22%, transparent), transparent 55%);
-  opacity:.65;
+    radial-gradient(1200px 260px at 20% 0%, rgba(255,79,216,.22), transparent 55%),
+    radial-gradient(900px 260px at 85% 10%, rgba(181,92,255,.18), transparent 55%);
+  opacity:.55;
   pointer-events:none;
-}
-.modal::after{
-  content:"";
-  position:absolute; inset:-2px;
-  border-radius:inherit;
-  background: conic-gradient(from 180deg, rgba(255,255,255,0), color-mix(in oklab, var(--a1) 70%, transparent), color-mix(in oklab, var(--a2) 55%, transparent), color-mix(in oklab, var(--a3) 55%, transparent), rgba(255,255,255,0));
-  opacity:.22;
-  filter: blur(12px);
-  pointer-events:none;
-  mix-blend-mode: screen;
 }
 @keyframes modalIn{ to { transform: translateY(0) scale(1); } }
 
@@ -600,11 +512,7 @@ body.modalOpen{ overflow:hidden; }
   cursor:pointer;
   transition: transform .18s var(--ease), filter .18s var(--ease), border-color .18s var(--ease);
 }
-.iconBtn:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.06);
-  border-color: color-mix(in oklab, var(--a1) 28%, rgba(255,255,255,.14));
-}
+.iconBtn:hover{ transform: translateY(-1px); filter: brightness(1.06); border-color: rgba(255,79,216,.22); }
 .iconBtn:active{ transform: translateY(0px) scale(.98); }
 .iconBtn--min{ font-weight: 950; }
 
@@ -613,6 +521,7 @@ body.modalOpen{ overflow:hidden; }
 .modal--collapsed .modal__body{ display:none; }
 .modal--collapsed .modal__top{ border-bottom: none; }
 
+/* Modal content blocks */
 .modalMedia{
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,.12);
@@ -621,6 +530,7 @@ body.modalOpen{ overflow:hidden; }
 }
 .modalMedia img, .modalMedia video{ width:100%; height:auto; display:block; }
 .modalVideo{ width:100%; max-height: 64vh; object-fit: contain; background: rgba(0,0,0,.35); }
+
 .tinyNote{ margin-top:10px; color: rgba(255,255,255,.62); font-weight: 650; font-size: 12px; }
 
 /* Accordion */
@@ -646,7 +556,6 @@ body.modalOpen{ overflow:hidden; }
 .acc__chev{ transition: transform .22s var(--ease2); opacity:.85; font-weight: 950; }
 details[open] .acc__chev{ transform: rotate(180deg); }
 .acc__panel{ padding: 0 12px 12px; color: var(--muted); font-weight: 650; }
-.acc--compact .acc__sum{ padding: 10px 12px; }
 
 /* Share block */
 .shareBlock{ display:flex; flex-direction:column; gap:10px; }
@@ -697,5 +606,4 @@ details[open] .acc__chev{ transform: rotate(180deg); }
   gap: 10px;
   padding: 14px 14px;
 }
-.footer__spark{ filter: drop-shadow(0 0 18px rgba(255,79,216,.22)); }
 .footer__text{ font-weight:900; }
