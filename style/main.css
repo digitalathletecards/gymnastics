@@ -1,623 +1,944 @@
-:root{
-  --bg0:#070A12;
-  --bg1:#0B0F1E;
-  --fg:#EAF0FF;
-  --muted:rgba(234,240,255,.72);
-  --muted2:rgba(234,240,255,.58);
-  --line:rgba(255,255,255,.10);
-  --glass:rgba(10,14,30,.58);
-  --glass2:rgba(10,14,30,.42);
-  --shadow: 0 24px 80px rgba(0,0,0,.55);
-  --shadow2: 0 10px 30px rgba(0,0,0,.45);
+/* Digital Athlete Card — GH Pages safe (relative paths, strict IDs) */
+(() => {
+  "use strict";
 
-  --pink0:#ff4fd8;
-  --pink1:#ff86ea;
-  --cyan0:#3ce7ff;
-  --gold0:#ffd86b;
-  --vio0:#a27cff;
-  --mint0:#4cffc9;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  --radius:22px;
-  --radius2:28px;
+  const els = {
+    fx: $("#fx"),
+    athletePhoto: $("#athletePhoto"),
+    athleteName: $("#athleteName"),
+    athleteSub: $("#athleteSub"),
+    tierBadge: $("#tierBadge"),
+    clubBadge: $("#clubBadge"),
+    sportBadge: $("#sportBadge"),
+    fundTitle: $("#fundTitle"),
+    fundNumbers: $("#fundNumbers"),
+    fundNote: $("#fundNote"),
+    meterBar: $("#meterBar"),
+    galleryGrid: $("#galleryGrid"),
+    gallerySub: $("#gallerySub"),
+    shareChips: $("#shareChips"),
 
-  --ease: cubic-bezier(.2,.9,.2,1);
-  --ease2: cubic-bezier(.16,1,.3,1);
-}
+    showcaseStage: $("#showcaseStage"),
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: radial-gradient(1200px 900px at 20% 10%, rgba(255,79,216,.18), transparent 60%),
-              radial-gradient(900px 700px at 85% 18%, rgba(60,231,255,.14), transparent 55%),
-              radial-gradient(800px 700px at 55% 90%, rgba(162,124,255,.12), transparent 55%),
-              linear-gradient(180deg, var(--bg0), var(--bg1));
-  color:var(--fg);
-  overflow-x:hidden;
-}
+    copyLinkBtn: $("#copyLinkBtn"),
+    shareBtn: $("#shareBtn"),
+    openShareModalBtn: $("#openShareModalBtn"),
+    bioBtn: $("#bioBtn"),
+    bioBtnPhoto: $("#bioBtnPhoto"),
+    supportBtn: $("#supportBtn"),
+    donateBtn: $("#donateBtn"),
+    builtBtn: $("#builtBtn"),
 
-/* ---------- Background FX ---------- */
-.bg{
-  position:fixed; inset:0;
-  z-index:-1;
-  pointer-events:none;
-}
-.bg__grid{
-  position:absolute; inset:-2px;
-  background:
-    linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px) 0 0/44px 44px,
-    linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px) 0 0/44px 44px;
-  mask-image: radial-gradient(closest-side at 50% 35%, black 0%, transparent 72%);
-  opacity:.35;
-  filter: blur(.1px);
-}
-.bg__glow{
-  position:absolute; width:900px; height:900px;
-  border-radius:50%;
-  filter: blur(50px);
-  opacity:.75;
-}
-.bg__glow--a{left:-260px; top:-300px; background: radial-gradient(circle at 30% 30%, rgba(255,79,216,.55), transparent 65%);}
-.bg__glow--b{right:-340px; top:-240px; background: radial-gradient(circle at 60% 30%, rgba(60,231,255,.45), transparent 65%);}
-#fx{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  opacity:.65;
-}
+    modalHost: $("#modalHost"),
+    modalBackdrop: $("#modalBackdrop"),
+    modal: $("#modal"),
+    modalTitle: $("#modalTitle"),
+    modalBody: $("#modalBody"),
+    modalClose: $("#modalClose"),
+    modalMinimize: $("#modalMinimize"),
+  };
 
-/* ---------- Layout ---------- */
-.stage{padding:22px 14px 40px}
-.wrap{max-width:1180px; margin:0 auto}
-.topbar{
-  position:sticky; top:0;
-  z-index:10;
-  padding:14px 14px;
-  backdrop-filter: blur(16px);
-  background: linear-gradient(180deg, rgba(7,10,18,.78), rgba(7,10,18,.35));
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-.topbar, .topbar *{ -webkit-tap-highlight-color: transparent; }
-.topbar__left{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
-.topbar__right{display:flex; gap:10px; align-items:center}
-.topbar{display:flex; justify-content:space-between; align-items:center}
-.crumbs{color:var(--muted); font-weight:650; letter-spacing:.2px}
+  // Add sparkly border layer to all fxCards (purely decorative).
+  $$(".fxCard").forEach(card => {
+    const layer = document.createElement("div");
+    layer.className = "sparkBorder";
+    card.appendChild(layer);
+  });
 
-.hero{
-  display:grid;
-  grid-template-columns: 1.1fr .9fr;
-  gap:18px;
-  align-items:start;
-  margin-top:14px;
-}
-@media (max-width: 980px){
-  .hero{grid-template-columns:1fr}
-  .topbar{position:static}
-}
+  // ---------- Modal ----------
+  const modalState = {
+    open: false,
+    minimized: false,
+    lastFocus: null,
+  };
 
-/* ---------- Cards / Glass ---------- */
-.card, .fxCard{
-  border-radius: var(--radius2);
-  background: linear-gradient(180deg, rgba(10,14,30,.62), rgba(10,14,30,.40));
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: var(--shadow2);
-  position:relative;
-  overflow:hidden;
-}
-.fxCard::before{
-  content:"";
-  position:absolute; inset:-2px;
-  background:
-    radial-gradient(900px 320px at 10% 0%, rgba(255,79,216,.14), transparent 55%),
-    radial-gradient(740px 320px at 92% 12%, rgba(60,231,255,.10), transparent 58%),
-    radial-gradient(820px 420px at 40% 120%, rgba(162,124,255,.10), transparent 55%);
-  pointer-events:none;
-}
-.fxCard::after{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(135deg, rgba(255,255,255,.12), transparent 35%, rgba(255,255,255,.06));
-  opacity:.28;
-  pointer-events:none;
-  mix-blend-mode: screen;
-}
+  function openModal({ title, theme = "pink", contentNode }) {
+    modalState.lastFocus = document.activeElement;
+    els.modal.dataset.theme = theme;
+    els.modalTitle.textContent = title;
 
-/* Ultra-premium pink metallic sparkly border */
-.fxCard{
-  outline: 1px solid rgba(255,255,255,.06);
-}
-.fxCard > *{position:relative; z-index:1}
-.fxCard .sparkBorder{
-  position:absolute; inset:-2px;
-  border-radius: inherit;
-  pointer-events:none;
-  background:
-    conic-gradient(from 180deg,
-      rgba(255,79,216,.0),
-      rgba(255,79,216,.65),
-      rgba(60,231,255,.35),
-      rgba(255,216,107,.25),
-      rgba(255,79,216,.6),
-      rgba(255,79,216,.0)
-    );
-  opacity:.35;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  padding:2px;
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: shimmer 5.6s linear infinite;
-}
-@keyframes shimmer{
-  0%{transform: rotate(0deg)}
-  100%{transform: rotate(360deg)}
-}
+    els.modalBody.innerHTML = "";
+    if (contentNode) els.modalBody.appendChild(contentNode);
 
-.titleRow{display:flex; justify-content:space-between; align-items:center; gap:10px}
-.title{font-weight:900; letter-spacing:.2px; font-size:18px}
-.sub{color:var(--muted); font-weight:650; margin-top:6px}
-.kicker{color:var(--muted); font-weight:800; letter-spacing:.14px; font-size:12px}
+    els.modal.classList.remove("isMin");
+    modalState.minimized = false;
+    els.modalMinimize.setAttribute("aria-expanded", "true");
+    els.modalMinimize.textContent = "▾";
 
-/* ---------- Buttons ---------- */
-.btn{
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color:var(--fg);
-  border-radius: 14px;
-  padding:10px 12px;
-  font-weight:850;
-  letter-spacing:.15px;
-  cursor:pointer;
-  transition: transform .18s var(--ease2), background .18s var(--ease), border-color .18s var(--ease);
-  user-select:none;
-}
-.btn:hover{transform: translateY(-1px)}
-.btn:active{transform: translateY(0px) scale(.99)}
-.btn--tiny{padding:7px 10px; font-weight:850; border-radius:12px}
-.btn--ghost{background: rgba(255,255,255,.03)}
-.btn--primary{
-  background: linear-gradient(135deg, rgba(255,79,216,.88), rgba(162,124,255,.78));
-  border-color: rgba(255,255,255,.14);
-  box-shadow: 0 18px 48px rgba(255,79,216,.18);
-}
-.btn--soft{
-  background: rgba(60,231,255,.08);
-  border-color: rgba(60,231,255,.18);
-}
-.btn--glow{
-  background: linear-gradient(135deg, rgba(255,216,107,.92), rgba(255,79,216,.75));
-  border-color: rgba(255,255,255,.14);
-  box-shadow: 0 18px 46px rgba(255,216,107,.14);
-}
-.pill{
-  display:inline-flex; align-items:center; gap:8px;
-  border-radius:999px;
-  padding:8px 10px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.05);
-  font-weight:850;
-  letter-spacing:.12px;
-  color:var(--fg);
-}
-.pill--spark{
-  background: radial-gradient(circle at 30% 30%, rgba(255,79,216,.22), rgba(255,255,255,.04));
-}
+    els.modalHost.classList.add("isOpen");
+    els.modalHost.setAttribute("aria-hidden", "false");
+    modalState.open = true;
 
-/* ---------- Athlete ---------- */
-.athlete{
-  display:flex;
-  gap:14px;
-  align-items:center;
-  padding:16px;
-}
-.athlete__photo{
-  width:88px; height:88px;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.06);
-  overflow:hidden;
-  padding:0;
-  cursor:pointer;
-  box-shadow: 0 16px 50px rgba(0,0,0,.35);
-  position:relative;
-}
-.athlete__photo img{
-  width:100%; height:100%;
-  object-fit:cover;
-  display:block;
-  transform: scale(1.02);
-}
-.athlete__photo::after{
-  content:"";
-  position:absolute; inset:-2px;
-  border-radius:inherit;
-  background: radial-gradient(40px 40px at 28% 20%, rgba(255,255,255,.26), transparent 60%);
-  pointer-events:none;
-}
-.athlete__meta{flex:1; min-width:0}
-.badgeRow{display:flex; gap:8px; flex-wrap:wrap}
-.badge{
-  font-weight:900;
-  letter-spacing:.12px;
-  font-size:12px;
-  padding:7px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-}
-.badge--soft{background: rgba(255,255,255,.04); color:var(--muted)}
-.athlete__name{
-  margin:8px 0 2px;
-  font-size:32px;
-  font-weight:950;
-  letter-spacing:.2px;
-  line-height:1.05;
-}
-.athlete__sub{color:var(--muted); font-weight:750}
-.ctaRow{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+    requestAnimationFrame(() => els.modalClose.focus());
+  }
 
-/* ---------- Fundraising ---------- */
-.fund{padding:16px}
-.fund__head{display:flex; justify-content:space-between; gap:14px; align-items:flex-start}
-.fund__numbers{font-weight:950; font-size:16px; color:rgba(255,255,255,.92); white-space:nowrap}
-.meter{
-  margin-top:12px;
-  height:12px;
-  border-radius:999px;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  position:relative;
-  overflow:hidden;
-}
-.meter__bar{
-  height:100%;
-  width:0%;
-  border-radius:inherit;
-  background: linear-gradient(90deg, rgba(255,79,216,.95), rgba(60,231,255,.75), rgba(255,216,107,.75));
-  transition: width .7s var(--ease2);
-  box-shadow: 0 12px 30px rgba(255,79,216,.16);
-}
-.meter__spark{
-  position:absolute; top:-14px; left:0;
-  width:40px; height:40px;
-  border-radius:999px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.72), rgba(255,255,255,.0) 60%);
-  filter: blur(1px);
-  mix-blend-mode: screen;
-  opacity:.45;
-  transform: translateX(-20px);
-}
-.fund__foot{
-  margin-top:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-.note{color:var(--muted2); font-weight:700}
+  function closeModal() {
+    els.modalHost.classList.remove("isOpen");
+    els.modalHost.setAttribute("aria-hidden", "true");
+    modalState.open = false;
 
-/* ---------- Share ---------- */
-.share{padding:16px}
-.share__head{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
-.share__chips{display:flex; gap:8px; flex-wrap:wrap}
-.chip{
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.05);
-  padding:8px 10px;
-  font-weight:850;
-  cursor:pointer;
-}
-.share__foot{margin-top:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap}
+    if (modalState.lastFocus && typeof modalState.lastFocus.focus === "function") {
+      modalState.lastFocus.focus();
+    }
+  }
 
-/* ---------- Gallery ---------- */
-.gallery{padding:16px}
-.galleryGrid{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap:10px;
-}
-@media (max-width: 560px){
-  .galleryGrid{grid-template-columns: repeat(2, minmax(0,1fr))}
-}
-.mediaCard{
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  overflow:hidden;
-  cursor:pointer;
-  position:relative;
-  min-height:120px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.28);
-  transform: translateZ(0);
-  transition: transform .18s var(--ease2), border-color .18s var(--ease);
-}
-.mediaCard:hover{transform: translateY(-2px)}
-.mediaCard:active{transform: translateY(0px) scale(.99)}
-.mediaCard img, .mediaCard video{
-  width:100%; height:100%;
-  object-fit:cover;
-  display:block;
-}
-.mediaCard::after{
-  content:"";
-  position:absolute; inset:0;
-  background: radial-gradient(70px 50px at 25% 18%, rgba(255,255,255,.26), transparent 60%),
-              linear-gradient(180deg, transparent 40%, rgba(0,0,0,.22));
-  pointer-events:none;
-}
-.playBadge{
-  position:absolute; left:10px; top:10px;
-  border-radius:999px;
-  padding:7px 10px;
-  font-weight:950;
-  border:1px solid rgba(255,255,255,.18);
-  background: rgba(0,0,0,.24);
-  backdrop-filter: blur(10px);
-}
+  function toggleMinimize() {
+    modalState.minimized = !modalState.minimized;
+    els.modal.classList.toggle("isMin", modalState.minimized);
+    els.modalMinimize.setAttribute("aria-expanded", String(!modalState.minimized));
+    els.modalMinimize.textContent = modalState.minimized ? "▸" : "▾";
+  }
 
-/* ---------- Showcase (Plush Drift) ---------- */
-.showcase{padding:16px}
-.showcase__head{margin-bottom:10px}
-.showcase__titleRow{align-items:flex-start}
-.showcase__stage{
-  position:relative;
-  width:100%;
-  height: 360px;
-  border-radius: 24px;
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.10);
-  background:
-    radial-gradient(600px 260px at 20% 15%, rgba(255,79,216,.18), transparent 58%),
-    radial-gradient(520px 240px at 90% 25%, rgba(60,231,255,.12), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 22px 60px rgba(0,0,0,.35);
-}
-.showcase__hint{
-  margin-top:10px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  color:var(--muted2);
-  font-weight:750;
-}
-.showcase__hintDot{
-  width:10px; height:10px;
-  border-radius:99px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.8), rgba(255,79,216,.9));
-  box-shadow: 0 0 18px rgba(255,79,216,.35);
-}
+  els.modalBackdrop.addEventListener("click", closeModal);
+  els.modalClose.addEventListener("click", closeModal);
+  els.modalMinimize.addEventListener("click", toggleMinimize);
+  window.addEventListener("keydown", (e) => {
+    if (!modalState.open) return;
+    if (e.key === "Escape") closeModal();
+  });
 
-/* Plush piece (button) */
-.plush{
-  position:absolute;
-  width: 84px;
-  height: 84px;
-  border:0;
-  padding:0;
-  background: transparent;
-  cursor:pointer;
-  transform: translate3d(0,0,0);
-  will-change: transform;
-  filter:
-    drop-shadow(0 22px 18px rgba(0,0,0,.28))
-    drop-shadow(0 8px 26px rgba(255,79,216,.06));
-  transition: transform .18s var(--ease2), filter .18s var(--ease);
-  -webkit-tap-highlight-color: transparent;
-}
-.plush:focus-visible{
-  outline: 2px solid rgba(255,255,255,.65);
-  outline-offset: 4px;
-  border-radius: 26px;
-}
-.plush:hover{
-  filter:
-    drop-shadow(0 26px 20px rgba(0,0,0,.30))
-    drop-shadow(0 10px 34px rgba(255,255,255,.08));
-}
-.plush:active{
-  transform: translate3d(0,0,0) scale(.985);
-}
+  // ---------- Clipboard / Share ----------
+  async function copyLink() {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("Link copied ✨");
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); toast("Link copied ✨"); }
+      catch { toast("Copy failed — select & copy from address bar"); }
+      finally { ta.remove(); }
+    }
+  }
 
-.plush__svg{
-  width:100%;
-  height:100%;
-  display:block;
-}
+  function openShareModal() {
+    const node = document.createElement("div");
 
-.plush__halo{
-  position:absolute; inset:-12px;
-  border-radius: 30px;
-  pointer-events:none;
-  opacity:0;
-  transform: scale(.94);
-  transition: opacity .18s var(--ease), transform .18s var(--ease);
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), transparent 55%),
-    conic-gradient(from 180deg, rgba(255,79,216,.0), rgba(255,79,216,.34), rgba(60,231,255,.22), rgba(255,216,107,.18), rgba(255,79,216,.0));
-  filter: blur(.6px);
-  mix-blend-mode: screen;
-}
-.plush:hover .plush__halo{
-  opacity:.85;
-  transform: scale(1);
-}
+    node.appendChild(section(
+      "Share this card",
+      "Send the link to family + potential sponsors. A quick share often turns into real support.",
+      {
+        grid: [
+          chipAction("💬 Text", () => shareVia("sms")),
+          chipAction("💚 WhatsApp", () => shareVia("whatsapp")),
+          chipAction("📘 Facebook", () => shareVia("facebook")),
+          chipAction("✉️ Email", () => shareVia("email")),
+          chipAction("📸 Instagram", () => shareVia("instagram")),
+          chipAction("𝕏 X", () => shareVia("x")),
+        ]
+      }
+    ));
 
-/* “Fur shimmer” overlay */
-.plush__fur{
-  position:absolute; inset:0;
-  border-radius: 26px;
-  pointer-events:none;
-  opacity:.55;
-  background:
-    radial-gradient(90px 60px at 30% 24%, rgba(255,255,255,.22), transparent 60%),
-    radial-gradient(90px 60px at 70% 66%, rgba(255,255,255,.10), transparent 60%),
-    linear-gradient(135deg, rgba(255,255,255,.12), transparent 40%, rgba(255,255,255,.06));
-  mix-blend-mode: screen;
-  animation: furFloat 4.6s var(--ease2) infinite;
-}
-@keyframes furFloat{
-  0%{transform: translateY(0) translateX(0); opacity:.52}
-  50%{transform: translateY(-1.6px) translateX(1.4px); opacity:.62}
-  100%{transform: translateY(0) translateX(0); opacity:.52}
-}
+    node.appendChild(section(
+      "Pro tip",
+      "Share with 3 sponsors today. Include one sentence about what the funds cover (travel, coaching, meet fees).",
+      { list: [
+        "Keep it short and upbeat.",
+        "Add one highlight (recent meet, new skill, personal best).",
+        "Ask for a small monthly amount or a one-time gift."
+      ]}
+    ));
 
-.plush__label{
-  position:absolute;
-  left:50%;
-  bottom:-22px;
-  transform: translateX(-50%);
-  font-size:11px;
-  font-weight:950;
-  letter-spacing:.14px;
-  color:rgba(255,255,255,.92);
-  text-shadow: 0 10px 30px rgba(0,0,0,.45);
-  white-space:nowrap;
-  pointer-events:none;
-}
+    node.appendChild(ctaRow([
+      { label: "↗ Copy Link", kind: "primary", onClick: copyLink },
+      { label: "Close", kind: "ghost", onClick: closeModal },
+    ]));
 
-/* ---------- Footer ---------- */
-.footer{margin-top:18px}
-.footer__banner{
-  padding:14px 16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-}
-.footer__spark{
-  width:34px; height:34px;
-  border-radius:12px;
-  display:grid; place-items:center;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-}
-.footer__text{font-weight:900; letter-spacing:.15px}
+    openModal({ title: "📤 Share Options", theme: "cyan", contentNode: node });
+  }
 
-/* ---------- Modal ---------- */
-.modalHost{
-  position:fixed; inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:50;
-}
-.modalHost.isOpen{display:flex}
-.modalHost__backdrop{
-  position:absolute; inset:0;
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(12px);
-}
-.modal{
-  position:relative;
-  width:min(860px, calc(100vw - 22px));
-  max-height: min(78vh, 760px);
-  border-radius: 26px;
-  overflow:hidden;
-  border: 1px solid rgba(255,255,255,.14);
-  background: linear-gradient(180deg, rgba(10,14,30,.72), rgba(10,14,30,.46));
-  box-shadow: var(--shadow);
-  transform: translateY(10px) scale(.985);
-  opacity:0;
-  transition: transform .24s var(--ease2), opacity .24s var(--ease);
-}
-.modalHost.isOpen .modal{transform: translateY(0) scale(1); opacity:1}
+  function shareVia(kind) {
+    const url = window.location.href;
+    const text = `Check out this Digital Athlete Card ✨\n${url}`;
+    const enc = encodeURIComponent;
 
-/* Theme variables driven by [data-theme] */
-.modal[data-theme="pink"]{ --t0: var(--pink0); --t1: var(--pink1); }
-.modal[data-theme="cyan"]{ --t0: var(--cyan0); --t1: rgba(60,231,255,.55); }
-.modal[data-theme="gold"]{ --t0: var(--gold0); --t1: rgba(255,216,107,.55); }
-.modal[data-theme="violet"]{ --t0: var(--vio0); --t1: rgba(162,124,255,.55); }
-.modal[data-theme="mint"]{ --t0: var(--mint0); --t1: rgba(76,255,201,.55); }
+    let target = url;
+    if (kind === "sms") target = `sms:?&body=${enc(text)}`;
+    if (kind === "whatsapp") target = `https://wa.me/?text=${enc(text)}`;
+    if (kind === "facebook") target = `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`;
+    if (kind === "email") target = `mailto:?subject=${enc("Digital Athlete Card")}&body=${enc(text)}`;
+    if (kind === "x") target = `https://twitter.com/intent/tweet?text=${enc(text)}`;
 
-.modal::before{
-  content:"";
-  position:absolute; inset:-2px;
-  border-radius:inherit;
-  background:
-    radial-gradient(720px 260px at 20% 0%, color-mix(in oklab, var(--t0) 45%, transparent), transparent 65%),
-    radial-gradient(720px 260px at 90% 10%, color-mix(in oklab, var(--t1) 35%, transparent), transparent 65%),
-    conic-gradient(from 180deg, rgba(255,255,255,.0), color-mix(in oklab, var(--t0) 32%, transparent), rgba(255,255,255,.0));
-  opacity:.85;
-  pointer-events:none;
-}
-.modal__chrome{position:relative}
-.modal__top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:14px 14px 10px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-}
-.modal__title{
-  font-weight:950;
-  letter-spacing:.15px;
-  font-size:16px;
-}
-.modal__actions{display:flex; gap:8px; align-items:center}
-.iconBtn{
-  width:38px; height:34px;
-  border-radius: 12px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.05);
-  color:rgba(255,255,255,.92);
-  cursor:pointer;
-  font-weight:950;
-}
-.iconBtn--min{font-size:18px; line-height:0}
-.modal__body{
-  padding:16px;
-  overflow:auto;
-  max-height: calc(78vh - 56px);
-}
-.modal.isMin .modal__body{display:none}
-.modal.isMin{max-height: unset}
-.modalSection{
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  border-radius: 18px;
-  padding:14px;
-  margin-bottom:12px;
-}
-.modalGrid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-}
-@media (max-width: 680px){
-  .modalGrid{grid-template-columns:1fr}
-}
-.modalH{
-  margin:0 0 6px;
-  font-weight:950;
-  letter-spacing:.12px;
-}
-.modalP{
-  margin:0;
-  color:var(--muted);
-  font-weight:700;
-  line-height:1.45;
-}
-.modalList{
-  margin:8px 0 0;
-  padding-left:18px;
-  color:var(--muted);
-  font-weight:750;
-}
-.modalCTA{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:10px;
-}
+    if (kind === "instagram") {
+      toast("Instagram: copy the link, then paste into IG bio/story link sticker.");
+      copyLink();
+      return;
+    }
+    window.open(target, "_blank", "noopener,noreferrer");
+  }
 
-/* ---------- Small helpers ---------- */
-.hidden{display:none !important}
-a{color:inherit}
+  els.copyLinkBtn.addEventListener("click", copyLink);
+  els.shareBtn.addEventListener("click", openShareModal);
+  els.openShareModalBtn.addEventListener("click", openShareModal);
+
+  // ---------- Toast ----------
+  let toastTimer = null;
+  function toast(msg) {
+    let el = $("#toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "toast";
+      el.style.position = "fixed";
+      el.style.left = "50%";
+      el.style.bottom = "18px";
+      el.style.transform = "translateX(-50%)";
+      el.style.padding = "10px 12px";
+      el.style.borderRadius = "14px";
+      el.style.border = "1px solid rgba(255,255,255,.16)";
+      el.style.background = "rgba(10,14,30,.72)";
+      el.style.backdropFilter = "blur(14px)";
+      el.style.color = "rgba(255,255,255,.92)";
+      el.style.fontWeight = "850";
+      el.style.letterSpacing = ".12px";
+      el.style.boxShadow = "0 18px 70px rgba(0,0,0,.45)";
+      el.style.zIndex = "80";
+      el.style.opacity = "0";
+      el.style.transition = "opacity .18s ease";
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = "1";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (el.style.opacity = "0"), 1800);
+  }
+
+  // ---------- Data ----------
+  async function loadAthlete() {
+    const url = `data/athlete.json?cb=${Date.now()}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to load athlete.json (${res.status})`);
+    return res.json();
+  }
+
+  function pct(a, b) {
+    if (!b || b <= 0) return 0;
+    return Math.max(0, Math.min(100, (a / b) * 100));
+  }
+
+  // ---------- Gallery ----------
+  function isVideoPath(path) {
+    return /\.(mp4|webm|ogg|mov)$/i.test(path);
+  }
+
+  function buildGallery(items) {
+    els.galleryGrid.innerHTML = "";
+
+    items.forEach((it) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "mediaCard";
+      card.title = "Tap to expand";
+      card.setAttribute("aria-label", "Open media");
+
+      const src = it.src;
+
+      if (it.type === "video" || isVideoPath(src)) {
+        const v = document.createElement("video");
+        v.src = src;
+        v.muted = true;
+        v.loop = true;
+        v.playsInline = true;
+        v.autoplay = true;
+        v.preload = "metadata";
+        v.setAttribute("playsinline", "");
+        v.setAttribute("muted", "");
+        v.setAttribute("loop", "");
+        v.setAttribute("autoplay", "");
+        v.controls = false;
+
+        v.addEventListener("canplay", () => { try { v.play(); } catch {} }, { once: true });
+
+        card.appendChild(v);
+
+        const badge = document.createElement("div");
+        badge.className = "playBadge";
+        badge.textContent = "▶ Video";
+        card.appendChild(badge);
+
+        card.addEventListener("click", () => openVideoModal(it));
+      } else {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = it.alt || "Photo";
+        img.loading = "lazy";
+        img.decoding = "async";
+        card.appendChild(img);
+        card.addEventListener("click", () => openImageModal(it));
+      }
+
+      els.galleryGrid.appendChild(card);
+    });
+  }
+
+  function openImageModal(it) {
+    const wrap = document.createElement("div");
+    const img = document.createElement("img");
+    img.src = it.src;
+    img.alt = it.alt || "Photo";
+    img.style.width = "100%";
+    img.style.borderRadius = "18px";
+    img.style.border = "1px solid rgba(255,255,255,.12)";
+    img.style.background = "rgba(255,255,255,.03)";
+    wrap.appendChild(img);
+
+    if (it.caption) wrap.appendChild(section("Caption", it.caption));
+    openModal({ title: "🖼️ Photo", theme: "violet", contentNode: wrap });
+  }
+
+  function openVideoModal(it) {
+    const wrap = document.createElement("div");
+
+    const v = document.createElement("video");
+    v.src = it.src;
+    v.muted = true;
+    v.loop = true;
+    v.playsInline = true;
+    v.autoplay = true;
+    v.controls = true;
+    v.preload = "metadata";
+    v.style.width = "100%";
+    v.style.borderRadius = "18px";
+    v.style.border = "1px solid rgba(255,255,255,.12)";
+    v.style.background = "rgba(255,255,255,.03)";
+    v.setAttribute("playsinline", "");
+    v.setAttribute("muted", "");
+    v.setAttribute("loop", "");
+    v.setAttribute("autoplay", "");
+
+    wrap.appendChild(v);
+
+    if (it.caption) wrap.appendChild(section("Clip", it.caption));
+    wrap.appendChild(ctaRow([{ label: "Close", kind: "ghost", onClick: closeModal }]));
+
+    openModal({ title: "▶ Video", theme: "cyan", contentNode: wrap });
+    setTimeout(() => { try { v.play(); } catch {} }, 50);
+  }
+
+  // ---------- Plush Showcase ----------
+  const plushDefs = [
+    { key: "sponsors", label: "Sponsors", theme: "pink", color: "#ff4fd8", symbol: "heart" },
+    { key: "snapshot", label: "Season Snapshot", theme: "gold", color: "#ffd86b", symbol: "spark" },
+    { key: "journey", label: "Journey", theme: "violet", color: "#a27cff", symbol: "path" },
+    { key: "upcoming", label: "Upcoming", theme: "cyan", color: "#3ce7ff", symbol: "calendar" },
+    { key: "achievements", label: "Achievements", theme: "mint", color: "#4cffc9", symbol: "trophy" },
+  ];
+
+  function plushSVG(hex, symbol) {
+    // Ultra-cute plush doll: fuzzy body + stitched seam + blush + patch icon
+    // Uses feTurbulence for a soft “fur” feel (still lightweight + GH safe).
+    const id = Math.random().toString(16).slice(2);
+
+    const iconPath = (() => {
+      // Small patch icon in the doll’s belly
+      switch (symbol) {
+        case "heart":
+          return `M50 60
+                  C42 52 34 48 30 54
+                  C26 60 30 68 36 72
+                  C42 76 46 80 50 84
+                  C54 80 58 76 64 72
+                  C70 68 74 60 70 54
+                  C66 48 58 52 50 60 Z`;
+        case "spark":
+          return `M50 36 L56 52 L72 50 L58 60 L64 76 L50 66 L36 76 L42 60 L28 50 L44 52 Z`;
+        case "path":
+          return `M28 70 C38 58 44 62 52 52
+                  C60 42 68 44 72 34
+                  M28 70 L34 72
+                  M52 52 L56 56
+                  M72 34 L74 40`;
+        case "calendar":
+          return `M34 44 H66
+                  C70 44 72 46 72 50 V72
+                  C72 76 70 78 66 78 H34
+                  C30 78 28 76 28 72 V50
+                  C28 46 30 44 34 44 Z
+                  M34 54 H66
+                  M38 40 V48
+                  M62 40 V48`;
+        case "trophy":
+        default:
+          return `M38 40 H62
+                  C62 54 58 60 50 64
+                  C42 60 38 54 38 40 Z
+                  M34 42 H38
+                  C38 52 34 54 30 54
+                  C28 54 26 52 26 50
+                  C26 46 28 44 34 44 Z
+                  M66 42 H62
+                  C62 52 66 54 70 54
+                  C72 54 74 52 74 50
+                  C74 46 72 44 66 44 Z
+                  M44 66 H56
+                  M42 70 H58
+                  M40 74 H60`;
+      }
+    })();
+
+    return `
+      <svg class="plush__svg" viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <radialGradient id="body_${id}" cx="30%" cy="25%" r="75%">
+            <stop offset="0%" stop-color="white" stop-opacity=".40"/>
+            <stop offset="35%" stop-color="${hex}" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#000" stop-opacity=".18"/>
+          </radialGradient>
+
+          <radialGradient id="shine_${id}" cx="28%" cy="20%" r="70%">
+            <stop offset="0%" stop-color="white" stop-opacity=".78"/>
+            <stop offset="18%" stop-color="white" stop-opacity=".22"/>
+            <stop offset="55%" stop-color="white" stop-opacity="0"/>
+          </radialGradient>
+
+          <filter id="fur_${id}" x="-30%" y="-30%" width="160%" height="160%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+
+          <filter id="soft_${id}" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="0.8" />
+          </filter>
+
+          <linearGradient id="stitch_${id}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="white" stop-opacity=".32"/>
+            <stop offset="55%" stop-color="white" stop-opacity=".12"/>
+            <stop offset="100%" stop-color="#000" stop-opacity=".12"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Plush body (rounded teddy shape) -->
+        <g filter="url(#fur_${id})">
+          <!-- ears -->
+          <circle cx="30" cy="22" r="11" fill="url(#body_${id})" opacity=".92"/>
+          <circle cx="70" cy="22" r="11" fill="url(#body_${id})" opacity=".92"/>
+
+          <!-- main body -->
+          <path d="M26 30
+                   C18 38 16 50 20 60
+                   C24 70 34 78 50 78
+                   C66 78 76 70 80 60
+                   C84 50 82 38 74 30
+                   C68 24 60 22 50 22
+                   C40 22 32 24 26 30 Z"
+                fill="url(#body_${id})"/>
+
+          <!-- arms -->
+          <ellipse cx="22" cy="54" rx="12" ry="10" fill="url(#body_${id})" opacity=".95"/>
+          <ellipse cx="78" cy="54" rx="12" ry="10" fill="url(#body_${id})" opacity=".95"/>
+
+          <!-- feet -->
+          <ellipse cx="38" cy="80" rx="12" ry="9" fill="url(#body_${id})" opacity=".92"/>
+          <ellipse cx="62" cy="80" rx="12" ry="9" fill="url(#body_${id})" opacity=".92"/>
+        </g>
+
+        <!-- face + blush -->
+        <circle cx="42" cy="48" r="3.2" fill="rgba(0,0,0,.55)"/>
+        <circle cx="58" cy="48" r="3.2" fill="rgba(0,0,0,.55)"/>
+        <path d="M47 54 C49 56 51 56 53 54" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="2" stroke-linecap="round"/>
+        <ellipse cx="34" cy="54" rx="7" ry="4.5" fill="rgba(255,160,205,.35)" filter="url(#soft_${id})"/>
+        <ellipse cx="66" cy="54" rx="7" ry="4.5" fill="rgba(255,160,205,.35)" filter="url(#soft_${id})"/>
+
+        <!-- stitched seam -->
+        <path d="M50 30 C48 40 48 52 50 74"
+              fill="none" stroke="url(#stitch_${id})" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 5" opacity=".9"/>
+
+        <!-- belly patch -->
+        <g>
+          <path d="M32 56
+                   C32 50 38 46 50 46
+                   C62 46 68 50 68 56
+                   C68 68 62 74 50 74
+                   C38 74 32 68 32 56 Z"
+                fill="rgba(255,255,255,.12)"
+                stroke="rgba(255,255,255,.18)"
+                stroke-width="1.5"/>
+          <path d="${iconPath}"
+                fill="none"
+                stroke="rgba(255,255,255,.78)"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                opacity=".95"/>
+        </g>
+
+        <!-- premium highlight bloom -->
+        <ellipse cx="40" cy="32" rx="30" ry="22" fill="url(#shine_${id})" opacity=".95"/>
+      </svg>
+    `.trim();
+  }
+
+  function makePlush(def, bounds) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "plush";
+    btn.dataset.key = def.key;
+    btn.dataset.theme = def.theme;
+
+    const scale = 0.92 + Math.random() * 0.26;
+    btn.style.width = `${84 * scale}px`;
+    btn.style.height = `${84 * scale}px`;
+
+    btn.innerHTML = `
+      ${plushSVG(def.color, def.symbol)}
+      <div class="plush__halo"></div>
+      <div class="plush__fur"></div>
+      <div class="plush__label">${def.label}</div>
+    `;
+
+    const pad = 14;
+    const x = pad + Math.random() * (bounds.w - pad * 2 - 92);
+    const y = pad + Math.random() * (bounds.h - pad * 2 - 120);
+
+    const plush = {
+      el: btn,
+      x, y,
+      vx: (Math.random() * 0.32 + 0.10) * (Math.random() < 0.5 ? -1 : 1),
+      vy: (Math.random() * 0.32 + 0.10) * (Math.random() < 0.5 ? -1 : 1),
+      wob: Math.random() * Math.PI * 2,
+      rot: (Math.random() * 10 - 5),
+      scale
+    };
+
+    btn.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${plush.rot}deg)`;
+
+    btn.addEventListener("click", () => openPlushModal(def));
+    btn.addEventListener("mouseenter", () => bump(plush, bounds));
+    btn.addEventListener("touchstart", () => bump(plush, bounds), { passive: true });
+
+    return plush;
+  }
+
+  function bump(p, bounds) {
+    const centerX = p.x + 42;
+    const centerY = p.y + 42;
+    const dx = centerX - bounds.w / 2;
+    const dy = centerY - bounds.h / 2;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    p.vx += (dx / len) * 0.08;
+    p.vy += (dy / len) * 0.08;
+  }
+
+  function openPlushModal(def) {
+    const theme = def.theme;
+    const title = `🧸 ${def.label}`;
+
+    const node = document.createElement("div");
+
+    if (def.key === "sponsors") {
+      node.appendChild(section("Sponsor Spotlight",
+        "Sponsors help cover travel, coaching, meet fees, and make it possible to compete with confidence.",
+        { list: [
+          "Logo placement on this card",
+          "Shout-outs on share links",
+          "Quarterly sponsor update message"
+        ]}
+      ));
+      node.appendChild(section("Become a sponsor",
+        "Pick a tier that feels right—every amount helps and means the world to this athlete.",
+        { grid: [
+          infoTile("🥉 Bronze", "Great for local businesses. Small monthly or one-time gift."),
+          infoTile("🥈 Silver", "Bigger visibility + sponsor feature in updates."),
+          infoTile("🥇 Gold", "Top placement + featured sponsor story."),
+          infoTile("💎 Diamond", "Premium placement + custom sponsor highlight.")
+        ]}
+      ));
+      node.appendChild(ctaRow([
+        { label: "Support / Donate", kind: "primary", onClick: () => toast("Tip: connect Donate button to your payment link.") },
+        { label: "Share to Sponsors", kind: "ghost", onClick: openShareModal }
+      ]));
+    }
+
+    if (def.key === "snapshot") {
+      node.appendChild(section("Season Snapshot",
+        "A quick look at goals, progress, and what support helps fund this season.",
+        { grid: [
+          infoTile("🎀 Goal", $("#fundNumbers")?.textContent || "$0 / $0"),
+          infoTile("📍 Focus", $("#fundTitle")?.textContent || "Training + meets"),
+          infoTile("🗓️ Rhythm", "Practice · Meets · Recovery"),
+          infoTile("💫 Why it matters", "Confidence, discipline, and big dreams.")
+        ]}
+      ));
+      node.appendChild(section("What your support covers",
+        "Travel, meet fees, coaching, and safe equipment—so the athlete can focus on performing their best.",
+        { list: ["Meet entry fees", "Coaching time", "Travel + lodging", "Uniforms + gear"] }
+      ));
+      node.appendChild(ctaRow([
+        { label: "Support / Donate", kind: "primary", onClick: () => $("#donateBtn")?.click() },
+        { label: "Close", kind: "ghost", onClick: closeModal }
+      ]));
+    }
+
+    if (def.key === "journey") {
+      node.appendChild(section("Journey",
+        "This is the story sponsors love: effort, growth, and proud moments.",
+        { list: [
+          "Training highlights & new skills",
+          "Meet moments and personal bests",
+          "Photos + video progress updates"
+        ]}
+      ));
+      node.appendChild(section("Add a new highlight",
+        "Keep the card fresh with one new photo/video each week. It’s the easiest way to keep sponsors engaged.",
+        { grid: [
+          infoTile("📸 Weekly", "New training clip"),
+          infoTile("🏅 Monthly", "Meet recap"),
+          infoTile("✨ Milestones", "New skill unlocked"),
+          infoTile("💌 Thank-you", "Sponsor shout-out")
+        ]}
+      ));
+      node.appendChild(ctaRow([
+        { label: "Open Share Options", kind: "primary", onClick: openShareModal },
+        { label: "Close", kind: "ghost", onClick: closeModal }
+      ]));
+    }
+
+    if (def.key === "upcoming") {
+      node.appendChild(section("Upcoming",
+        "A simple schedule block makes sponsors feel involved and keeps family excited.",
+        { list: [
+          "Next meet: add date + location",
+          "Training focus this week",
+          "Goal skill to master"
+        ]}
+      ));
+      node.appendChild(section("Sponsor-friendly update",
+        "Send a short message after each meet: one photo + one sentence about growth.",
+        { list: ["What went well", "What we’re working on", "What’s next"] }
+      ));
+      node.appendChild(ctaRow([
+        { label: "Share Update", kind: "primary", onClick: openShareModal },
+        { label: "Close", kind: "ghost", onClick: closeModal }
+      ]));
+    }
+
+    if (def.key === "achievements") {
+      node.appendChild(section("Achievements",
+        "Celebrate milestones — they’re perfect moments to share with sponsors and family.",
+        { grid: [
+          infoTile("🏅 Medal moments", "Add recent placements"),
+          infoTile("📈 Personal best", "New score PR"),
+          infoTile("✨ New skill", "Unlocked this season"),
+          infoTile("💪 Character", "Consistency + courage")
+        ]}
+      ));
+      node.appendChild(section("Thank-you message",
+        "A quick thank-you note goes a long way. Sponsors remember how you made them feel.",
+        { list: ["Be specific", "Share impact", "Invite them to follow along"] }
+      ));
+      node.appendChild(ctaRow([
+        { label: "Copy Link to Share", kind: "primary", onClick: copyLink },
+        { label: "Close", kind: "ghost", onClick: closeModal }
+      ]));
+    }
+
+    openModal({ title, theme, contentNode: node });
+  }
+
+  // Drift simulation inside stage
+  let plushies = [];
+  let driftRAF = 0;
+
+  function startPlushDrift() {
+    const stage = els.showcaseStage;
+    if (!stage) return;
+
+    const rect = stage.getBoundingClientRect();
+    const bounds = { w: rect.width, h: rect.height };
+
+    stage.innerHTML = "";
+    plushies = [];
+
+    plushDefs.forEach((def) => {
+      const p = makePlush(def, bounds);
+      plushies.push(p);
+      stage.appendChild(p.el);
+    });
+
+    const pad = 10;
+
+    const tick = () => {
+      const r = stage.getBoundingClientRect();
+      const w = r.width, h = r.height;
+
+      plushies.forEach((p) => {
+        p.wob += 0.018;
+        const wobX = Math.cos(p.wob) * 0.20;
+        const wobY = Math.sin(p.wob) * 0.20;
+
+        p.x += (p.vx + wobX);
+        p.y += (p.vy + wobY);
+
+        const elW = p.el.offsetWidth || 84;
+        const elH = p.el.offsetHeight || 84;
+
+        if (p.x < pad) { p.x = pad; p.vx *= -1; }
+        if (p.y < pad) { p.y = pad; p.vy *= -1; }
+        if (p.x > w - elW - pad) { p.x = w - elW - pad; p.vx *= -1; }
+        if (p.y > h - elH - pad) { p.y = h - elH - pad; p.vy *= -1; }
+
+        const sp = Math.hypot(p.vx, p.vy);
+        if (sp > 0.72) { p.vx *= 0.93; p.vy *= 0.93; }
+
+        // “Plush wobble” rotation
+        const rot = (p.vx * 9) + (Math.sin(p.wob) * 2.2);
+        p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0) rotate(${rot}deg)`;
+      });
+
+      driftRAF = requestAnimationFrame(tick);
+    };
+
+    cancelAnimationFrame(driftRAF);
+    driftRAF = requestAnimationFrame(tick);
+  }
+
+  // Resize handling
+  let resizeTimer = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => startPlushDrift(), 120);
+  });
+
+  // ---------- UI helpers ----------
+  function section(title, text, opts = {}) {
+    const box = document.createElement("div");
+    box.className = "modalSection";
+
+    const h = document.createElement("h3");
+    h.className = "modalH";
+    h.textContent = title;
+    box.appendChild(h);
+
+    if (text) {
+      const p = document.createElement("p");
+      p.className = "modalP";
+      p.textContent = text;
+      box.appendChild(p);
+    }
+
+    if (opts.list && Array.isArray(opts.list)) {
+      const ul = document.createElement("ul");
+      ul.className = "modalList";
+      opts.list.forEach(li => {
+        const item = document.createElement("li");
+        item.textContent = li;
+        ul.appendChild(item);
+      });
+      box.appendChild(ul);
+    }
+
+    if (opts.grid && Array.isArray(opts.grid)) {
+      const grid = document.createElement("div");
+      grid.className = "modalGrid";
+      opts.grid.forEach(node => grid.appendChild(node));
+      box.appendChild(grid);
+    }
+
+    return box;
+  }
+
+  function infoTile(title, desc) {
+    const t = document.createElement("div");
+    t.className = "modalSection";
+    t.style.margin = "0";
+    t.style.padding = "12px";
+    const h = document.createElement("div");
+    h.className = "modalH";
+    h.style.fontSize = "13px";
+    h.style.marginBottom = "4px";
+    h.textContent = title;
+    const p = document.createElement("div");
+    p.className = "modalP";
+    p.style.fontSize = "13px";
+    p.textContent = desc;
+    t.appendChild(h);
+    t.appendChild(p);
+    return t;
+  }
+
+  function ctaRow(actions) {
+    const row = document.createElement("div");
+    row.className = "modalCTA";
+    actions.forEach(a => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `btn ${a.kind === "primary" ? "btn--primary" : (a.kind === "ghost" ? "btn--ghost" : "")}`.trim();
+      b.textContent = a.label;
+      b.addEventListener("click", a.onClick);
+      row.appendChild(b);
+    });
+    return row;
+  }
+
+  function chipAction(label, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  // ---------- Bio & Built-to-be-shared ----------
+  function openBioModal(data) {
+    const node = document.createElement("div");
+
+    node.appendChild(section("About", data.bio?.about || "Add a short athlete bio in data/athlete.json."));
+    node.appendChild(section("Why this matters",
+      "This card helps family stay updated and makes it easy for sponsors to support the season in a feel-good way.",
+      { list: ["Parents share once, updates stay live", "Sponsors see progress over time", "Simple link = simple support"] }
+    ));
+
+    openModal({ title: `🏅 ${data.athlete?.name || "Athlete"} — Bio`, theme: "violet", contentNode: node });
+  }
+
+  function openBuiltModal() {
+    const node = document.createElement("div");
+    node.appendChild(section(
+      "Showcase the Journey",
+      "A digital athlete card sponsors actually want to open — with highlights, progress, and one-tap sharing.",
+      { list: [
+        "Feels premium and modern",
+        "Built for quick sponsor sharing",
+        "Photos + video + updates in one link"
+      ]}
+    ));
+    node.appendChild(ctaRow([
+      { label: "Showcase the Journey — cards start at $199.99", kind: "primary", onClick: () => toast("Hook this button to your sales page link.") },
+      { label: "Close", kind: "ghost", onClick: closeModal }
+    ]));
+    openModal({ title: "✨ Built to be shared", theme: "pink", contentNode: node });
+  }
+
+  // ---------- FX Canvas (lightweight) ----------
+  function startCanvasFX() {
+    const c = els.fx;
+    if (!c) return;
+    const ctx = c.getContext("2d", { alpha: true });
+
+    let w = 0, h = 0;
+    const dots = Array.from({ length: 70 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() * 0.06 + 0.02) * (Math.random() < 0.5 ? -1 : 1),
+      vy: (Math.random() * 0.06 + 0.02) * (Math.random() < 0.5 ? -1 : 1),
+      r: Math.random() * 1.4 + 0.6,
+      a: Math.random() * 0.45 + 0.10
+    }));
+
+    function resize() {
+      w = c.width = Math.floor(window.innerWidth * devicePixelRatio);
+      h = c.height = Math.floor(window.innerHeight * devicePixelRatio);
+      c.style.width = "100%";
+      c.style.height = "100%";
+      ctx.setTransform(1,0,0,1,0,0);
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    const tick = () => {
+      ctx.clearRect(0, 0, w, h);
+      dots.forEach(d => {
+        d.x += d.vx / 100;
+        d.y += d.vy / 100;
+        if (d.x < -0.05) d.x = 1.05;
+        if (d.x > 1.05) d.x = -0.05;
+        if (d.y < -0.05) d.y = 1.05;
+        if (d.y > 1.05) d.y = -0.05;
+
+        const px = d.x * w;
+        const py = d.y * h;
+
+        ctx.beginPath();
+        ctx.arc(px, py, d.r * devicePixelRatio, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${d.a})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // ---------- Init ----------
+  async function init() {
+    startCanvasFX();
+
+    const chipDefs = [
+      { label: "💬 Text", fn: () => shareVia("sms") },
+      { label: "💚 WhatsApp", fn: () => shareVia("whatsapp") },
+      { label: "📘 Facebook", fn: () => shareVia("facebook") },
+      { label: "✉️ Email", fn: () => shareVia("email") },
+      { label: "📸 Instagram", fn: () => shareVia("instagram") },
+      { label: "𝕏 X", fn: () => shareVia("x") },
+    ];
+    els.shareChips.innerHTML = "";
+    chipDefs.forEach(c => els.shareChips.appendChild(chipAction(c.label, c.fn)));
+
+    let data;
+    try {
+      data = await loadAthlete();
+    } catch (err) {
+      console.error(err);
+      toast("Could not load data/athlete.json");
+      return;
+    }
+
+    const athlete = data.athlete || {};
+    els.athleteName.textContent = athlete.name || "Athlete Name";
+    els.athleteSub.textContent = athlete.sub || "Tap to view bio";
+    els.tierBadge.textContent = athlete.tier || "🏅 Bronze";
+    els.clubBadge.textContent = athlete.club || "Club";
+    els.sportBadge.textContent = athlete.sport || "Sport";
+
+    if (athlete.photo) {
+      els.athletePhoto.src = athlete.photo;
+    } else {
+      els.athletePhoto.src =
+        "data:image/svg+xml;charset=utf-8," +
+        encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="rgba(255,255,255,.06)"/><text x="50%" y="52%" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="16" font-family="Arial">Photo</text></svg>`);
+    }
+
+    const fundraising = data.fundraising || { raised: 0, goal: 0, title: "" };
+    const raised = Number(fundraising.raised || 0);
+    const goal = Number(fundraising.goal || 0);
+    els.fundTitle.textContent = fundraising.title || "Help cover travel, coaching, meet fees.";
+    els.fundNumbers.textContent = `$${raised.toLocaleString()} / $${goal.toLocaleString()}`;
+    const p = pct(raised, goal);
+    els.meterBar.style.width = `${p}%`;
+    $(".meter")?.setAttribute("aria-valuenow", String(Math.round(p)));
+    els.fundNote.textContent = goal > 0 ? `${Math.round(p)}% of season goal reached` : "Set a goal in athlete.json";
+
+    const gallery = Array.isArray(data.gallery) ? data.gallery : [];
+    els.gallerySub.textContent = data.gallerySub || "Highlights from training + meets.";
+    buildGallery(gallery);
+
+    // START plush drift
+    startPlushDrift();
+
+    els.bioBtn.addEventListener("click", () => openBioModal(data));
+    els.bioBtnPhoto.addEventListener("click", () => openBioModal(data));
+
+    els.donateBtn.addEventListener("click", () => {
+      if (data.links?.donate) {
+        window.open(data.links.donate, "_blank", "noopener,noreferrer");
+      } else {
+        toast("Add a donate link in data/athlete.json → links.donate");
+        openPlushModal(plushDefs[1]);
+      }
+    });
+
+    els.supportBtn.addEventListener("click", () => els.donateBtn.click());
+    els.builtBtn.addEventListener("click", openBuiltModal);
+
+    els.copyLinkBtn.addEventListener("click", copyLink);
+    els.shareBtn.addEventListener("click", openShareModal);
+    els.openShareModalBtn.addEventListener("click", openShareModal);
+  }
+
+  init();
+})();
